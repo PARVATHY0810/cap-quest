@@ -4,13 +4,14 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "index":"nodemon app.js"
+    "index": "nodemon app.js"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
     "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
     "express": "^4.21.2",
     "mongodb": "^6.13.0",
     "mongoose": "^8.9.6",
