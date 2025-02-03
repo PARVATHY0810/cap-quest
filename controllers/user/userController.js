@@ -1,3 +1,5 @@
+const User = require("../../models/userSchema");
+
 
 const pageNotFound = async (req,res)=>{
   try{
@@ -7,9 +9,6 @@ const pageNotFound = async (req,res)=>{
      console.log('Page Not Found');
     }
 };
-
-
-
 
 const loadHomepage = async (req,res)=>{
   try{
@@ -30,9 +29,36 @@ const loadShopPage = async (req,res)=>{
   }
 }
 
+const loadSignupPage = async (req,res)=>{
+  try{
+    res.render("signup");
+    console.log('Signup Page rendered');
+  } catch (error){
+     console.log('Signup Page not Found');
+    }
+}
+ 
+const signup = async (req,res)=>{ 
+    const {name,email,password} = req.body;
+    try{
+     const newUser = new User({name,email,password});
+     console.log('User created', newUser);
+     await newUser.save();
+     console.log('User signed up');
+     return res.redirect("/signup");
+  } catch (error){
+    console.error('Error for save user',error);
+    res.status(500).send("server error");
+  }
+}
+
+
+
 
 module.exports ={
   loadHomepage,
+  loadSignupPage,
   pageNotFound,
   loadShopPage,
+  signup
 }
