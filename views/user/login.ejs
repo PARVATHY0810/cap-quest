@@ -1,0 +1,186 @@
+<!-- =<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <style>
+        body {
+            background: url('/img/background.webp') no-repeat center center/cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .login-container {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            text-align: center;
+            color: white;
+        }
+        .login-container h2 {
+            margin-bottom: 20px;
+            color: orange;
+        }
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+        }
+        .login-btn {
+            background-color: orange;
+            color: black;
+            padding: 10px;
+            border: none;
+            width: 100%;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .google-btn {
+            background-color: white;
+            color: black;
+            padding: 10px;
+            border: none;
+            width: 100%;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .error {
+            color: red;
+            font-size: 14px;
+        }
+    </style>
+    <script>
+        function validateForm(event) {
+            event.preventDefault();
+            let email = document.getElementById("email").value;
+            let password = document.getElementById("password").value;
+            let errorMessage = "";
+            
+            if (!email.includes("@") || !email.includes(".")) {
+                errorMessage += "Please enter a valid email address.\n";
+            }
+            if (password.length < 6) {
+                errorMessage += "Password must be at least 6 characters long.";
+            }
+            
+            if (errorMessage) {
+                document.getElementById("error-message").innerText = errorMessage;
+            } else {
+                document.getElementById("error-message").innerText = "";
+                alert("Form submitted successfully!");
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        <form action="/login" onsubmit="validateForm(event)">
+            <input type="email" id="email" class="input-field" placeholder="Email Address" required>
+            <input type="password" id="password" class="input-field" placeholder="Password" required>
+        
+        <% if(locals.message && message.length>0){%>
+            <div class="alert alert-danger text-center">
+                  <%=message%>
+            </div>
+        <%}%>
+            
+            <p id="error-message" class="error"></p>
+            <button type="submit" class="login-btn">Login</button>
+            <button type="button" class="google-btn">Login with Google</button>
+        </form>
+    </div>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - The Perfume .</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .login-container {
+            max-width: 900px;
+            margin: auto;
+            padding: 50px 0;
+        }
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        .login-box img {
+            width: 100%;
+            border-radius: 10px;
+        }
+        .footer {
+            background: black;
+            color: white;
+            padding: 30px 0;
+        }
+    </style>
+</head>
+<body>
+    
+   
+    <!-- Login Section -->
+    <div class="container login-container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <img src="/images/projectSignupImage.webp" alt="Perfume" class="img-fluid">
+            </div>
+            <div class="col-md-6">
+                <div class="login-box">
+                    <h3 class="mb-4">Log in to Exclusive</h3>
+                    <form action="/login" method="post">
+                        <div class="mb-3">
+                            <label>Email</label>
+                            <input type="email" name="email" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>Password</label>
+                            <input type="password" name="password" class="form-control" required>
+                        </div>
+
+
+                        <% if(locals.message && message.length>0){%>
+                            <div class="alert alert-danger text-center">
+                                  <%=message%>
+                            </div>
+                        <%}%>
+
+                        
+
+                        <div class="mb-3 text-end">
+                            <a href="#" class="text-danger">Forgot Password?</a>
+                        </div>
+                        <button class="btn btn-danger w-100">Login</button>
+                        <div class="text-center mt-3">
+                            <button class="btn btn-light w-100 border"><i class="fab fa-google"></i> Sign in with Google</button>
+                        </div>
+                        <div class="text-center mt-3">
+                            Don't have an account? <a href="/signup" class="text-danger">Sign Up</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+   
