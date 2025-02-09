@@ -29,7 +29,7 @@ router.get("/unblockCustomer",adminAuth,customerController.customerunBlocked);
 //category Management
 router.get("/category",adminAuth,categoryController.categoryInfo)
 router.post("/addCategory",adminAuth,categoryController.addCategory)
-router.post("/unlistCatecory",adminAuth,categoryController.getUnlistCategory);
+router.get("/unlistCategory",adminAuth,categoryController.getUnlistCategory);
 router.get("/listCategory",adminAuth,categoryController.getListCategory);
 router.get("/editCategory",adminAuth,categoryController.getEditCategory)
 router.post("/editCategory",adminAuth,categoryController.getEditCategory);
@@ -46,6 +46,8 @@ router.get("/deleteBrand",adminAuth,brandController.deletBrand);
 router.get("/addProducts",adminAuth,productController.getProductAddPage)
 router.post("/addProducts",adminAuth,uploads.array("images",4),productController.addProducts);
 router.get("/products",adminAuth,productController.getAllProducts)
+
+
 router.get("/blockProduct",adminAuth,productController.blockProduct);
 router.get("/unblockProduct",adminAuth,productController.unblockProduct);
 router.get("/editProduct",adminAuth,productController.getEditProduct);

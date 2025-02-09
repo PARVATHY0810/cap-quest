@@ -56,17 +56,17 @@
                 <td>
                 <% if(data[i].isBlocked===false){ %>
                     <button class="btn btn-danger" style="width: 80px;">
-                        <a href="/admin/blockProduct?id=<%=data[i]._%>" class="text-white" style="text-decoration: none;">Block</a>
+                        <a href="/admin/blockProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Block</a>
                     </button>
                     <% }else{ %>
                     <button class="btn btn-success" style="width: 80px;">
-                        <a href="/admin/unblockProduct?id=<%=data[i]._" class="text-white" style="text-decoration: none;">Unblock</a>
+                        <a href="/admin/unblockProduct?id=<%=data[i]._id%>"  class="text-white" style="text-decoration: none;">Unblock</a>
                     </button>
                     <% } %>
                 </td>
                 <td>
                     <button class="btn btn-info" style="width: 80px;">
-                        <a href="/admin/editProduct?id=<%=data._id%>" class="text-white" style="text-decoration: none;">Edit</a>
+                        <a href="/admin/editProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Edit</a>
                     </button>
                 </td>
             </tr>
@@ -89,7 +89,7 @@
 
 
           <% for (let i = 1; i <= totalPages; i++) { %>
-          <li class="page-item <%=(i === currentPage) ? 'active' : '' %>">
+          <li class="page-item <%- (i === currentPage) ? 'active' : '' %>">
               <a class="page-link" href="?page=<%= i %>"><%= i %></a>
           </li>
           <% } %>

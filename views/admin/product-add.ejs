@@ -39,9 +39,10 @@
                                <div id="productName-error" class="error-message"></div>
                            </div>
                            <div class="col-lg-4 mb-4">
+                            <% console.log("Brand Data:", brand); %>
                                <label class="form-label">Brand</label>
                                <select class="form-select border" name="brand">
-                                 <% for (let i =0 ;i< brand.leng;i++) { %>  
+                                 <% for (let i =0 ;i< brand.length;i++) { %>  
                                 
                                        <option value="<%= brand[i].brandName  %>">
                                            <%= brand[i].brandName  %>
@@ -192,8 +193,7 @@
                                                        </div>
                            </div>
                            <div>
-                               <button class="btn btn-md rounded font-sm hover-up"  type="button" onclick="validateAndSubmit()
-">Publish</button>
+                               <button class="btn btn-md rounded font-sm hover-up"  type="submit">Publish</button>
                            </div>
                        </form>
                    </div>
@@ -231,7 +231,7 @@
     let reader = new FileReader();
     reader.onload =function(){
       let dataURL = reader.result;
-      let image = document.getElementById("imageView"+index);
+      let image = document.getElementById("imgView"+index);
       image.src = dataURL;
       let cropper = new Cropper(image,{
         aspectRatio:1,

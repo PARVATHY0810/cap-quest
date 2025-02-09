@@ -13,7 +13,7 @@
   try {
     const category = await Category.find({isListed:true});
     const brand = await Brand.find({isBlocked:false});
-    res.render("Product-add",{
+    res.render("product-add",{
       cat:category,
       brand:brand
     });
@@ -25,6 +25,7 @@
  // Add Product
 const addProducts = async (req, res) => {
   try {
+    console.log(req.files)
       const products = req.body;
 
       // Check if product already exists
@@ -36,10 +37,7 @@ const addProducts = async (req, res) => {
           if (req.files && req.files.length > 0) {
                const uploadDir = path.join(__dirname, "../../public/uploads/re-images");
 
-              // ✅ Ensure the directory exists
-              if (!fs.existsSync(uploadDir)) {
-                  fs.mkdirSync(uploadDir, { recursive: true });
-              }
+             
 
               // // Resize and save images
               // for (let i = 0; i < req.files.length; i++) {
@@ -56,23 +54,23 @@ const addProducts = async (req, res) => {
 
 
               for (let i = 0; i < req.files.length; i++) {
-                  const originalImagePath = req.files[i].path;
-                  const resizedImageName = `${Date.now()}-${req.files[i].filename}`;
-                  const resizedImagePath = path.join(uploadDir, resizedImageName);
+                 images.push(`/uploads/re-images/${req.files[i].filename}`)
+               
 
            
 
-                  try {
-                      await sharp(originalImagePath)
-                          .resize({ width: 440, height: 440 })
-                          .jpeg({ quality: 80 }) // Convert to JPEG format
-                          .toFile(resizedImagePath);
+                  // try {
+                  //     await sharp(originalImagePath)
+                  //         .resize({ width: 440, height: 440 })
+                  //         .jpeg({ quality: 80 }) // Convert to JPEG format
+                  //         .toFile(resizedImagePath);
                       
-                      images.push(resizedImageName);
-                  } catch (sharpError) {
-                      console.error("Sharp processing error:", sharpError);
-                  }
+                  //     images.push(resizedImageName);
+                  // } catch (sharpError) {
+                  //     console.error("Sharp processing error:", sharpError);
+                  // }
               }
+              console.log(images)
 
 
           }
@@ -120,8 +118,8 @@ const getAllProducts = async(req,res)=>{
       const productData = await Product.find({
           $or:[
 
-              {productName :{$regex :new RegExp(". "+search +".","i")}},
-              {brand :{$regex :new RegExp("."+search +".","i")}},
+              {productName :{$regex :new RegExp(".* "+search +".*","i")}},
+              {brand :{$regex :new RegExp(".*"+search +".*","i")}},
 
           ],
       })
@@ -129,8 +127,8 @@ const getAllProducts = async(req,res)=>{
 
       const count = await Product.find({
           $or:[
-              {productName :{$regex :new RegExp("."+search+".","i")}},
-              {brand:{$regex: new RegExp("."+search+".","i")}},
+              {productName :{$regex :new RegExp(".*"+search+".*","i")}},
+              {brand:{$regex: new RegExp(".*"+search+".*","i")}},
           ],
       }).countDocuments()
 

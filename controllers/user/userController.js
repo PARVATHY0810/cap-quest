@@ -1,4 +1,7 @@
 const User = require("../../models/userSchema");
+const category =require ("../../models/categorySchema");
+const product = require("../../models/productSchema");
+
 const env = require("dotenv").config();
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
@@ -18,24 +21,36 @@ const pageNotFound = async (req,res)=>{
 
 const loadHomepage = async (req,res)=>{
   try{
-    console.log("hai")
+    //console.log("hai")
     const user = req.session.user;
     console.log(user)
+    const categories = await category.find({isListed:true});
+    let productData = await product.find(
+     {isBlocked:false,
+      category:{$in:categories.map(category=>category._id)},quantity:{$gt:0}
+     }
+
+    )
+    productData.sort((a,b)=> new Date (b.creatOne)-new Date(a.creatOne));
+    productData = productData.slice(0,4);
+  
+    
      if(user){
       const userData = await User.findOne({_id:user});
       console.log(userData)
-      return res.render("home",{userData});
-     }
-      
-     return res.render("home",{userData:""})
-   
+      return res.render("home",{userData,products:productData});
      
-    
+    }else{
+      const userData = ""
+      return res.render("home",{products:productData,userData});
+   
+    }
+      
   }catch(error){
-    console.log('Home Page not Found')
+    console.error(error)
     res.status(500).send("server error")
   }
-}
+};
 
 
 const loadShopPage = async (req,res)=>{

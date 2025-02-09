@@ -13,8 +13,8 @@ const categoryInfo = async (req, res) => {
 
         const categoryData = await Category.find({
             $or: [
-                { name: { $regex: "." + search + ".", $options: "i" } },
-                { description: { $regex: "." + search + ".", $options: "i" } }
+                { name: { $regex: ".*" + search + ".*", $options: "i" } },
+                { description: { $regex: ".*" + search + ".*", $options: "i" } }
             ]
         })
             .sort({ createdAt: -1 })
@@ -23,8 +23,8 @@ const categoryInfo = async (req, res) => {
 
         const totalCategories = await Category.countDocuments({
             $or: [
-                { name: { $regex: "." + search + ".", $options: "i" } },
-                { description: { $regex: "." + search + ".", $options: "i" } }
+                { name: { $regex: ".*" + search + ".*", $options: "i" } },
+                { description: { $regex: ".*" + search + ".*", $options: "i" } }
             ]
         });
 
@@ -50,11 +50,13 @@ const addCategory = async (req,res)=>{
     try {
         const normalizedName = name.trim().toLowerCase();
         const existingCategory = await Category.findOne({name:normalizedName});
+        //const existingCategory = await Category.findOne({name});
         if(existingCategory){
             return res.status(400).json({error:"Category already exists"})
         }
         const newCategory = new Category({
             name:normalizedName,
+            //name,
             description,
         })
         await newCategory.save();
@@ -67,13 +69,13 @@ const addCategory = async (req,res)=>{
 const getEditCategory= async (req,res)=>{
     try {
         const id = req.query.id;
-        const category= await Category.findById({_id:id});
+        const category= await Category.findOne({_id:id});
         
         res.render("editCategory",{category:category});
 
     } catch (error) {
         
-        res.redirect("/pageError")
+        res.redirect("/pageerror")
     }
 };
 

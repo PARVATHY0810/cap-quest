@@ -124,12 +124,16 @@
                         <td></td>
                         <td class="text-start"><%= category.name %></td>
                         <td class="text-start"><%= category.description %></td>
+
+
                         <!-- <td><% if (category.categoryOffer) {%>
                             <%=category.categoryOffer %>
                           <%}else{%>
                             0%
                             <% } %>
-                         </td> -->
+                         </td>  -->
+
+
                         <td class="text-start">
                           <% if (category.isListed) { %>
                             <span class="badge rounded-pill alert-success" style="width: 60px">Listed</span>
@@ -219,6 +223,7 @@ async function handleAddCategory(name, description) {
         });
     }
 }
+
 
 function handleFormSubmit(event) {
     event.preventDefault();
