@@ -20,3 +20,46 @@
     </div>
 </div>
 <%- include("../../views/partials/admin/footer") %>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById('editCategoryForm').addEventListener('submit', async function (event) {
+        event.preventDefault(); // Prevent default form submission
+
+        const categoryId = "<%= category._id %>"; // Get category ID from EJS
+        const categoryName = document.getElementById('categoryName').value.trim();
+        const description = document.getElementById('description').value.trim();
+
+        try {
+            const response = await fetch(`/admin/editCategory/${categoryId}`, {
+                method: 'PUT', // Use PUT method
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ categoryName, description }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: data.message, // "Category updated successfully"
+                }).then(() => {
+                    window.location.href = '/admin/categories'; // Redirect after success
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.error || 'Something went wrong!',
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Internal server error',
+            });
+        }
+    });
+</script>

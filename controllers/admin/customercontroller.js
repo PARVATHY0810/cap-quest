@@ -17,12 +17,12 @@ const customerInfo =async (req,res)=>{
      if(req.query.page){
       page=req.query.page
      }
-     const limit=1555
+     const limit=4
      const UserData = await User.find({
       isAdmin: false,
       $or:[
-        {name: {$regex: "." + search + "."} },
-            {email: {$regex: "." + search + "."} },
+        {name: {$regex: ".*" + search + ".*"} },
+            {email: {$regex: ".*" + search + ".*"} },
         ],
     })
     .limit(limit*1)
@@ -61,6 +61,7 @@ const customerInfo =async (req,res)=>{
 const customerBlocked = async (req,res)=>{
     try {
         let id=req.query.id;
+        console.log(id);
         await User.updateOne({_id:id},{$set:{is_Blocked:true}});
         res.redirect("/admin/users")
     } catch (error) {

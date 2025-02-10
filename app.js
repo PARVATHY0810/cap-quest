@@ -3,7 +3,9 @@ const app=express();
 const path = require("path");
 const env = require("dotenv").config();
 const session = require("express-session");
-//const passport = require("./config/passport");
+const passport = require("passport");
+require("./config/passport");
+require("dotenv").config();
 const db =require("./config/db")
 const userRouter=require("./routes/userRouter")
 const adminRouter=require("./routes/adminRouter") 
@@ -26,8 +28,8 @@ app.use(session({
 
 }));
 
-// app.use(passport.initialize());
-// app.use(passport.session());
+app.use(passport.initialize());
+app.use(passport.session());
 
 
 app.set("view engine" ,"ejs");

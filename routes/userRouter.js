@@ -34,7 +34,7 @@ router.post("/login",userController.login);
 router.get("/logout",userController.logout);
 
 //product Management
-router.get("/productDetails",userAuth,productController.productDetails);
+router.get("/product-details",userAuth,productController.productDetails);
 
 
 

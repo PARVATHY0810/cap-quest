@@ -158,8 +158,9 @@ else{
 }
 
 const blockProduct = async (req,res)=>{
+  console.log("block ethi");
   try {
-    let id = req.queri.id;
+    let id = req.query.id;
     await Product.updateOne({_id:id},{$set:{isBlocked:true}});
     res.redirect("/admin/products");
 
@@ -169,8 +170,9 @@ const blockProduct = async (req,res)=>{
 }
 
 const unblockProduct = async (req,res)=>{
+  console.log("unblock ethi");
   try {
-    let id = req.queri.id;
+    let id = req.query.id;
     await Product.updateOne({_id:id},{$set:{isBlocked:false}});
     res.redirect("/admin/products");
 
