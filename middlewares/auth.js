@@ -18,18 +18,16 @@ const userAuth =(req,res,next)=>{
  }
 }
 const adminAuth = (req,res,next)=>{
-  User.findOne({isAdmin:true})
-  .then(data=>{
-    if(data){
-    next();
-    }else{
+   if(req.session.admin || req.path === "/admin/login"){
+    next()
+   }else{
+    if(req.originalUrl !== "/admin/login"){
       res.redirect("/admin/login")
+    }else{
+      next()
     }
-  })
-  .catch(error=>{
-    console.log("Error in adminauth middlware ",error);
-    res.status(500).send("Internal Server Error")
-  })
+    return res.redirect("/admin/login")
+   }
 }
 
 module.exports = {

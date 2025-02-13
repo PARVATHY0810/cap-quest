@@ -9,18 +9,19 @@ const pageerror =async (req,res)=>{
 }
 
 
-const loadlogin = async (req, res) => { 
-// try {
-//     console.log("hai")
-if(req.session.admin){
-  res.redirect("/admin/dashboard");
-}
-//      
-//   } catch (error) {
-     res.render("adminLoginPage",{message:null});
+const loadlogin = async (req, res) => {
+  try {
+    if(req.session.admin){
+      res.redirect("/admin/dashboard");
+    }else{
+      res.render("adminLoginPage",{message:null});
+    }
+  } catch (error) {
+    console.log(error)
   }
+}
    
-// }
+
   
 const login = async (req,res)=>{
   try{

@@ -9,6 +9,7 @@ require("dotenv").config();
 const db =require("./config/db")
 const userRouter=require("./routes/userRouter")
 const adminRouter=require("./routes/adminRouter") 
+const nocache = require("nocache")
 db()
 
 
@@ -31,6 +32,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use(nocache())
 
 app.set("view engine" ,"ejs");
 app.set("views",[path.join(__dirname,'views/user'),path.join(__dirname,'views/admin')]);

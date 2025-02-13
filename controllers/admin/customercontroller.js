@@ -31,17 +31,17 @@ const customerInfo =async (req,res)=>{
 
     
 
-    const count = await User.find({
-        is_admin:false,
+    const count = await User.countDocuments({
+        isAdmin:false,
         $or: [      
             {name: {$regex: "." + search + "."} },
             {email: {$regex: "." + search + "."} },
         ],
-    }).countDocuments();
+    })
 
     const totalPages = Math.ceil(count / limit);
-    console.log(UserData)
-
+   
+console.log(page)
 
     return res.render('customers',{
         data: UserData,
@@ -61,8 +61,12 @@ const customerInfo =async (req,res)=>{
 const customerBlocked = async (req,res)=>{
     try {
         let id=req.query.id;
-        console.log(id);
-        await User.updateOne({_id:id},{$set:{is_Blocked:true}});
+        console.log("Blocking Customer ID:", id);
+
+        if (!id) {
+            return res.status(400).send("Customer ID is missing.");
+        }
+        await User.updateOne({_id:id},{$set:{isBlocked:true}});
         res.redirect("/admin/users")
     } catch (error) {
         res.redirect("/pageerror");
@@ -73,7 +77,7 @@ const customerBlocked = async (req,res)=>{
 const customerunBlocked = async (req,res)=>{
     try {
         let id = req.query.id;
-        await User.updateOne({_id:id},{$set:{is_Blocked:false}})
+        await User.updateOne({_id:id},{$set:{isBlocked:false}})
         res.redirect("/admin/users")
     } catch (error) {
         res.redirect("/pageerror")

@@ -193,7 +193,7 @@
                                                        </div>
                            </div>
                            <div>
-                               <button class="btn btn-md rounded font-sm hover-up"  type="submit">Publish</button>
+                               <button class="btn btn-md rounded font-sm hover-up"  type="submit" onclick="validateAndSubmit()" >Publish</button>
                            </div>
                        </form>
                    </div>
@@ -241,18 +241,20 @@
         Zoomable:true
       });
 
-      let cropperContainer = document.querySelector("#croppedId"+index).parentNode;
+      let cropperContainer = document.querySelector("#croppedImg"+index).parentNode;
       cropperContainer.style.display = 'block';
 
       let saveButton = document.querySelector('#saveButton'+index);
       saveButton.addEventListener('click',async function (){
 
-        let croppedCanvas = ceropper.getElementById();
+        // let croppedCanvas = cropper.getElementById();
+        let croppedCanvas = cropper.getCroppedCanvas();
+
         let croppedIamge = document.getElementById("croppedImg"+index);
         croppedIamge.src = croppedCanvas.toDataURL('image/jpeg',1.0);
         
         let timestamp = new Date().getTime();
-        let fileName = 'cropped-img-${timestap}-${index}.png';
+        let fileName = `cropped-img-${timestamp}-${index}.png`;
 
         await croppedCanvas.toBlob(blob=>{
           let input = document.getElementById('input'+index);

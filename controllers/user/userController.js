@@ -23,7 +23,7 @@ const loadHomepage = async (req,res)=>{
   try{
     //console.log("hai")
     const user = req.session.user;
-    console.log(user)
+    //console.log(user)
     const categories = await category.find({isListed:true});
     let productData = await product.find(
      {isBlocked:false,
@@ -37,7 +37,7 @@ const loadHomepage = async (req,res)=>{
     
      if(user){
       const userData = await User.findOne({_id:user});
-      console.log(userData)
+      //console.log(userData)
       return res.render("home",{userData,products:productData});
      
     }else{
@@ -104,21 +104,24 @@ const signup = async (req,res)=>{
     const {name,email,password,cPassword} = req.body;
     console.log('User data',name,email,password,cPassword);
     if(password !== cPassword){
-      return res.status(400).send("Password does not match");
+      // return res.status(400).send("Password does not match");
+      return res.render("signup",{message:"Password does not match"});
     }
    
     
     const findUser = await User.findOne({ email });
-    console.log("user", User)
-    console.log(User)
+    //console.log("user", User)
+   // console.log(User)
+  
     if(findUser){
-      return res.render("signup",{message:"User already exists"});
+      return res.render("signup",{message:"User already exist"});
     }
     const otp = generateOtp();
     console.log('OTP generated',otp);
     const emailSent = await sendVerificationEmail(email,otp);
     if(!emailSent){
-      return res.status(500).send("Email not sent");
+      // return res.status(500).send("Email not sent");
+      return res.render("signup", { message: "Error sending verification email" });
     }
     req.session.userOtp = otp;
     req.session.userData = {name,email,password};
