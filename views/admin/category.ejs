@@ -282,7 +282,55 @@ function handleFormSubmit(event) {
           element.style.display = "none";
       });
   }
+   
 
+  function toggleCategoryStatus(categoryId, isListed) {
+    isListed = isListed === "true"; 
+    let action = isListed ? "unlist" : "list";
+    let newStatus = isListed ? "Unlisted" : "Listed";
+    let newButtonClass = isListed ? "btn-success" : "btn-danger";
+    let newButtonText = isListed ? "List" : "Unlist";
+    
+    Swal.fire({
+        title: `Are you sure you want to ${action} this category?`,
+        text: "You can change it later if needed.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: `Yes, ${action} it!`
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/admin/${action}Category?id=${categoryId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" }
+            })
+            .then(response => response.json())  
+            .then(data => {
+                if (data.success) {
+                    Swal.fire(`${newStatus}!`, `The category has been ${action}ed.`, "success");
+
+                 
+                    let button = document.getElementById(`category-btn-${categoryId}`);
+                    let statusBadge = document.getElementById(`category-status-${categoryId}`);
+
+                    button.setAttribute("onclick",` toggleCategoryStatus('${categoryId}', ${!isListed})`);
+                    button.className = `btn ${newButtonClass}`;
+                    button.innerHTML = `<span class="text-white">${newButtonText}</span>`;
+
+                    statusBadge.className = `badge rounded-pill alert-${isListed ? "danger" : "success"}`;
+                    statusBadge.innerText = newStatus;
+                } else {
+                    Swal.fire("Error!", "Something went wrong.", "error");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                Swal.fire("Error!", "Something went wrong.", "error");
+            });
+        }
+    });
+}
 
   </script>
   

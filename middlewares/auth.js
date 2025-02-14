@@ -6,12 +6,12 @@ const userAuth =(req,res,next)=>{
     if(data && !data.isBlocked){
       next()
     }else{
-      res.redirect("/login")
+      return res.redirect("/login")
     }
   })
   .catch (error=>{
     console.log("Error in User auth middlware");
-    res.status(500).send("Internal server error")
+    return res.status(500).send("Internal server error")
   })
  }else{
   res.redirect("/login")
@@ -22,7 +22,7 @@ const adminAuth = (req,res,next)=>{
     next()
    }else{
     if(req.originalUrl !== "/admin/login"){
-      res.redirect("/admin/login")
+      return res.redirect("/admin/login")
     }else{
       next()
     }

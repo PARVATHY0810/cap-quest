@@ -130,7 +130,7 @@
                     <div id="otpTimer" class="otp-timer">
                         <span id="timerValue">60</span>
                     </div>
-                    <button type="button" class="btn btn-secondary" id="resend"  onclick="resendOTP()" disabled>Resend OTP</button>
+                    <button type="button" class="btn btn-secondary" id="resend"  onclick="resendOTP()">Resend OTP</button>
                 </div>
                 <% if (locals.message && message.length > 0) { %>
                 <div class="alert alert-danger"><%= message %></div>
@@ -147,78 +147,87 @@
 <script>
     document.getElementById("otp").focus();
 
-    let timer = 60;
-    let timerInterval;
+    let timer = 120;
+let timerInterval;
+let resendButton = document.getElementById("resend");
+let timerElement = document.getElementById("timerValue");
 
-    function startTimer() {
-        timerInterval = setInterval(() => {
-            timer--;
-            document.getElementById("timerValue").textContent = timer;
-            if (timer <= 0) {
-                clearInterval(timerInterval);
-                document.getElementById("timerValue").classList.add("expired");
-                document.getElementById("timerValue").textContent = "Expired";
-            
-            }
-        }, 1000);
-    }
-    startTimer();
+function formatTime(seconds) {
+    let minutes = Math.floor(seconds / 60);
+    let remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+}
 
-    function validateOTPForm(){
-        
-            const otpInput = document.getElementById("otp").value
-        $.ajax({
-            type:"POST",
-            url:"verify-otp",
-            data:{otp:otpInput},
-            success: function(response){
-                console.log(response)
-                if(response.success){
-                    Swal.fire({
-                        icon:"success",
-                        title:"OTP verified successfully",
-                        showConfirmButton :false,
-                        timer:1500,
+function startTimer() {
+    timerElement.textContent = formatTime(timer);
+    resendButton.disabled = true; // Disable resend for 60 seconds
 
-                    }).then(()=>{
-                        window.location.href = response.redirectUrl
-                    })
-                }else{
-                    Swal.fire({
-                        icon:"error",
-                        title:"Error",
-                        text:response.message,
-                    })
-                }
-            },
-            error: function(){
+    let disableResendTime = 60; // Disable for 60 sec
+    let disableInterval = setInterval(() => {
+        disableResendTime--;
+        if (disableResendTime <= 0) {
+            clearInterval(disableInterval);
+            resendButton.disabled = false; // Re-enable after 60 sec
+        }
+    }, 1000);
+
+    timerInterval = setInterval(() => {
+        timer--;
+        timerElement.textContent = formatTime(timer);
+        if (timer <= 0) {
+            clearInterval(timerInterval);
+            timerElement.classList.add("expired");
+            timerElement.textContent = "Expired";
+        }
+    }, 1000);
+}
+startTimer();
+
+function validateOTPForm() {
+    const otpInput = document.getElementById("otp").value;
+    $.ajax({
+        type: "POST",
+        url: "verify-otp",
+        data: { otp: otpInput },
+        success: function (response) {
+            console.log(response);
+            if (response.success) {
                 Swal.fire({
-                    icon:"error",
-                    title:"Invalid OTP",
-                    text:"Please try again"
-                })
+                    icon: "success",
+                    title: "OTP verified successfully",
+                    showConfirmButton: false,
+                    timer: 1500,
+                }).then(() => {
+                    window.location.href = response.redirectUrl;
+                });
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: response.message,
+                });
             }
-        })
-        return false
+        },
+        error: function () {
+            Swal.fire({
+                icon: "error",
+                title: "Invalid OTP",
+                text: "Please try again",
+            });
+        },
+    });
+    return false;
+}
 
-    }
-
-
-
-    function resendOTP() {
+function resendOTP() {
     clearInterval(timerInterval);
-    timer = 60;
+    timer = 120;
     document.getElementById("otp").disabled = false;
-    document.getElementById("timerValue").classList.remove("expired");
-
-    let resendButton = document.getElementById('resend');
+    timerElement.classList.remove("expired");
+    
+    resendButton.disabled = true; // Disable resend button for 60 sec
 
     startTimer(); // Restart the timer
-
-    // Enable button after 60 seconds
-    setTimeout(() => {
-        resendButton.removeAttribute = disabled; // ✅ Re-enable after 60s
-    }, 60000);
 
     $.ajax({
         type: "POST",
@@ -227,7 +236,7 @@
             if (response.success) {
                 Swal.fire({
                     icon: "success",
-                    title: "OTP resend successfully",
+                    title: "OTP resent successfully",
                     showConfirmButton: false,
                     timer: 1500,
                 });
@@ -237,7 +246,7 @@
                     title: "Error",
                     text: "An error occurred while resending OTP. Please try again",
                 });
-                resendButton.disabled = false; // ✅ Re-enable immediately if error
+                resendButton.disabled = false; // Enable button if resend fails
             }
         },
         error: function () {
@@ -246,12 +255,13 @@
                 title: "Error",
                 text: "Network error, please try again",
             });
-            resendButton.disabled = false; // ✅ Re-enable if AJAX fails
-        }
+            resendButton.disabled = false; // Enable button if AJAX fails
+        },
     });
 
     return false;
 }
+
 
 </script>
 <%- include("../../views/partials/user/footer") %>

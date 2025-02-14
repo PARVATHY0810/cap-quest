@@ -132,7 +132,7 @@
                                                                    <input class="form-control" type="file" name="images" id="input1"
                                                                        accept="image/png, image/jpeg, image/jpg"
                                                                        onchange="viewImage1(event), viewImage(event, 1)">
-                                                                       <div id="images-error" class="error-message"></div>
+                                                                       
                                                                </div>
                                                                <div class="image-cropper d-flex align-items-center"
                                                                    style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
@@ -149,6 +149,7 @@
                                                                    <input class="form-control" type="file" name="images" id="input2"
                                                                        accept="image/png, image/jpeg, image/jpg"
                                                                        onchange="viewImage2(event),viewImage(event, 2)">
+                                                                    
                                                                </div>
                                                                <div class="image-cropper d-flex align-items-center"
                                                                    style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
@@ -165,6 +166,7 @@
                                                                    <input class="form-control" type="file" name="images" id="input3"
                                                                        accept="image/png, image/jpeg, image/jpg"
                                                                        onchange="viewImage3(event),viewImage(event, 3)">
+                                                                       
                                                                </div>
                                                                <div class="image-cropper d-flex align-items-center"
                                                                    style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
@@ -191,7 +193,9 @@
                                                            </div>
                           
                                                        </div>
+                                                       <div id="images-error" class="error-message"></div>
                            </div>
+                           
                            <div>
                                <button class="btn btn-md rounded font-sm hover-up"  type="submit" onclick="validateAndSubmit()" >Publish</button>
                            </div>
@@ -380,6 +384,28 @@
                   displayErrorMessage("images-error",'Please select an image.');
                   isValid = false;
               }
+              let hasImage = false; // Flag to track if at least one image is selected
+
+              let selectedImages = 0; // Count selected images
+
+const imageInputs = document.querySelectorAll('input[name="images"]');
+
+imageInputs.forEach(input => {
+    if (input.files.length > 0) {
+        selectedImages++; // Count the number of selected images
+    }
+});
+
+if (selectedImages !== 3) {
+    document.getElementById("images-error").textContent = "Please select atleast 3 images.";
+    isValid = false;
+} else {
+    document.getElementById("images-error").textContent = ""; // Clear error message if valid
+}
+
+if (!isValid) {
+    event.preventDefault(); // Prevent form submission if validation fails
+}
               return isValid;
           }
 

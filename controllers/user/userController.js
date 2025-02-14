@@ -32,7 +32,7 @@ const loadHomepage = async (req,res)=>{
 
     )
     productData.sort((a,b)=> new Date (b.creatOne)-new Date(a.creatOne));
-    productData = productData.slice(0,4);
+    // productData = productData.slice(0,4);
   
     
      if(user){
@@ -273,6 +273,74 @@ const login = async (req,res)=>{
     }
   }
 
+const forgotPasssword = async (req, res) => {
+  try {
+
+    return res.render("forgot-password")
+    
+  } catch (error) {
+    console.log('Forgot password page renderign error',error);
+    res.redirect("/pageNotFound");
+  }
+}
+const forgotPassswordSendLink = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    console.log("Received email:", email);
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email is required" });
+    }
+
+    const user = await User.findOne({ email, isAdmin: false });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    console.log("User found:", user);
+
+    // Generate OTP
+    const otp = generateOtp();
+    user.forgotPasswordOtp = otp;
+    user.otpExpires = Date.now() + 10 * 60 * 1000; 
+    await user.save();
+
+    console.log(otp)
+
+    // Send success response
+    return res.json({ success: true, message: "OTP sent to email" });
+
+  } catch (error) {
+    console.error("Error in forgot password:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+const newPassword = async (req, res) => {
+  try {
+
+    return res.render("new-password")
+    
+  } catch (error) {
+    console.log('Forgot password page renderign error',error);
+    res.redirect("/pageNotFound");
+  }
+}
+
+const CapProductDetails = async(req,res)=>{
+  try {
+    console.log("haai")
+      const Products=await product.find({isBlocked:false})
+      const User=req.session.user
+      
+   
+     console.log(Products)
+      res.render("productDetails",{User,Products})
+  } catch (error) {
+      console.log("error")
+  }
+}
 module.exports = {
   loadHomepage,
   loadSignupPage,
@@ -284,5 +352,9 @@ module.exports = {
   resendOtp,
   loadLogin,
   login,
+  forgotPasssword,
+  forgotPassswordSendLink,
+  newPassword,
+  CapProductDetails,
   logout
 }

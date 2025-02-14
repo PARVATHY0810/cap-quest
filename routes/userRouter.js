@@ -29,6 +29,10 @@ router.get(
 });
 router.get("/login",userController.loadLogin);
 router.post("/login",userController.login);
+router.get("/forgot-password", userController.forgotPasssword)
+router.post("/reset-password", userController.forgotPassswordSendLink);
+router.get("/new-password", userController.newPassword)
+router.get("/productdetails",userController.CapProductDetails)
 
 // router.get('/',userController.loadHomepage);
 router.get("/logout",userController.logout);

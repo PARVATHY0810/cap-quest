@@ -112,6 +112,8 @@ const userSchema = new mongoose.Schema({
       searchOne: { type: Date, default: Date.now },
     },
   ],
+  forgotPasswordOtp: { type: String, default: null }, // Add this field
+  otpExpires: { type: Date, default: null } // Optional: Store OTP expiration time
 });
 
 const User = mongoose.model("User", userSchema);

@@ -114,28 +114,49 @@ const editCategory = async (req,res)=>{
 }
 
 
-const getListCategory = async (req,res)=>{
+// const getListCategory = async (req,res)=>{
+//     try {
+//         let id = req.query.id;
+//         await Category.updateOne({_id:id},{$set:{isListed:false}});
+//         res.redirect("/admin/category");
+       
+//     } catch (error) {
+//         res.redirect("/pageerror");
+//     }
+// };
+
+// const getUnlistCategory = async (req,res)=>{
+//     try {
+//         let id = req.query.id;
+//         await Category.updateOne({_id:id},{$set:{isListed:true}});
+//         res.redirect("/admin/category")
+       
+//     } catch (error) {
+//         res.redirect("/pageerror");
+//     }
+// }
+
+const getListCategory = async (req, res) => {
     try {
         let id = req.query.id;
-        await Category.updateOne({_id:id},{$set:{isListed:false}});
-        res.redirect("/admin/category");
-       
+        await Category.updateOne({ _id: id }, { $set: { isListed: true } });
+        res.json({ success: true, message: "Category unlisted successfully" }); 
     } catch (error) {
-        res.redirect("/pageerror");
+        console.error("Error unlisting category:", error);
+        res.status(500).json({ success: false, message: "Something went wrong" });
     }
 };
 
-const getUnlistCategory = async (req,res)=>{
+const getUnlistCategory = async (req, res) => {
     try {
         let id = req.query.id;
-        await Category.updateOne({_id:id},{$set:{isListed:true}});
-        res.redirect("/admin/category")
-       
+        await Category.updateOne({ _id: id }, { $set: { isListed: false } });
+        res.json({ success: true, message: "Category listed successfully" });  
     } catch (error) {
-        res.redirect("/pageerror");
+        console.error("Error listing category:", error);
+        res.status(500).json({ success: false, message: "Something went wrong" });
     }
-}
-
+};
 
 
 module.exports ={
