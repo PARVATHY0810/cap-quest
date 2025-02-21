@@ -7,10 +7,9 @@ const addressSchema = new Schema({
     ref: 'User',
     required: true
   },
-  address:[{
     addressType:{
       type: String,
-      required: true
+      required: false
     },
     name:{
       type: String,
@@ -28,18 +27,17 @@ const addressSchema = new Schema({
       required: true
     },
     pincode:{
-      type: number,
+      type: Number,
       required: true
     },
     phone:{
-      type: string,
+      type: String,
       required: true
     },
-    altPhone:{
-      type: string,
-      required: false
-    },
-  }]
+    // altPhone:{
+    //   type: String,
+    //   required: false
+    // },
 })
 
 

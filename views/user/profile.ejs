@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= user.name %> | Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        :root {
+            --primary-color: #ff7700;
+            --secondary-color: #fff5eb;
+            --accent-color: #ff9f43;
+        }
+        
+        body {
+            background-color: #fafafa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 14px;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        .profile-container {
+            height: 100vh;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .profile-header {
+            background: linear-gradient(135deg, var(--primary-color), #ff9f43);
+            color: white;
+            padding: 1rem;
+            position: relative;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .profile-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 30px;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--primary-color);
+            margin: 0 auto 0.5rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .profile-header h2 {
+            font-size: 18px;
+            margin-bottom: 0;
+        }
+        
+        .profile-header p {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            background-color: white;
+            border-right: 1px solid #eee;
+            overflow-y: auto;
+            width: 250px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .nav-menu {
+            flex: 1;
+            padding-top: 0.5rem;
+        }
+        
+        .nav-item {
+            transition: all 0.2s ease;
+            border-left: 2px solid transparent;
+            height: 45px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item:hover {
+            background-color: var(--secondary-color);
+            border-left: 2px solid var(--primary-color);
+        }
+        
+        .nav-link {
+            color: #555;
+            font-weight: 500;
+            padding: 0.8rem 1rem;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+            color: #777;
+        }
+        
+        .nav-item:hover .nav-link,
+        .nav-item:hover .nav-link i {
+            color: var(--primary-color);
+        }
+        
+        .active {
+            background-color: rgba(255, 119, 0, 0.05);
+            border-left: 2px solid var(--primary-color);
+        }
+        
+        .active .nav-link,
+        .active .nav-link i {
+            color: var(--primary-color);
+        }
+        
+        .logout-container {
+            padding: 1rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .logout-btn {
+            background: linear-gradient(to right, #ff7700, #ff9f43);
+            border: none;
+            color: white;
+            font-size: 14px;
+            padding: 0.5rem;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(255, 119, 0, 0.2);
+        }
+        
+        .content-area {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .content-area-empty {
+            color: #aaa;
+            text-align: center;
+        }
+        
+        .content-area-empty i {
+            font-size: 48px;
+            margin-bottom: 1rem;
+            color: #ddd;
+        }
+        
+        .content-wrapper {
+            width: 100%;
+            max-width: 900px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #eee;
+            }
+            
+            .content-area {
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <%= user.name.charAt(0).toUpperCase() %>
+            </div>
+            <h2><%= user.name %></h2>
+            <p><%= user.email %></p>
+        </div>
+        
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="nav-menu">
+                    <ul class="nav flex-column">
+                        <li class="nav-item" id="nav-account">
+                            <a class="nav-link" href="/userProfile" onclick="showContent('account')">
+                                <i class="fas fa-user"></i> Account
+                            </a>
+                        </li>
+                        <li class="nav-item" id="nav-address">
+                            <a class="nav-link" href="/loadAddAddress" onclick="showContent('address')">
+                                <i class="fas fa-map-marker-alt"></i> Address
+                            </a>
+                        </li>
+                        <li class="nav-item" id="nav-orders">
+                            <a class="nav-link" href="#orders" onclick="showContent('orders')">
+                                <i class="fas fa-clipboard-list"></i> Orders
+                            </a>
+                        </li>
+                        <li class="nav-item" id="nav-wishlist">
+                            <a class="nav-link" href="#wishlist" onclick="showContent('wishlist')">
+                                <i class="fas fa-heart"></i> Wishlist
+                            </a>
+                        </li>
+                        <li class="nav-item" id="nav-cart">
+                            <a class="nav-link" href="#cart" onclick="showContent('cart')">
+                                <i class="fas fa-shopping-cart"></i> Cart
+                            </a>
+                        </li>
+                        <li class="nav-item" id="nav-wallet">
+                            <a class="nav-link" href="#wallet" onclick="showContent('wallet')">
+                                <i class="fas fa-wallet"></i> Wallet
+                            </a>
+                        </li>
+                        <li class="nav-item" id="nav-coupons">
+                            <a class="nav-link" href="#coupons" onclick="showContent('coupons')">
+                                <i class="fas fa-ticket-alt"></i> Coupons
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="logout-container">
+                    <form action="/auth/logout" method="POST">
+                        <button type="submit" class="btn logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="content-area">
+                <div id="empty-state" class="content-area-empty">
+                    <i class="fas fa-user-circle"></i>
+                    <h4>Welcome, <%= user.name %></h4>
+                    <p>Select an option from the menu to view details</p>
+                </div>
+                
+                <!-- Account Content (Hidden by default) -->
+                <!-- <div id="account-content" class="content-wrapper" style="display: none;">
+                    <h4>Account Details</h4>
+                    <hr>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row mb-2">
+                                <div class="col-md-6">
+                                    <label class="form-label text-muted small">Full Name</label>
+                                    <p class="fw-bold"><%= user.name %></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-muted small">Email Address</label>
+                                    <p class="fw-bold"><%= user.email %></p>
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-md-6">
+                                    <label class="form-label text-muted small">Phone Number</label>
+                                    <p class="fw-bold"><%= user.phone || 'Not provided' %></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-muted small">Member Since</label>
+                                    <p class="fw-bold"><%= new Date(user.createdAt).toLocaleDateString() %></p>
+                                </div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary">Edit Profile</button>
+                        </div>
+                    </div>
+                </div> -->
+                
+                <!-- Other content sections (all hidden by default) -->
+                <div id="address-content" class="content-wrapper" style="display: none;">
+                    <h4>My Addresses</h4>
+                    <hr>
+                    <!-- Address content here -->
+                </div>
+                
+                <div id="orders-content" class="content-wrapper" style="display: none;">
+                    <h4>My Orders</h4>
+                    <hr>
+                    <!-- Orders content here -->
+                </div>
+                
+                <div id="wishlist-content" class="content-wrapper" style="display: none;">
+                    <h4>My Wishlist</h4>
+                    <hr>
+                    <!-- Wishlist content here -->
+                </div>
+                
+                <div id="cart-content" class="content-wrapper" style="display: none;">
+                    <h4>My Cart</h4>
+                    <hr>
+                    <!-- Cart content here -->
+                </div>
+                
+                <div id="wallet-content" class="content-wrapper" style="display: none;">
+                    <h4>My Wallet</h4>
+                    <hr>
+                    <!-- Wallet content here -->
+                </div>
+                
+                <div id="coupons-content" class="content-wrapper" style="display: none;">
+                    <h4>My Coupons</h4>
+                    <hr>
+                    <!-- Coupons content here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Function to show content based on selection
+        function showContent(contentType) {
+            // Hide all content sections
+            document.getElementById('empty-state').style.display = 'none';
+            document.getElementById('account-content').style.display = 'none';
+            document.getElementById('address-content').style.display = 'none';
+            document.getElementById('orders-content').style.display = 'none';
+            document.getElementById('wishlist-content').style.display = 'none';
+            document.getElementById('cart-content').style.display = 'none';
+            document.getElementById('wallet-content').style.display = 'none';
+            document.getElementById('coupons-content').style.display = 'none';
+            
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected content and make nav item active
+            if (contentType) {
+                document.getElementById(`${contentType}-content`).style.display = 'block';
+                document.getElementById(`nav-${contentType}`).classList.add('active');
+            } else {
+                document.getElementById('empty-state').style.display = 'block';
+            }
+        }
+        
+        // Check URL hash on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const hash = window.location.hash.substring(1);
+            if (hash && ['account', 'address', 'orders', 'wishlist', 'cart', 'wallet', 'coupons'].includes(hash)) {
+                showContent(hash);
+            }
+        });
+    </script>
+</body>
+</html>

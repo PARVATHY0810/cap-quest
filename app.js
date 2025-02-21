@@ -46,7 +46,7 @@ app.use("/admin",adminRouter)
 
 const PORT=process.env.PORT || 4488;
 app.listen(PORT,()=>{
-  console.log("server running");
+  console.log(`server is running http://localhost:${PORT}`);
 })
 
 

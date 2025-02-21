@@ -237,7 +237,7 @@ const loadLogin = async (req,res)=>{
   
 const login = async (req,res)=>{
   try{
-    console.log("hai")
+    
     const {email,password} = req.body;
     const findUser = await User.findOne({isAdmin:0,email});
     console.log(findUser)
@@ -307,9 +307,11 @@ const forgotPassswordSendLink = async (req, res) => {
     await user.save();
 
     console.log(otp)
-
+   
+    req.session.user=email
     // Send success response
-    return res.json({ success: true, message: "OTP sent to email" });
+     res.json({ success: true, message: "OTP sent to email" });
+     
 
   } catch (error) {
     console.error("Error in forgot password:", error);
@@ -318,19 +320,31 @@ const forgotPassswordSendLink = async (req, res) => {
 };
 
 const newPassword = async (req, res) => {
-  try {
-
+  try{
     return res.render("new-password")
+
+  }
     
-  } catch (error) {
+   catch (error) {
     console.log('Forgot password page renderign error',error);
     res.redirect("/pageNotFound");
   }
 }
 
+const changePassword=async(req,res)=>{
+  try {
+    const passwordHash = await bcrypt.hash(req.body.password,10);
+   await User.updateOne({email:req.session.user},{password:passwordHash})
+   req.session.user=null
+   res.json({success:"Successfully changed the password"})
+  } catch (error) {
+    console.log(error)
+  }
+}
+
 const CapProductDetails = async(req,res)=>{
   try {
-    console.log("haai")
+    
       const Products=await product.find({isBlocked:false})
       const User=req.session.user
       
@@ -356,5 +370,6 @@ module.exports = {
   forgotPassswordSendLink,
   newPassword,
   CapProductDetails,
-  logout
+  logout,
+  changePassword
 }

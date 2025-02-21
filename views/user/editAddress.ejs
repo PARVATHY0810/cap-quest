@@ -1,0 +1,228 @@
+<title>Edit User Address</title>
+<style>
+
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+    }
+
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background-color: #f4f4f4;
+    }
+
+    .container {
+        width: 70%;
+        max-width: 900px;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-left: 280px;
+    }
+
+    h2 {
+        text-align: center;
+        color: #2d6a4f;
+        margin-bottom: 20px;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        width: 20%;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .form-group input {
+        width: 75%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        background: #2d6a4f;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 18px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    button:hover {
+        background: #1b4d35;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .container {
+            width: 90%;
+        }
+
+        .form-group {
+            flex-direction: column;
+        }
+
+        .form-group label, .form-group input {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+    }
+</style>
+</head>
+<body>
+<form id="addAddress">
+    <div class="form-group">
+        <label>Address Type:</label>
+        <input type="text" name="address_type" required id="addressType" value="<%= addressData.addressType %>">
+        <input type="hidden" id="id" value="<%= addressData._id %>">
+    </div>
+
+    <div class="form-group">
+        <label>Name:</label>
+        <input type="text" name="name" required id="name" value="<%= addressData.name %>">
+    </div>
+
+    <div class="form-group">
+        <label>City:</label>
+        <input type="text" name="city" required id="city" value="<%= addressData.city %>">
+    </div>
+
+    <div class="form-group">
+        <label>Landmark:</label>
+        <input type="text" name="landmark" id="landmark" value="<%= addressData.landMark %>">
+    </div>
+
+    <div class="form-group">
+        <label>State:</label>
+        <input type="text" name="state" required id="state" value="<%= addressData.state %>">
+    </div>
+
+    <div class="form-group">
+        <label>Pincode:</label>
+        <input type="text" name="pincode" required id="pincode" value="<%= addressData.pincode %>">
+    </div>
+
+    <div class="form-group">
+        <label>Phone:</label>
+        <input type="tel" name="phone" required id="phone" value="<%= addressData.phone %>">
+    </div>
+
+    <!-- <div class="form-group">
+        <label>Alternate Phone:</label>
+        <input type="tel" name="alt_phone" id="alternatePhone" value="">
+        <input type="hidden" name="userId" value="" id="userid" >
+    </div> -->
+
+
+    <button type="submit">Submit</button>
+</form>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+document.getElementById("addAddress").addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const addressType = document.getElementById("addressType").value.trim();
+    const name = document.getElementById("name").value.trim();
+    const city = document.getElementById("city").value.trim();
+    const landmark = document.getElementById("landmark").value.trim();
+    const state = document.getElementById("state").value.trim();
+    const pincode = document.getElementById("pincode").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const addressId = document.getElementById("id").value.trim();
+
+    // Validation Patterns
+    const alphabetPattern = /^[A-Za-z\s]+$/;  // Only alphabets and spaces
+    const pincodePattern = /^[1-9][0-9]{5}$/; // 6-digit positive number, cannot start with 0
+    const phonePattern = /^[6-9]\d{9}$/;      // 10-digit number, starts with 6-9
+
+    if (!addressType || !name || !city || !state || !pincode || !phone) {
+        return Swal.fire("Error!", "All fields except Alternate Phone are required.", "error");
+    }
+
+    if (!alphabetPattern.test(addressType) || !alphabetPattern.test(name) || !alphabetPattern.test(city) || !alphabetPattern.test(state) || (landmark && !alphabetPattern.test(landmark))) {
+        return Swal.fire("Error!", "Address Type, Name, City, Landmark, and State should contain only alphabets.", "error");
+    }
+
+    if (!pincodePattern.test(pincode)) {
+        return Swal.fire("Error!", "Pincode must be a 6-digit positive number.", "error");
+    }
+
+    if (!phonePattern.test(phone)) {
+        return Swal.fire("Error!", "Phone number must be a 10-digit positive number starting with 6-9.", "error");
+    }
+
+    // if (altPhone && !phonePattern.test(altPhone)) {
+    //     return Swal.fire("Error!", "Alternate Phone must be a 10-digit positive number starting with 6-9.", "error");
+    // }
+
+    // If all validations pass, send the data
+    const data = {
+        address_type: addressType,
+        name: name,
+        city: city,
+        landmark: landmark,
+        state: state,
+        pincode: pincode,
+        phone: phone,
+        addressId:addressId
+    };
+
+    try {
+        const response = await fetch("/editAddress", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            Swal.fire({
+                title: "Success!",
+                text: "Address Added Successfully",
+                icon: "success",
+                showConfirmButton: true
+            }).then(() => {
+                if (document.referrer.includes("/checkout")) {
+                    window.location.href = "/user/checkout";
+                } else {
+                    window.location.href = "/profile";
+                }
+            });
+        } else {
+            Swal.fire("Error!", "Failed to add address. Please try again.", "error");
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        Swal.fire("Error!", "Something went wrong.", "error");
+    }
+});
+
+
+</script>
+
+</html>

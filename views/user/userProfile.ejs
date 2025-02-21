@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+            color: #000;
+            flex-direction: column;
+        }
+
+        .breadcrumbs {
+            font-size: 14px;
+            margin-bottom: 15px;
+            text-align: left;
+            width: 500px;
+        }
+
+        .breadcrumbs a {
+            text-decoration: none;
+            color: orange;
+            font-weight: bold;
+        }
+
+        .breadcrumbs a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 500px;
+            animation: fadeInUp 0.6s ease-in-out;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        h2 { text-align: left; font-size: 24px; margin-bottom: 20px; }
+
+        label { font-weight: 600; display: block; margin: 10px 0 5px; font-size: 14px; }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .buttons { display: flex; justify-content: space-between; margin-top: 15px; }
+
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn.cancel { background: #e0e0e0; color: #000; }
+        .btn.cancel:hover { background: #d6d6d6; }
+        .btn.save { background: #000; color: #fff; }
+        .btn.save:hover { background: #007bff; }
+    </style>
+</head>
+<body>
+    <div class="breadcrumbs">
+        <a href="/user">User</a> > 
+        <a href="/profile">Profile</a> > 
+        <span>Account</span>
+    </div>
+    <div class="container">
+        <form action="" id="updateProfile">
+            <h2>Edit Your Profile</h2>
+            <input type="hidden" id="userid" value="<%= user._id%>">
+            <label for="first-name">User Name</label>
+            <input type="text" id="first-name" placeholder="Enter first name" value="<%= user.name %>">
+            
+            <h3>Password Changes</h3>
+            <label for="current-password">Current Password</label>
+            <input type="password" id="current-password" placeholder="Enter current password">
+            
+            <label for="new-password">New Password</label>
+            <input type="password" id="new-password" placeholder="Enter new password">
+            
+            <label for="confirm-password">Confirm New Password</label>
+            <input type="password" id="confirm-password" placeholder="Confirm new password">
+            
+            <div class="buttons">
+                <button class="btn cancel">Cancel</button>
+                <button type="submit" class="btn save">Save Changes</button>
+            </div>
+        </form>
+    </div>
+    <script>
+        document.getElementById("updateProfile").addEventListener("submit", async (event) => {
+            event.preventDefault();
+        
+            const userId = document.getElementById("userid").value.trim();
+           // Assuming you have this field
+            const name = document.getElementById("first-name").value.trim();
+            const currentPassword = document.getElementById("current-password").value.trim();
+            const newPassword = document.getElementById("new-password").value.trim();
+            const confirmPassword = document.getElementById("confirm-password").value.trim();
+        
+            if (newPassword !== confirmPassword) {
+                return Swal.fire({
+                    icon: "error",
+                    title: "Password Mismatch!",
+                    text: "New password and confirm password do not match.",
+                });
+            }
+        
+            try {
+                const response = await fetch("/updateProfile", {
+                    method: "PUT",  // Use PUT instead of POST for updates
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ userId, name, currentPassword, newPassword })
+                });
+        
+                const data = await response.json();
+        
+                if (data.success) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Success!",
+                        text: data.message,
+                        showConfirmButton: false,
+                        timer: 2000
+                    }).then(() => {
+                        window.location.href="/profile";
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error!",
+                        text: data.message
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error!",
+                    text: "Something went wrong! Please try again."
+                });
+            }
+        });
+        
+        </script>
+</body>
+</html>
