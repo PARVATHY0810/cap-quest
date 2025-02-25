@@ -1,25 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+<%- include("../../views/partials/user/header") %>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Details</title>
-    
-    <!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- Fancybox -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
-
-<!-- Elevate Zoom -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/3.0.8/jquery.elevatezoom.min.js"></script>
-
-
-    
-
-
-
 
     <style>
         /* General Styles */
@@ -150,41 +133,38 @@
         }
 
         /* Image container */
-.image-container {
-    position: relative;
-    display: inline-block;
-}
+        .image-container {
+            position: relative;
+            display: inline-block;
+        }
 
-/* Cursor Box (Small Hover Area) */
-#cursorBox {
-    width: 100px;
-    height: 100px;
-    border: 2px solid #000;
-    position: absolute;
-    display: none;
-    background: rgba(255, 255, 255, 0.3);
-    pointer-events: none; /* Allows mouse interaction with the image */
-}
+        /* Cursor Box (Small Hover Area) */
+        #cursorBox {
+            width: 100px;
+            height: 100px;
+            border: 2px solid #000;
+            position: absolute;
+            display: none;
+            background: rgba(255, 255, 255, 0.3);
+            pointer-events: none; /* Allows mouse interaction with the image */
+        }
 
-/* Zoomed Image Display */
-#zoomWindow {
-    width: 500px;
-    height: 500px;
-    border: 2px solid #000;
-    position: absolute;
-    left: 670px; /* Adjust to position next to the image */
-    top: 0;
-    overflow: hidden;
-    display: none;
-    background-image: url("/uploads/re-image/<%= product.productImage[0] %>");
-    background-repeat: no-repeat;
-    background-size: 900px; /* Adjust for zoom level */
-}
-
-
-
+        /* Zoomed Image Display */
+        #zoomWindow {
+            width: 500px;
+            height: 500px;
+            border: 2px solid #000;
+            position: absolute;
+            left: 670px; /* Adjust to position next to the image */
+            top: 0;
+            overflow: hidden;
+            display: none;
+            background-repeat: no-repeat;
+            background-size: 900px; /* Adjust for zoom level */
+        }
     </style>
 </head>
+
 <body>
 
     <div class="container">
@@ -194,35 +174,29 @@
             <span><%= product.productName %></span>
         </div>
         
-
         <div class="product-details">
-            
             <div class="product-image">
-               <!-- Image Container -->
-            <div class="image-container">
-                <!-- Main Image -->
-                <img id="zoomImage" 
-                    src="/uploads/re-image/<%= product.productImage[0] %>" 
-                    data-zoom-image="/uploads/re-image/<%= product.productImage[0] %>" 
-                    width="400" height="400" />
+                <!-- Image Container -->
+                <div class="image-container">
+                    <!-- Main Image -->
+                    <img id="zoomImage" 
+                        src="/uploads/re-image/<%= product.productImage[0] %>" 
+                        data-zoom-image="/uploads/re-image/<%= product.productImage[0] %>" 
+                        width="400" height="400" />
 
-                <!-- Cursor Box (Magnifying Glass Effect) -->
-                <div id="cursorBox"></div>
-                 <!-- Div for Zoomed Image -->
-            <div id="zoomWindow"></div>
-            </div>
-
-           
-
+                    <!-- Cursor Box (Magnifying Glass Effect) -->
+                    <div id="cursorBox"></div>
+                    <!-- Div for Zoomed Image -->
+                    <div id="zoomWindow"></div>
+                </div>
 
                 <div class="image-thumbnails">
                     <% product.productImage.forEach(image => { %>
-                        <a href="/uploads/re-image/<%= image %>" data-fancybox="gallery">
-                            <img src="/uploads/re-image/<%= image %>" style="width: 100px; margin: 5px;">
-                        </a>
+                        <img src="/uploads/re-image/<%= image %>" 
+                             class="thumbnail-image" 
+                             style="width: 100px; margin: 5px; cursor: pointer;">
                     <% }) %>
                 </div>
-
             </div>
 
             <div class="product-info">
@@ -231,19 +205,33 @@
                 <p><strong>Brand:</strong> <%= product.brand %></p>
                 <p><strong>Category:</strong> <%= product.category.name %></p>
 
-                
-                <p class="price">Sale Price: $<%= product.salePrice %>  
+                <!-- <p class="price">Sale Price: ₹<%= product.salePrice %>  
                     <% if (product.regularPrice > product.salePrice) { %>
                         <span class="discount">(Save <%= ((product.regularPrice - product.salePrice) / product.regularPrice * 100).toFixed(1) %>%)</span>
                     <% } %>
+                </p> -->
+
+                <p class="price">
+                    <span>Sale Price: ₹<%= product.salePrice %></span>  
+                    <% if (product.regularPrice > product.salePrice) { %>
+                        <span style="text-decoration: line-through; color: #888; font-size: 14px;">₹<%= product.regularPrice %></span>
+                        <span class="discount">(Save <%= ((product.regularPrice - product.salePrice) / product.regularPrice * 100).toFixed(1) %>%)</span>
+                    <% } %>
                 </p>
+                
+                
+                
 
                 <p class="stock">
                     <%= product.quantity > 0 ? "In Stock" : "<span style='color:black;'>Sold Out</span>" %>
                 </p>
                 
                 <p class="rating">⭐⭐⭐⭐☆ (4.5 / 5)</p>
-                <button class="btn">Add to Cart</button>
+                 <!-- <button class="btn" id="addtocart">Add to Cart</button> -->
+                
+                 <button class="btn add-to-cart" data-product-id="<%= product._id %>">Add to Cart</button>
+
+
                 <button class="btn">Wishlist</button>
             </div>
         </div>
@@ -265,63 +253,104 @@
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
 
-    <!-- Include Elevate Zoom -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/3.0.8/jquery.elevatezoom.min.js"></script>
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
     <!-- Custom Zoom Script -->
     <script>
-   $(document).ready(function() {
-    var $image = $("#zoomImage");
-    var $cursorBox = $("#cursorBox");
-    var $zoomWindow = $("#zoomWindow");
+        $(document).ready(function() {
+            var $image = $("#zoomImage");
+            var $cursorBox = $("#cursorBox");
+            var $zoomWindow = $("#zoomWindow");
 
-    var imageWidth = $image.width();
-    var imageHeight = $image.height();
-    var zoomFactor = 2; // Adjust the zoom level
-    var zoomWidth = 100;
-    var zoomHeight = 100;
+            var imageWidth = $image.width();
+            var imageHeight = $image.height();
+            var zoomFactor = 2; // Adjust the zoom level
+            var zoomWidth = 100;
+            var zoomHeight = 100;
 
-    // Show cursor box & zoom window on hover
-    $image.mouseenter(function() {
-        $cursorBox.show();
-        $zoomWindow.show();
-    });
+            // Show cursor box & zoom window on hover
+            $image.mouseenter(function() {
+                $cursorBox.show();
+                $zoomWindow.show();
+            });
 
-    // Hide cursor box & zoom window when not hovering
-    $image.mouseleave(function() {
-        $cursorBox.hide();
-        $zoomWindow.hide();
-    });
+            // Hide cursor box & zoom window when not hovering
+            $image.mouseleave(function() {
+                $cursorBox.hide();
+                $zoomWindow.hide();
+            });
 
-    // Update cursor and zoom window dynamically
-    $image.mousemove(function(event) {
-        var offset = $image.offset();
-        var x = event.pageX - offset.left;
-        var y = event.pageY - offset.top;
+            // Update cursor and zoom window dynamically
+            $image.mousemove(function(event) {
+                var offset = $image.offset();
+                var x = event.pageX - offset.left;
+                var y = event.pageY - offset.top;
 
-        // Prevent cursor box from going outside the image
-        var cursorX = Math.max(0, Math.min(x - zoomWidth / 2, imageWidth - zoomWidth));
-        var cursorY = Math.max(0, Math.min(y - zoomHeight / 2, imageHeight - zoomHeight));
+                // Prevent cursor box from going outside the image
+                var cursorX = Math.max(0, Math.min(x - zoomWidth / 2, imageWidth - zoomWidth));
+                var cursorY = Math.max(0, Math.min(y - zoomHeight / 2, imageHeight - zoomHeight));
 
-        // Move the cursor box
-        $cursorBox.css({
-            left: cursorX + "px",
-            top: cursorY + "px"
+                // Move the cursor box
+                $cursorBox.css({
+                    left: cursorX + "px",
+                    top: cursorY + "px"
+                });
+
+                // Move the zoomed image inside the zoom window
+                var bgX = -(cursorX * zoomFactor) + "px";
+                var bgY = -(cursorY * zoomFactor) + "px";
+
+                $zoomWindow.css({
+                    "background-position": bgX + " " + bgY
+                });
+            });
+
+            // Change main image on thumbnail click
+            $(".thumbnail-image").on("click", function() {
+                var newSrc = $(this).attr("src");
+                $image.attr("src", newSrc);
+                $image.attr("data-zoom-image", newSrc);
+                $zoomWindow.css("background-image", "url(" + newSrc + ")");
+            });
         });
 
-        // Move the zoomed image inside the zoom window
-        var bgX = -(cursorX * zoomFactor) + "px";
-        var bgY = -(cursorY * zoomFactor) + "px";
-
-        $zoomWindow.css({
-            "background-position": bgX + " " + bgY
+        document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.add-to-cart').forEach(button => {
+            button.addEventListener('click', function () {
+                let productId = this.getAttribute('data-product-id'); // Get the product ID from the button
+                addToCart(productId);
+            });
         });
     });
-});
-                
+
+    function addToCart(productId) {
+        fetch(`/add-to-cart/${productId}`, {  // Ensure this matches your backend route
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ quantity: 1 }) // Default quantity = 1
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Product added to cart successfully');
+                window.location.href = '/cart'; // Redirect to cart page (optional)
+            } else {
+                alert('Failed to add product to cart');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while adding to cart');
+        });
+    }
+
+
     </script>
- 
 </body>
-</html>
+<%- include("../../views/partials/user/footer") %>

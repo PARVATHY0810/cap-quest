@@ -109,7 +109,7 @@ a[href="/login"]:hover {
             <nav class="header__menu mobile-menu">
                 <ul>
                     <li class="active"><a href="/">Home</a></li>
-                    <!-- <li><a href="/shop">Shop</a></li> -->
+                     <li><a href="/shop">Shop</a></li> 
                     <!-- <li><a href="#">Pages</a>
                         <ul class="dropdown">
                             <li><a href="./about.html">About Us</a></li>
@@ -119,29 +119,26 @@ a[href="/login"]:hover {
                             <li><a href="./blog-details.html">Blog Details</a></li>
                         </ul>
                     </li> -->
-                    <!-- <li><a href="./blog.html">Blog</a></li> -->
+                     <!-- <li><a href="./blog.html">Blog</a></li>  -->
                     <li><a href="./contact.html">Contacts</a></li>
                 </ul>
             </nav>
         </div>
         <div class="col-lg-3 col-md-3">
             <div class="header__nav__option ">
-         <% if (userData=="") { %>
-            <a href="/signup" class="sign-in-link" >Sign Up</a>
-            <a href="/login" >Log in</a>
-            <% } else { %>
-                <div class="dropdown">
-                    <a href="#" class="sign-in-link"><%=userData.name%></a>
-                    <div class="dropdown-content">
-                        <!-- <a href="/profile/<%=userData._id%>">Profile</a> -->
-                        <a href="/profile">Profile</a>
-
-                        <a href="/logout">Logout</a>
+                <% if (!userData) { %>
+                    <a href="/signup" class="sign-in-link">Sign Up</a>
+                    <a href="/login">Log in</a>
+                <% } else { %>
+                    <div class="dropdown">
+                        <a href="#" class="sign-in-link"><%= userData.name %></a>
+                        <div class="dropdown-content">
+                            <a href="/profile">Profile</a>
+                            <a href="/logout">Logout</a>
+                        </div>
                     </div>
-                   
-                </div>
-                <a href="/cart" class="sign-in-link">Cart</a>
-         <% } %>
+                    <a href="/cart" class="sign-in-link">Cart</a>
+                <% } %>
             </div>
         </div>
     </div>

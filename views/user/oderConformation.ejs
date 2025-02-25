@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <%- include("../partials/user/header") %>
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .order-container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .order-header {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .order-items {
+            margin: 20px 0;
+        }
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .shipping-details {
+            background: #f9f9f9;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .order-summary {
+            margin-top: 20px;
+            text-align: right;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-confirmed { background: #e2e3e5; color: #41464b; }
+        .status-shipped { background: #d4edda; color: #155724; }
+        .status-delivered { background: #c3e6cb; color: #155724; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="order-container">
+        <div class="mb-3">
+            <a href="/checkOut" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+        
+        <div class="order-header">
+            <h1>Order Confirmation</h1>
+            <p>Order ID: <%= order._id %></p>
+            <p>Order Date: <%= new Date(order.createdAt).toLocaleDateString() %></p>
+            <div class="status-badge status-<%= order.status ? order.status.toLowerCase() : 'pending' %>">
+                <strong>Status:</strong> <%= order.status ? order.status : 'Pending' %>
+            </div>
+        </div>
+
+        <div class="shipping-details">
+            <h3>Shipping Details</h3>
+            <p><strong>Name:</strong> <%= order.shippingAddress.name %></p>
+            <p><strong>Address Type:</strong> <%= order.shippingAddress.addresstype %></p>
+            <p><strong>City:</strong> <%= order.shippingAddress.city %></p>
+            <p><strong>State:</strong> <%= order.shippingAddress.state %></p>
+            <p><strong>Pincode:</strong> <%= order.shippingAddress.pincode %></p>
+            <p><strong>Phone:</strong> <%= order.shippingAddress.phone %></p>
+        </div>
+
+        <div class="order-items">
+            <h3>Order Items</h3>
+            <% order.products.forEach(product => { %>
+                <div class="item-row">
+                    <div>
+                        <p><%= product.productId.productName %></p>
+                    </div>
+                    <div>
+                        <p>Qty: <%= product.quantity %></p>
+                        <p>Price: ₹<%= product.price.toFixed(2) %></p>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+
+        <a href="/orderDetails/<%= order._id %>" class="btn btn-primary">View Order Details</a>
+
+        <div class="order-summary">
+            <h3>Order Summary</h3>
+            <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+            <% if (order.coupon && order.coupon.code) { %>
+                <p><strong>Coupon Applied:</strong> <%= order.coupon.code %></p>
+                <p><strong>Discount:</strong> -₹<%= order.coupon.discount %></p>
+            <% } %>
+            <p><strong>Shipping:</strong> +₹50</p>
+            <p><strong>Grand Total:</strong> ₹<%= order.totalAmount %></p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <p>Thank you for shopping with us!</p>
+            <p>For any queries regarding your order, please contact our customer support.</p>
+        </div>
+    </div>
+
+    <%- include("../../views/partials/user/footer") %>
+</body>
+</html>

@@ -1,6 +1,7 @@
 const User = require("../../models/userSchema");
 const category =require ("../../models/categorySchema");
 const product = require("../../models/productSchema");
+const Brand = require("../../models/brandSchema")
 
 const env = require("dotenv").config();
 const nodemailer = require("nodemailer");
@@ -23,7 +24,7 @@ const loadHomepage = async (req,res)=>{
   try{
     //console.log("hai")
     const user = req.session.user;
-    //console.log(user)
+
     const categories = await category.find({isListed:true});
     let productData = await product.find(
      {isBlocked:false,
@@ -51,16 +52,6 @@ const loadHomepage = async (req,res)=>{
     res.status(500).send("server error")
   }
 };
-
-
-const loadShopPage = async (req,res)=>{
-  try{
-    return res.render("shop");
-  }catch(error){
-    console.log('Shop Page not Found')
-    res.status(500).send("server error")
-  }
-}
 
 const loadSignupPage = async (req,res)=>{
   try{
@@ -349,17 +340,114 @@ const CapProductDetails = async(req,res)=>{
       const User=req.session.user
       
    
-     console.log(Products)
+
       res.render("productDetails",{User,Products})
   } catch (error) {
       console.log("error")
   }
 }
+
+const loadShop = async (req, res) => {
+  try {
+      // Initialize userData as null
+      let userData ;
+      
+      // Check if user is logged in and get user data if they are
+      if (req.session.user) {
+          userData = await User.findOne({ _id: req.session.user });
+      }
+  
+
+      const query = {
+          search: req.query.search || '',
+          sort: req.query.sort || '',
+          category: req.query.category || '',
+          brand: req.query.brand || '',
+          maxPrice: req.query.maxPrice || '',
+          minPrice: req.query.minPrice || ''
+      };
+
+      // Base filter conditions
+      const filter = {
+          isBlocked: false,
+          status: "Available"
+      };
+
+      // Add search filter if provided
+      if (query.search) {
+          filter.productName = { $regex: query.search, $options: 'i' };
+      }
+
+      // Add category filter if provided
+      if (query.category) {
+          filter.category = query.category;
+      }
+
+      // Add brand filter if provided
+      if (query.brand) {
+          filter.brand = query.brand;
+      }
+
+      // Add price range filter if provided
+      if (query.minPrice || query.maxPrice) {
+          filter.salesPrice = {};
+          if (query.minPrice) filter.salesPrice.$gte = parseInt(query.minPrice);
+          if (query.maxPrice) filter.salesPrice.$lte = parseInt(query.maxPrice);
+      }
+
+      // Sort options
+      let sortOptions = {};
+      switch (query.sort) {
+          case 'price-asc':
+              sortOptions = { salesPrice: 1 };
+              break;
+          case 'price-desc':
+              sortOptions = { salesPrice: -1 };
+              break;
+          case 'name-asc':
+              sortOptions = { productName: 1 };
+              break;
+          case 'name-desc':
+              sortOptions = { productName: -1 };
+              break;
+          default:
+              sortOptions = { createdAt: -1 };
+      }
+
+      // Fetch all required data
+      const [products, categories, brands] = await Promise.all([
+          product.find(filter)
+                 .sort(sortOptions)
+                 .populate('category')
+                 .populate('brand'),
+          category.find({ isListed: true }),
+          Brand.find()
+      ]);
+
+     
+
+      // Render the shop page with or without user data
+      res.render('shop', {
+          products,
+          categories,
+          brands,
+          query,
+          userData, // This will be null for non-logged-in users
+          isLoggedIn: !!req.session.user // Add a boolean flag for login status
+      });
+
+  } catch (error) {
+      console.error('Shop page error:',error);
+      res.status(500).send('Internal Server Error');
+  }
+};
+
+
+
 module.exports = {
   loadHomepage,
   loadSignupPage,
   pageNotFound,
-  loadShopPage,
   signup,
   verifyOtp,
   loadOtp,
@@ -371,5 +459,6 @@ module.exports = {
   newPassword,
   CapProductDetails,
   logout,
-  changePassword
+  changePassword,
+  loadShop
 }

@@ -208,7 +208,7 @@ document.getElementById("addAddress").addEventListener("submit", async (event) =
                 showConfirmButton: true
             }).then(() => {
                 if (document.referrer.includes("/checkout")) {
-                    window.location.href = "/user/checkout";
+                    window.location.href = "/checkout";
                 } else {
                     window.location.href = "/profile";
                 }
