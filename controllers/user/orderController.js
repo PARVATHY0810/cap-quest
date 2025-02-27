@@ -14,7 +14,7 @@ const getCheckoutPage = async (req, res) => {
   try {
     const userId = req.session.user;  
     const userData = userId ? await User.findById(userId) : null;
-    console.log(userData);
+    console.log("user in checkout:    ",userData);
 
     // Fetch cart items
     const cartItems = await Cart.find({ userId }).populate("productId");
@@ -34,7 +34,7 @@ const getCheckoutPage = async (req, res) => {
     }
 
     res.render("checkout", {
-      userData: "",
+      userData,
       cart: cartItems,
       addresses: addresses || [], // Pass addresses, default to empty array if none found
       total: subtotal,
@@ -297,14 +297,80 @@ const orderDetail = async (req, res) => {
       { $match: { userId: new ObjectId(userId) } },
     ]);
 
-    console.log(orders);
-    res.render("orders", { orders, userData });
+    const formattedOrders = orders.map(order => ({
+      _id: order._id,
+      Date: order.orderDate.toLocaleDateString(), // Format the date
+      userDetails: order.userDetails[0], // Assuming userDetails is an array with one element
+      finalAmount: order.finalAmount
+    }));
+
+
+    res.render("orders", { orders:formattedOrders, userData });
   } catch (error) {
     console.error("Error fetching order details:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
 
+// const viewOrder = async (req, res) => {
+//   try {
+//     const orderId = req.query.orderId;
+    
+//     // Find order and populate the product details from orderedItems
+//     const orders = await Order.find({ _id: orderId })
+//       .populate("orderedItems.product")
+//       .populate("userId");
+    
+//     if (!orders || orders.length === 0) {
+//       return res.status(404).send("Order not found");
+//     }
+
+//     // Format data to match template expectations
+//     const formattedOrders = [{
+//       _id: orders[0]._id,
+//       Date: orders[0].orderDate, // Using orderDate from your schema
+//       // Map orderedItems to orderItems expected by template
+//       orderItems: orders[0].orderedItems.map(item => ({
+//         _id: item._id,
+//         productName: item.product ? item.product.name : 'Product Name Not Available',
+//         productImage: item.product ? item.product.image : 'default.jpg',
+//         quantity: item.quantity,
+//         price: item.price,
+//         orderStatus: orders[0].status // Using the order's status for each item
+//       })),
+//       // Map shippingAddress to address expected by template
+//       address: {
+//         name: orders[0].shippingAddress.fullName,
+//         phone: orders[0].shippingAddress.phone,
+//         addressType: orders[0].shippingAddress.addressType,
+//         city: orders[0].shippingAddress.city,
+//         landmark: orders[0].shippingAddress.landmark,
+//         state: orders[0].shippingAddress.state,
+//         pincode: orders[0].shippingAddress.pincode
+//       }
+//     }];
+
+//     // Calculate total price
+//     const Totalprice = orders[0].orderedItems.reduce((sum, element) => {
+//       return sum + element.quantity * element.price;
+//     }, 0);
+
+//     console.log("Total Price:", Totalprice);
+
+//     // Add userData for the header partial
+//     const userData = req.session.user || null;
+
+//     res.render("view-allorder", { 
+//       orders: formattedOrders, 
+//       Totalprice, 
+//       userData 
+//     });
+
+//   } catch (error) {
+//     console.error("Error fetching order details:", error);
+//     res.status(500).send("Server Error");
+//   }
+// };
 const viewOrder = async (req, res) => {
   try {
     const orderId = req.query.orderId;
@@ -321,15 +387,15 @@ const viewOrder = async (req, res) => {
     // Format data to match template expectations
     const formattedOrders = [{
       _id: orders[0]._id,
-      Date: orders[0].orderDate, // Using orderDate from your schema
+      Date: orders[0].orderDate.toLocaleDateString(), // Using orderDate from your schema
       // Map orderedItems to orderItems expected by template
       orderItems: orders[0].orderedItems.map(item => ({
         _id: item._id,
-        productName: item.product ? item.product.name : 'Product Name Not Available',
-        productImage: item.product ? item.product.image : 'default.jpg',
+        productName: item.product ? item.product.productName : 'Product Name Not Available',
+        productImage: item.product ? item.product.productImage[0] : 'default.jpg',
         quantity: item.quantity,
         price: item.price,
-        orderStatus: orders[0].status // Using the order's status for each item
+        orderStatus: item.status // Using the item's status
       })),
       // Map shippingAddress to address expected by template
       address: {
@@ -349,7 +415,6 @@ const viewOrder = async (req, res) => {
     }, 0);
 
     console.log("Total Price:", Totalprice);
-    console.log("Formatted Orders:", formattedOrders);
 
     // Add userData for the header partial
     const userData = req.session.user || null;
@@ -433,6 +498,7 @@ const cancelOrder = async (req, res) => {
   try {
     console.log(req.body);
     const { orderId, productId } = req.body;
+    console.log("hai:", orderId, productId);
 
     // Find the order
     const order = await Order.findOne({ _id: orderId });
@@ -442,8 +508,8 @@ const cancelOrder = async (req, res) => {
 
     // Update the order status
     const updatedOrder = await Order.findOneAndUpdate(
-      { _id: orderId, "orderItems._id": productId },
-      { $set: { "orderItems.$.orderStatus": "cancelled" } },
+      { _id: orderId, "orderedItems._id": productId },
+      { $set: { "orderedItems.$.status": "Cancelled" } },
       { new: true } // This ensures you get the updated document
     );
 
@@ -452,7 +518,7 @@ const cancelOrder = async (req, res) => {
     }
 
     // Restore product quantity
-    const cancelledItem = order.orderItems.find(item => item._id.toString() === productId);
+    const cancelledItem = order.orderedItems.find(item => item._id.toString() === productId);
     if (cancelledItem) {
       await Product.findByIdAndUpdate(
         cancelledItem.product,
@@ -467,7 +533,6 @@ const cancelOrder = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
-
 
 
 

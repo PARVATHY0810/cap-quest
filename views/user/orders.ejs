@@ -75,7 +75,7 @@
                         <div class="row p-3 order-item">
                             <div class="col-md-2"># <%= element._id %></div>
                             <div class="col-md-2"><%= element.Date %></div>
-                            <div class="col-md-3"><%= element.userDetails[0].firstName %> <%= element.userDetails[0].lastrName %></div>
+                            <div class="col-md-3"><%= element.userDetails.name %></div>
                             <div class="col-md-2">$ <%= element.finalAmount %></div>
             
                             <div class="col-md-1"><button class="btn btn-sm btn-outline-primary" onclick="window.location.href='/viewOrder?orderId=<%= element._id %>'">View</button></div>

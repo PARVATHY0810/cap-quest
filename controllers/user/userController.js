@@ -347,6 +347,17 @@ const CapProductDetails = async(req,res)=>{
   }
 }
 
+const handleGoogleLogin = async (req, res) => {
+  try {
+
+    req.session.user = req.user._id;
+    
+    res.redirect("/");
+  } catch (error) {
+    console.log("error")
+  }
+}
+
 const loadShop = async (req, res) => {
   try {
       // Initialize userData as null
@@ -460,5 +471,6 @@ module.exports = {
   CapProductDetails,
   logout,
   changePassword,
+  handleGoogleLogin,
   loadShop
 }

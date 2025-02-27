@@ -19,6 +19,7 @@
     <table class="table table-striped">
         <thead>
             <tr>
+                <th scope="col"><b>Product image</b></th>
                 <th scope="col"><b>Product name</b></th>
                 <th scope="col"><b>Brand</b></th>
                 <th scope="col"><b>Category</b></th>
@@ -35,44 +36,38 @@
             
             <% for(let i=data.length-1;i>=0;i--){ %>
 
-            <tr>
-                <td><%=data[i].productName %></td>
-                <td><%=data[i].brand %></td>
-                <td><%=data[i].category.name %></td>
-                <td><%=data[i].regularPrice%></td>
-                <td><%=data[i].salePrice%></td>
-                <td><%=data[i].quantity%></td>
-
-               
-                <!-- <td>
-                
-                    <button class="btn btn-info" onclick="" style="width: 100px;">
-                        <a href="#" class="text-white">Add Offer</a>
-                    </button>
-        
-                    <button class="btn btn-info" onclick="" style="width: 100px;">
-                        <a href="#" class="text-white">Remove</a>
-                    </button>
-                
-                </td> -->
-               
-                <td>
-                <% if(data[i].isBlocked===false){ %>
-                    <button class="btn btn-danger" style="width: 80px;">
-                        <a href="/admin/blockProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Block</a>
-                    </button>
-                    <% }else{ %>
-                    <button class="btn btn-success" style="width: 80px;">
-                        <a href="/admin/unblockProduct?id=<%=data[i]._id%>"  class="text-white" style="text-decoration: none;">Unblock</a>
-                    </button>
-                    <% } %>
-                </td>
-                <td>
-                    <button class="btn btn-info" style="width: 80px;">
-                        <a href="/admin/editProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Edit</a>
-                    </button>
-                </td>
-            </tr>
+                <tr>
+                    <td>
+                        <% if (data[i].productImage && data[i].productImage.length > 0) { %>
+                            <img src="/uploads/re-image/<%= data[i].productImage[0] %>" alt="<%= data[i].productImage %>" style="width: 50px; height: 50px; object-fit: cover;">
+                        <% } else { %>
+                            <span>No Image</span>
+                        <% } %>
+                    </td>
+                    
+                    <td><%= data[i].productName %></td>
+                    <td><%= data[i].brand %></td>
+                    <td><%= data[i].category.name %></td>
+                    <td><%= data[i].regularPrice %></td>
+                    <td><%= data[i].salePrice %></td>
+                    <td><%= data[i].quantity %></td>
+                    <td>
+                        <% if(data[i].isBlocked===false){ %>
+                            <button class="btn btn-danger" style="width: 80px;">
+                                <a href="/admin/blockProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Block</a>
+                            </button>
+                        <% }else{ %>
+                            <button class="btn btn-success" style="width: 80px;">
+                                <a href="/admin/unblockProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Unblock</a>
+                            </button>
+                        <% } %>
+                    </td>
+                    <td>
+                        <button class="btn btn-info" style="width: 80px;">
+                            <a href="/admin/editProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Edit</a>
+                        </button>
+                    </td>
+                </tr>
             
          <% } %>
 

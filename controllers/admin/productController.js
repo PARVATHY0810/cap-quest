@@ -39,32 +39,10 @@ const addProducts = async (req, res) => {
           "../../public/uploads/re-images"
         );
 
-        // // Resize and save images
-        // for (let i = 0; i < req.files.length; i++) {
-        //     const originalImagePath = req.files[i].path;
-        //     //const resizedImagePath = path.join(uploadDir, req.files[i].filename);
-        //     const resizedImagePath = path.join('public','uploads','product-images',req.files[i].filename)
-
-        //     await sharp(originalImagePath)
-        //         .resize({ width: 440, height: 440 })
-        //         .toFile(resizedImagePath);
-
-        //     images.push(req.files[i].filename);
-        // }
-
+       
         for (let i = 0; i < req.files.length; i++) {
           images.push(`${req.files[i].filename}`);
 
-          // try {
-          //     await sharp(originalImagePath)
-          //         .resize({ width: 440, height: 440 })
-          //         .jpeg({ quality: 80 }) // Convert to JPEG format
-          //         .toFile(resizedImagePath);
-
-          //     images.push(resizedImageName);
-          // } catch (sharpError) {
-          //     console.error("Sharp processing error:", sharpError);
-          // }
         }
         console.log(images);
       }
@@ -117,9 +95,10 @@ const getAllProducts = async (req, res) => {
         { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
       ],
     })
+      .select("productName brand category regularPrice salePrice quantity productImage isBlocked") // Explicitly select fields including productImage
       .limit(limit * 1)
       .skip((page - 1) * limit)
-      .sort({createdAt: -1})
+      .sort({ createdAt: -1 })
       .populate("category")
       .exec();
 
@@ -142,7 +121,7 @@ const getAllProducts = async (req, res) => {
         brand: brand,
       });
     } else {
-      res.render("page-404 ");
+      res.render("page-404");
     }
   } catch (error) {
     res.redirect("/pageerror");

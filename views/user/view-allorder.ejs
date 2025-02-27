@@ -53,11 +53,9 @@
                     <div class="row">
                         <div class="col-md-6">
                             <h5>Order Status</h5>
-                           
                             <p>Order Date: <%= orders[0].Date %></p>
                         </div>
                         <div class="col-md-6 text-md-end">
-                           
                         </div>
                     </div>
                 </div>
@@ -101,12 +99,11 @@
                                     <th scope="col" class="text-center">Quantity</th>
                                     <th scope="col" class="text-end">Price</th>
                                     <th scope="col" class="text-end">Total</th>
-                                    <th>action</th>
+                                    <th>Action</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                
                                 <% orders[0].orderItems.forEach(element => { %> 
                                     <tr> 
                                         <td> 
@@ -117,14 +114,13 @@
                                         </td> 
                                         <td class="text-center"><%= element.quantity %></td> 
                                         <td class="text-end">Rs. <%= element.price %></td> 
-                                        <td class="text-end">Rs.<%= element.quantity*element.price %></td> 
+                                        <td class="text-end">Rs.<%= element.quantity * element.price %></td> 
                                         <td> 
-                                            <button class="btn btn-danger cancelOrder" data-product-id="<%= element._id %>" data-order-id="<%= orders[0]._id %>" >cancel</button> 
+                                            <button class="btn btn-danger cancelOrder" data-product-id="<%= element._id %>" data-order-id="<%= orders[0]._id %>" >Cancel</button> 
                                         </td> 
                                         <td><%= element.orderStatus %></td> 
                                     </tr> 
                                 <% }) %>
-                            
                             </tbody>
                         </table>
                     </div>
@@ -142,12 +138,11 @@
                         </div>
                         <div class="summary-item">
                             <span>Shipping</span>
-                            <span>free</span>
+                            <span>Free</span>
                         </div>
-                
                         <div class="summary-item summary-total">
                             <span>Total</span>
-                            <span><%= Totalprice %></span>
+                            <span>Rs.<%= Totalprice %></span>
                         </div>
                     </div>
                 </div>
@@ -192,7 +187,6 @@ document.addEventListener('click', async (event) => {
         }
     }
 });
-
     </script>
 </body>
 </html>

@@ -44,25 +44,30 @@ const categoryInfo = async (req, res) => {
 };
 
 
-const addCategory = async (req,res)=>{
-    console.log(req.body)
-    const {name,description} = req.body;
+const addCategory = async (req, res) => {
+    console.log(req.body);
+    const { name, description } = req.body;
     try {
+        if (!name || !description) {
+            return res.status(400).json({ error: "Name and description are required" });
+        }
         const normalizedName = name.trim().toLowerCase();
-        const existingCategory = await Category.findOne({name:normalizedName});
-        //const existingCategory = await Category.findOne({name});
-        if(existingCategory){
-            return res.status(400).json({error:"Category already exists"})
+        if (!/^[a-zA-Z\s]+$/.test(normalizedName)) {
+            return res.status(400).json({ error: "Category name must contain only letters and spaces" });
+        }
+        const existingCategory = await Category.findOne({ name: normalizedName });
+        if (existingCategory) {
+            return res.status(400).json({ error: "Category already exists" });
         }
         const newCategory = new Category({
-            name:normalizedName,
-            //name,
-            description,
-        })
+            name: normalizedName,
+            description: description.trim(),
+        });
         await newCategory.save();
-        return res.json({message:"Category added successfully"})
+        return res.json({ message: "Category added successfully" });
     } catch (error) {
-        return res.status(500).json({error:"Internal Server Error"})
+        console.error("Error adding category:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
     }
 };
 
@@ -82,37 +87,40 @@ const getEditCategory= async (req,res)=>{
 
 
 
-const editCategory = async (req,res)=>{
+const editCategory = async (req, res) => {
     try {
-        const id=req.params.id;
-        const {categoryName,description}=req.body;
+        const id = req.params.id;
+        const { categoryName, description } = req.body;
 
-        const normalizedCategoryName = categoryName.trim().toLowerCase();
-
-        const existingCategory = await Category.findOne({name:normalizedCategoryName,_id: { $ne: id } });
-
-
-        if(existingCategory){
-            return res.status(400).json({error:"Category exists, please choose another name"})
-        }
-                    
-        const updatedCategory = await Category.findByIdAndUpdate(id,{
-            name:normalizedCategoryName,
-            description:description,
-        },{new:true,runValidators:true});
-
-        if(!updatedCategory){
-            return res.status(404).json({success:false,message:'Category not found'});
+        if (!categoryName || !description) {
+            return res.status(400).json({ error: "Name and description are required" });
         }
 
-        res.json({ success: true, message: 'Category updated successfully' });
-  
+        // Case-insensitive validation using regex with 'i' option
+        const existingCategory = await Category.findOne({ 
+            name: { $regex: new RegExp(`^${categoryName}$`, 'i') },
+            _id: { $ne: id }
+        });
+
+        if (existingCategory) {
+            return res.status(400).json({ error: "Category exists with a similar name (case-insensitive), please choose another name" });
+        }
+
+        const updatedCategory = await Category.findByIdAndUpdate(id, {
+            name: categoryName, // Keep original case for storage
+            description: description,
+        }, { new: true, runValidators: true });
+
+        if (!updatedCategory) {
+            return res.status(404).json({ error: 'Category not found' });
+        }
+
+        res.json({ message: 'Category updated successfully' });
+
     } catch (error) {
-        res.status(500).json({error:"Internal server error"})
+        res.status(500).json({ error: "Internal server error" });
     }
-
 }
-
 
 // const getListCategory = async (req,res)=>{
 //     try {

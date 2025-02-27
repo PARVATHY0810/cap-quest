@@ -3,8 +3,7 @@ const app=express();
 const path = require("path");
 const env = require("dotenv").config();
 const session = require("express-session");
-const passport = require("passport");
-require("./config/passport");
+const passport = require("./config/passport");
 require("dotenv").config();
 const db =require("./config/db")
 const userRouter=require("./routes/userRouter")

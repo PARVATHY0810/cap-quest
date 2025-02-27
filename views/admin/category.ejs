@@ -86,7 +86,7 @@
       <div class="card-body">
         <div class="row">
           <div class="col-md-3">
-            <form method="post" action="/admin/addCategory" onsubmit="return handleFormSubmit(event)">
+            <form method="post" onsubmit="return handleFormSubmit(event)">
               <div class="mb-4">
                 <label for="product_name" class="form-label">Name</label>
                 <input type="text" name="name" placeholder="Type here" class="form-control" id="product_name" required/>
@@ -200,12 +200,11 @@ async function handleAddCategory(name, description) {
             body: JSON.stringify({ name: name, description: description }),
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Something went wrong');
-        }
-
         const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Something went wrong');
+        }
 
         await Swal.fire({
             icon: 'success',
@@ -215,11 +214,11 @@ async function handleAddCategory(name, description) {
 
         location.reload(); 
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error:', error.message);
         Swal.fire({
             icon: 'error',
             title: 'Oops...',
-            text: "",
+            text: error.message,
         });
     }
 }

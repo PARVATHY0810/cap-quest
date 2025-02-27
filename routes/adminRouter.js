@@ -29,12 +29,12 @@ router.get("/unblockCustomer",adminAuth,customerController.customerunBlocked);
 
 //category Management
 router.get("/category",adminAuth,categoryController.categoryInfo)
-router.post("/addCategory",adminAuth,categoryController.addCategory)
+router.post("/addCategory", adminAuth, categoryController.addCategory);
 router.get("/unlistCategory",adminAuth,categoryController.getUnlistCategory);
 router.get("/listCategory",adminAuth,categoryController.getListCategory);
 router.get("/editCategory",adminAuth,categoryController.getEditCategory)
 router.post("/editCategory",adminAuth,categoryController.getEditCategory);
-router.post("/editCategory/:id",adminAuth,categoryController.editCategory)
+router.post("/editCategory/:id", adminAuth, categoryController.editCategory)
 
 //Brand Management
 router.get("/brands",adminAuth,brandController.getBrandPage);

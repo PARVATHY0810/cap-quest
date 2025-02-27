@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/user/userController");
-const passport = require("passport");
+const passport = require("../config/passport");
 const { userAuth } = require("../middlewares/auth");
 const Product = require("../models/productSchema");
 const profileController = require("../controllers/user/profileController")
@@ -22,7 +22,9 @@ router.post("/resend-otp", userController.resendOtp);
 
 
 router.get("/auth/google",passport.authenticate("google", { scope: ["profile", "email"] }));
-router.get("/auth/google/callback",passport.authenticate("google", { failureRedirect: "/signup" }),(req,res)=>{res.redirect("/");});
+router.get("/auth/google/callback",passport.authenticate("google", { failureRedirect: "/signup" }), userController.handleGoogleLogin);
+
+
 router.get("/login",userController.loadLogin);
 router.post("/login",userController.login);
 
