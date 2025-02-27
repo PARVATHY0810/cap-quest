@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order List</title>
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <%- include('../../views/partials/user/header') %>
+    <style>
+        .order-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .order-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        .order-header {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+        .order-total {
+            font-weight: bold;
+            border-top: 2px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-5">
+        <div class="order-list">
+            <h2 class="mb-4">Order List</h2>
+            
+            <!-- Order Search/Filter -->
+            <div class="row mb-4">
+                <!-- <div class="col-md-6">
+                    <input type="text" class="form-control" placeholder="Search orders...">
+                </div> -->
+
+
+                
+                <!-- <div class="col-md-3">
+                    <select class="form-select">
+                        <option selected>Filter by status</option>
+                        <option>Pending</option>
+                        <option>Processing</option>
+                        <option>Shipped</option>
+                        <option>Delivered</option>
+                        <option>Cancelled</option>
+                    </select>
+                </div> -->
+                <!-- <div class="col-md-3">
+                    <button class="btn btn-primary w-100">Search</button>
+                </div> -->
+            </div>
+            
+            <!-- Order List -->
+            <div class="card">
+                <div class="card-body p-0">
+                    <!-- Order Header -->
+                    <div class="row p-3 order-header">
+                        <div class="col-md-2"><strong>Order ID</strong></div>
+                        <div class="col-md-2"><strong>Date</strong></div>
+                        <div class="col-md-3"><strong>Customer</strong></div>
+                        <div class="col-md-2"><strong>Total</strong></div>
+                       
+                        <div class="col-md-1"><strong>Action</strong></div>
+                    </div>
+                    
+                    <!-- Order Items -->
+                    <% orders.forEach(element => { %>
+                        <div class="row p-3 order-item">
+                            <div class="col-md-2"># <%= element._id %></div>
+                            <div class="col-md-2"><%= element.Date %></div>
+                            <div class="col-md-3"><%= element.userDetails[0].firstName %> <%= element.userDetails[0].lastrName %></div>
+                            <div class="col-md-2">$ <%= element.finalAmount %></div>
+            
+                            <div class="col-md-1"><button class="btn btn-sm btn-outline-primary" onclick="window.location.href='/viewOrder?orderId=<%= element._id %>'">View</button></div>
+                        </div>
+                    <% }) %>
+                    
+                    
+                </div>
+            </div>
+            
+            <!-- Pagination -->
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1">Previous</a>
+                    </li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

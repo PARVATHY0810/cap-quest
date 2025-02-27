@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <%- include('../../views/partials/user/header') %>
+    <style>
+        .order-details {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .product-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+        }
+        .order-status {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .order-summary {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 20px;
+        }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+        .summary-total {
+            font-weight: bold;
+            border-top: 1px solid #dee2e6;
+            padding-top: 15px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-5">
+        <div class="order-details">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Order Details</h2>
+                <span class="order-id">#<%= orders[0]._id %></span>
+            </div>
+
+            <!-- Order Status and Actions -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Order Status</h5>
+                           
+                            <p>Order Date: <%= orders[0].Date %></p>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipping Address -->
+            <div class="card mb-4">
+              <div class="card-header">
+                  <h5 class="mb-0">Shipping Address</h5>
+              </div>
+              <div class="card-body">
+                  <% if (orders[0].address) { %>
+                      <p><strong>Name:</strong> <%= orders[0].address.name %></p>
+                      <p><strong>Phone:</strong> <%= orders[0].address.phone %></p>
+                      <p><strong>Address Type:</strong> <%= orders[0].address.addressType || 'Not specified' %></p>
+                      <p><strong>City:</strong> <%= orders[0].address.city %></p>
+                      <p><strong>Landmark:</strong> <%= orders[0].address.landmark %></p>
+                      <p><strong>State:</strong> <%= orders[0].address.state %></p>
+                      <p><strong>Pincode:</strong> <%= orders[0].address.pincode %></p>
+                  <% } else { %>
+                      <p style="color: red;">Address not available</p>
+                  <% } %>
+              </div>
+          </div>
+          
+          
+            <input type="hidden" value="<%= orders[0]._id %>" id="orderId">
+
+            <!-- Order Items -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Order Items</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-borderless mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th scope="col">Product</th>
+                                    <th scope="col">Details</th>
+                                    <th scope="col" class="text-center">Quantity</th>
+                                    <th scope="col" class="text-end">Price</th>
+                                    <th scope="col" class="text-end">Total</th>
+                                    <th>action</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                <% orders[0].orderItems.forEach(element => { %> 
+                                    <tr> 
+                                        <td> 
+                                            <img src="/uploads/re-image/<%= element.productImage %>" alt="" class="product-image"> 
+                                        </td> 
+                                        <td> 
+                                            <h6 class="mb-0"><%= element.productName %></h6> 
+                                        </td> 
+                                        <td class="text-center"><%= element.quantity %></td> 
+                                        <td class="text-end">Rs. <%= element.price %></td> 
+                                        <td class="text-end">Rs.<%= element.quantity*element.price %></td> 
+                                        <td> 
+                                            <button class="btn btn-danger cancelOrder" data-product-id="<%= element._id %>" data-order-id="<%= orders[0]._id %>" >cancel</button> 
+                                        </td> 
+                                        <td><%= element.orderStatus %></td> 
+                                    </tr> 
+                                <% }) %>
+                            
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="row">
+                <div class="col-md-6 ms-auto">
+                    <div class="order-summary">
+                        <h5 class="mb-3">Order Summary</h5>
+                        <div class="summary-item">
+                            <span>Subtotal</span>
+                            <span>Rs.<%= Totalprice %></span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Shipping</span>
+                            <span>free</span>
+                        </div>
+                
+                        <div class="summary-item summary-total">
+                            <span>Total</span>
+                            <span><%= Totalprice %></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back Button -->
+            <div class="mt-4">
+                <a href="/orders" class="btn btn-outline-primary">Back to Orders</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+       // Use event delegation to handle all cancel buttons
+document.addEventListener('click', async (event) => {
+    // Check if clicked element is a cancel button
+    if (event.target.classList.contains('cancelOrder')) {
+        const productId = event.target.dataset.productId;
+        const orderId = event.target.dataset.orderId;
+        
+        try {
+            const response = await fetch("/cancelOrder", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ orderId, productId })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                alert(data.success);
+                // Optionally refresh the page or update the UI
+                location.reload();
+            } else {
+                alert(data.message || "Failed to cancel order.");
+            }
+        } catch (error) {
+            console.error("Error cancelling order:", error);
+            alert("Something went wrong. Please try again.");
+        }
+    }
+});
+
+    </script>
+</body>
+</html>

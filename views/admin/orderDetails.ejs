@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Details</title>
+  <!-- External Libraries -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      background-color: #f1f3f6;
+      margin: 0;
+      padding: 20px;
+    }
+
+    /* Box Model Containers */
+    .order-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .info-box, .items-box, .cancelled-box {
+      background-color: #fff;
+      border: 1px solid #e4e7ed;
+      border-radius: 4px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .info-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .info-label {
+      font-weight: 500;
+      color: #212121;
+      font-size: 16px;
+    }
+
+    .info-value {
+      color: #388e3c;
+      font-weight: 600;
+      font-size: 18px;
+    }
+
+    /* Table Styling */
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .items-table th, .items-table td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid #e4e7ed;
+    }
+
+    .items-table th {
+      background-color: #f9fafc;
+      color: #212121;
+      font-weight: 500;
+      font-size: 14px;
+      text-transform: uppercase;
+    }
+
+    .items-table td {
+      color: #424242;
+      font-size: 14px;
+    }
+
+    /* Status Badges */
+    .status-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      color: #fff;
+      text-transform: capitalize;
+    }
+
+    .status-pending { background-color: #ff9800; }
+    .status-processing { background-color: #2874f0; }
+    .status-shipped { background-color: #388e3c; }
+    .status-delivered { background-color: #2e7d32; }
+    .status-returnrequest { background-color: #d32f2f; }
+    .status-unknown { background-color: #757575; }
+
+    /* Buttons */
+    .edit-status-btn {
+      background-color: #2874f0;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 2px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background-color 0.2s;
+    }
+
+    .edit-status-btn:hover {
+      background-color: #1a5bc8;
+    }
+
+    /* Cancelled Items */
+    .cancelled-box .info-label {
+      color: #d32f2f;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .cancelled-box div {
+      color: #424242;
+      font-size: 14px;
+      padding: 5px 0;
+    }
+
+    /* Total Amount */
+    .total-amount {
+      text-align: right;
+      font-size: 18px;
+      font-weight: 600;
+      color: #212121;
+      padding-top: 15px;
+    }
+
+    /* Modal Styling */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 4px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 24px;
+      color: #757575;
+      cursor: pointer;
+    }
+
+    .close-modal:hover {
+      color: #212121;
+    }
+
+    .modal-content h2 {
+      margin: 0 0 20px;
+      color: #212121;
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .status-select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #e4e7ed;
+      border-radius: 2px;
+      font-size: 14px;
+      margin-bottom: 20px;
+      background-color: #fff;
+    }
+
+    .save-status-btn {
+      background-color: #fb641b;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 2px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+
+    .save-status-btn:hover {
+      background-color: #e65100;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .info-box {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .info-value {
+        margin-top: 5px;
+      }
+      .items-table th, .items-table td {
+        padding: 10px;
+        font-size: 12px;
+      }
+      .modal-content {
+        width: 95%;
+        margin: 20% auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="order-container">
+    <div class="info-box">
+      <div class="info-label">Total:</div>
+      <div class="info-value">₹<%= order.finalAmount.toFixed(2) %></div>
+      <input type="text" value="<%= order._id %>" id="orderId">
+    </div>
+
+    <div class="items-box">
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          
+          <% if (order.orderedItems && order.orderedItems.length > 0) { %>
+            <% order.orderedItems.forEach(item => { %>
+              <tr>
+                <td><%= item.product ? item.product.productName : "Product Deleted" %></td>
+                <td><%= item.quantity %></td>
+                <td>₹<%= item.price.toFixed(2) %></td>
+                <td>
+                  <span class="status-badge status-<%= (item.orderStatus || 'unknown').toLowerCase().replace(' ', '') %>">
+                    <%= item.orderStatus || 'Unknown' %>
+                  </span>
+                </td>
+                <td>
+                  <button class="edit-status-btn" onclick="openStatusModal('<%= item._id %>')">Edit Status</button>
+                </td>
+              </tr>
+            <% }); %>
+          <% } %>
+        </tbody>
+      </table>
+
+      <% if (order.cancelledItems && order.cancelledItems.length > 0) { %>
+        <div class="cancelled-box">
+          <div class="info-label">Cancelled Items:</div>
+          <% order.cancelledItems.forEach(item => { %>
+            <div>
+              <%= item.product.name %>: <%= item.reason %>
+            </div>
+          <% }); %>
+        </div>
+      <% } %>
+
+      <div class="total-amount">
+        Total: ₹<%= order.finalAmount.toFixed(2) %>
+      </div>
+    </div>
+
+    <div id="statusModal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal" onclick="closeStatusModal()">×</span>
+        <h2>Edit Status</h2>
+        <select id="statusSelect" class="status-select">
+          <option value="Pending">Pending</option>
+          <option value="Processing">Processing</option>
+          <option value="Shipped">Shipped</option>
+          <option value="Delivered">Delivered</option>
+          <option value="Return request">Return Request</option>
+        </select>
+        <button class="save-status-btn" onclick="updateStatus()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentItemId = '';
+
+    function openStatusModal(itemId) {
+      currentItemId = itemId;
+      document.getElementById('statusModal').style.display = 'block';
+      // Pre-select the current status if available
+      const currentStatus = document.querySelector(`.status-${itemId}`).textContent.trim();
+      document.getElementById('statusSelect').value = currentStatus || 'Pending';
+    }
+
+    function closeStatusModal() {
+      document.getElementById('statusModal').style.display = 'none';
+    }
+
+    function updateStatus() {
+      const newStatus = document.getElementById('statusSelect').value;
+      const orderId =document.getElementById('orderId').value;
+
+      fetch(`/admin/orders/update-status/${currentItemId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus ,orderId:orderId })
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(err => { throw new Error(err.message || 'Failed to update status'); });
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Status Updated',
+            text: 'The order status has been successfully updated.',
+            showConfirmButton: false,
+            timer: 1500
+          }).then(() => {
+            closeStatusModal();
+            location.reload(); // Reload to reflect the updated status
+          });
+        } else {
+          throw new Error(data.message || 'Update failed');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message || 'Something went wrong. Please try again.',
+        });
+      });
+    }
+
+    window.onclick = function(event) {
+      const modal = document.getElementById('statusModal');
+      if (event.target === modal) {
+        closeStatusModal();
+      }
+    };
+  </script>
+
+  <%- include("../../views/partials/admin/footer") %>
+</body>
+</html>

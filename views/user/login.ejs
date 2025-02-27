@@ -1,106 +1,4 @@
-<!-- =<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Page</title>
-    <style>
-        body {
-            background: url('/img/background.webp') no-repeat center center/cover;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
-        .login-container {
-            background-color: rgba(0, 0, 0, 0.8);
-            padding: 20px;
-            border-radius: 10px;
-            width: 300px;
-            text-align: center;
-            color: white;
-        }
-        .login-container h2 {
-            margin-bottom: 20px;
-            color: orange;
-        }
-        .input-field {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 5px;
-        }
-        .login-btn {
-            background-color: orange;
-            color: black;
-            padding: 10px;
-            border: none;
-            width: 100%;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .google-btn {
-            background-color: white;
-            color: black;
-            padding: 10px;
-            border: none;
-            width: 100%;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .error {
-            color: red;
-            font-size: 14px;
-        }
-    </style>
-    <script>
-        function validateForm(event) {
-            event.preventDefault();
-            let email = document.getElementById("email").value;
-            let password = document.getElementById("password").value;
-            let errorMessage = "";
-            
-            if (!email.includes("@") || !email.includes(".")) {
-                errorMessage += "Please enter a valid email address.\n";
-            }
-            if (password.length < 6) {
-                errorMessage += "Password must be at least 6 characters long.";
-            }
-            
-            if (errorMessage) {
-                document.getElementById("error-message").innerText = errorMessage;
-            } else {
-                document.getElementById("error-message").innerText = "";
-                alert("Form submitted successfully!");
-            }
-        }
-    </script>
-</head>
-<body>
-    <div class="login-container">
-        <h2>Login</h2>
-        <form action="/login" onsubmit="validateForm(event)">
-            <input type="email" id="email" class="input-field" placeholder="Email Address" required>
-            <input type="password" id="password" class="input-field" placeholder="Password" required>
-        
-        <% if(locals.message && message.length>0){%>
-            <div class="alert alert-danger text-center">
-                  <%=message%>
-            </div>
-        <%}%>
-            
-            <p id="error-message" class="error"></p>
-            <button type="submit" class="login-btn">Login</button>
-            <button type="button" class="google-btn">Login with Google</button>
-        </form>
-    </div>
-</body>
-</html> -->
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -136,6 +34,7 @@
         }
     </style>
 </head>
+ 
 <body>
     
    

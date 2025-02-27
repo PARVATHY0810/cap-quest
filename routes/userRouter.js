@@ -68,7 +68,9 @@ router.post("/create-order", userAuth, orderController.createOrder);
 router.get("/order-placed", userAuth, orderController.getOrderPlacedPage);
 
 //order Management
-router.get("/my-orders", userAuth, orderController.loadMyOrdersPage)
+router.get("/orders", userAuth, orderController.orderDetail)
 router.get('/order/details/:orderId', userAuth, orderController.getOrderDetails);
+router.get('/viewOrder',orderController.viewOrder);
+router.post('/cancelOrder',orderController.cancelOrder)
 
 module.exports = router;
