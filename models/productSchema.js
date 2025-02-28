@@ -48,6 +48,18 @@ const productSchema = new Schema({
     type: Boolean,
     default: false
   },
+  popularityScore: {
+    type: Number,
+    default: 0
+  },
+  averageRating: {
+    type: Number,
+    default: 0
+  },
+  isFeatured: {
+    type: Boolean,
+    default: false
+  },
   status:{
     type: String,
     enum:["Available"," Out of Stock","Discont"],

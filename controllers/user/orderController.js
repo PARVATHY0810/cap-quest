@@ -111,11 +111,8 @@ const createOrder = async (req, res) => {
     // Fetch the selected address
     const address = await Address.findById(addressId);
     if (!address) {
-
       return res.status(400).json({ success: false, message: "Invalid address" });
     }
-
-    console.log(address)
 
     // Fetch the cart and populate product details
     const cartItems = await Cart.find({ userId }).populate("productId");
@@ -132,6 +129,7 @@ const createOrder = async (req, res) => {
     
     // Calculate total price from cart items
     const totalPrice = cartItems.reduce((sum, item) => sum + item.price, 0);
+
     // Create a new order
     const order = new Order({
       userId,
@@ -149,17 +147,34 @@ const createOrder = async (req, res) => {
       },
       paymentMethod: paymentMethod.toLowerCase(),
       orderDate: new Date(),
-      deliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      deliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       status: paymentMethod === "COD" ? "Pending COD" : "Pending",
-      discount: 0, // Add logic for discount if applicable
-      shippingCharge: 0 // Add logic for shipping charge if applicable
+      discount: 0,
+      shippingCharge: 0
     });
 
     // Save the order to the database
     const savedOrder = await order.save();
 
-    // Optionally, clear the cart after order placement
+    // Update product quantities
+    for (const item of orderedItems) {
+      const product = await Product.findById(item.product);
+      if (!product) {
+        return res.status(400).json({ success: false, message: `Product with ID ${item.product} not found` });
+      }
+      if (product.quantity < item.quantity) {
+        return res.status(400).json({ success: false, message: `Insufficient stock for ${product.productName}` });
+      }
+      await Product.findByIdAndUpdate(
+        item.product,
+        { $inc: { quantity: -item.quantity } },
+        { new: true }
+      );
+    }
+
+    // Clear the cart after order placement
     await Cart.deleteMany({ userId });
+
     // Send success response with orderId
     res.status(200).json({ success: true, orderId: savedOrder._id });
   } catch (error) {

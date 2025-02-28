@@ -58,31 +58,32 @@ console.log(page)
 }
 };
 
-const customerBlocked = async (req,res)=>{
+const customerBlocked = async (req, res) => {
     try {
-        let id=req.query.id;
+        let id = req.query.id;
         console.log("Blocking Customer ID:", id);
 
         if (!id) {
             return res.status(400).send("Customer ID is missing.");
         }
-        await User.updateOne({_id:id},{$set:{isBlocked:true}});
-        res.redirect("/admin/users")
+        await User.updateOne({_id: id}, {$set: {isBlocked: true}});
+        // Redirect with a success parameter
+        res.redirect("/admin/users?blockSuccess=true");
     } catch (error) {
         res.redirect("/pageerror");
     }
 };
 
-
-const customerunBlocked = async (req,res)=>{
+const customerunBlocked = async (req, res) => {
     try {
         let id = req.query.id;
-        await User.updateOne({_id:id},{$set:{isBlocked:false}})
-        res.redirect("/admin/users")
+        await User.updateOne({_id: id}, {$set: {isBlocked: false}});
+        // Redirect with a success parameter
+        res.redirect("/admin/users?unblockSuccess=true");
     } catch (error) {
-        res.redirect("/pageerror")
+        res.redirect("/pageerror");
     }
-}
+};
 
 
 

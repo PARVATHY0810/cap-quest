@@ -340,12 +340,9 @@
   }
   </style>
     
-  <%- include('../../views/partials/user/header') %>
-  
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>  
+    <%- include('../../views/partials/user/header') %>
 
-
+    
     <div class="main-container">
       <section class="shop-page">
         <div class="shop-topbar">
@@ -355,7 +352,6 @@
           </form>
     
           <form action="" method="GET" id="sortForm">
-            <!-- Preserve other query parameters -->
             <% if(query.category) { %>
               <input type="hidden" name="category" value="<%= query.category %>">
             <% } %>
@@ -365,29 +361,37 @@
             <% if(query.search) { %>
               <input type="hidden" name="search" value="<%= query.search %>">
             <% } %>
-            
+            <% if(query.minPrice) { %>
+              <input type="hidden" name="minPrice" value="<%= query.minPrice %>">
+            <% } %>
+            <% if(query.maxPrice) { %>
+              <input type="hidden" name="maxPrice" value="<%= query.maxPrice %>">
+            <% } %>
+    
             <select name="sort" class="sort-dropdown" onchange="document.getElementById('sortForm').submit()">
               <option value="" <%= !query.sort ? 'selected' : '' %>>Sort By</option>
+              <option value="popularity" <%= query.sort === 'popularity' ? 'selected' : '' %>>Popularity</option>
               <option value="price-asc" <%= query.sort === 'price-asc' ? 'selected' : '' %>>Price: Low to High</option>
               <option value="price-desc" <%= query.sort === 'price-desc' ? 'selected' : '' %>>Price: High to Low</option>
-              <option value="name-asc" <%= query.sort === 'name-asc' ? 'selected' : '' %>>Name: A to Z</option>
-              <option value="name-desc" <%= query.sort === 'name-desc' ? 'selected' : '' %>>Name: Z to A</option>
-            </select>
+              <option value="ratings" <%= query.sort === 'ratings' ? 'selected' : '' %>>Average Ratings</option>
+              <option value="featured" <%= query.sort === 'featured' ? 'selected' : '' %>>Featured</option>
+              <option value="new-arrivals" <%= query.sort === 'new-arrivals' ? 'selected' : '' %>>New Arrivals</option>
+              <option value="name-asc" <%= query.sort === 'name-asc' ? 'selected' : '' %>>A - Z</option>
+              <option value="name-desc" <%= query.sort === 'name-desc' ? 'selected' : '' %>>Z - A</option>
+          </select>
           </form>
         </div>
     
         <div class="product-list-container">
           <aside class="sidebar">
-              <a href="/shop" class="clear-filter-btn">
-                Clear All Filters
-              </a>
-            <!-- Categories -->
+            <a href="/shop" class="clear-filter-btn">Clear All Filters</a>
+    
             <div class="filter-section">
               <h3 class="filter-title">Categories</h3>
               <div class="filter-items">
                 <% categories.forEach(category => { %>
                   <div class="filter-item">
-                    <a href="?category=<%= category._id %>&sort=<%= query.sort %>&search=<%= query.search %>">
+                    <a href="?category=<%= category._id %>&sort=<%= query.sort %>&search=<%= query.search %>&minPrice=<%= query.minPrice %>&maxPrice=<%= query.maxPrice %>">
                       <%= category.name %>
                     </a>
                   </div>
@@ -395,13 +399,13 @@
               </div>
             </div>
     
-            <!-- Brands -->
             <div class="filter-section">
               <h3 class="filter-title">Brands</h3>
               <div class="filter-items">
                 <% brands.forEach(brand => { %>
                   <div class="filter-item">
-                    <a href="?brand=<%= brand._id %>&sort=<%= query.sort %>&search=<%= query.search %>">
+                    <a href="?brand=<%= brand._id %>&sort=<%= query.sort || '' %>&search=<%= query.search || '' %>&minPrice=<%= query.minPrice || '' %>&maxPrice=<%= query.maxPrice || '' %>"
+                       class="<%= query.brand === brand._id.toString() ? 'active' : '' %>">
                       <%= brand.brandName %>
                     </a>
                   </div>
@@ -409,14 +413,13 @@
               </div>
             </div>
     
-            <!-- Price Range -->
             <div class="filter-section">
               <h3 class="filter-title">Price Range</h3>
               <div class="price-filters">
-                <button type="button" class="price-button" onclick="filterPrice(0, 500)">Under ₹2000</button>
-                <button type="button" class="price-button" onclick="filterPrice(500, 1000)">₹2500 - ₹4000</button>
-                <button type="button" class="price-button" onclick="filterPrice(1000, 1500)">₹4000 - ₹6000</button>
-                <button type="button" class="price-button" onclick="filterPrice(1500, null)">Above ₹600</button>
+                <button type="button" class="price-button" onclick="filterPrice(0, 2000)">Under ₹2000</button>
+                <button type="button" class="price-button" onclick="filterPrice(2000, 4000)">₹2000 - ₹4000</button>
+                <button type="button" class="price-button" onclick="filterPrice(4000, 6000)">₹4000 - ₹6000</button>
+                <button type="button" class="price-button" onclick="filterPrice(6000, null)">Above ₹6000</button>
               </div>
             </div>
           </aside>
@@ -438,30 +441,33 @@
                       <span class="original-price">₹<%= product.regularPrice %></span>
                       <span class="sale-price">₹<%= product.salePrice %></span>
                     </p>
-                  
-
-                    <a href="#" class="add-cart"  data-quantity="1" data-id="<%= product._id %>"
-                      data-price="<%= product.salesPrice %>">
-                      + Add To Cart
-                    </a>
+                    <a href="#" class="add-cart" data-quantity="1" data-id="<%= product._id %>" data-price="<%= product.salePrice %>">+ Add To Cart</a>
                   </div>
                 </div>
-               
               <% }) %>
             <% } %>
           </main>
         </div>
       </section>
     </div>
-
     
     <script>
+      function filterPrice(minPrice, maxPrice) {
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('minPrice', minPrice);
+        if (maxPrice !== null) {
+          urlParams.set('maxPrice', maxPrice);
+        } else {
+          urlParams.delete('maxPrice');
+        }
+        window.location.search = urlParams.toString();
+      }
+    
       document.querySelectorAll('.add-cart').forEach(function (button) {
         button.addEventListener('click', function (event) {
           event.preventDefault();
           const productId = this.getAttribute('data-id');
           const quantity = this.getAttribute('data-quantity');
-          console.log('this is the product id',productId)
           $.ajax({
             url: `/add-To-Cart/${productId}`,
             method: 'POST',
@@ -502,7 +508,35 @@
           });
         });
       });
-    </script>
 
+      //Filter functionality
+
+      document.addEventListener('DOMContentLoaded', function() {
+      const filterForm = document.querySelector('#sortForm'); // Changed to sortForm
+      const clearFiltersButton = document.querySelector('.clear-filter-btn');
+      const searchInput = document.querySelector('.search-input');
+
+      let debounceTimeout;
+
+      searchInput.addEventListener('input', function() {
+          clearTimeout(debounceTimeout);
+          debounceTimeout = setTimeout(() => {
+              filterForm.submit();
+          }, 1000);
+      });
+
+      filterForm.addEventListener('submit', function(event) {
+          event.preventDefault();
+          const formData = new FormData(filterForm);
+          const queryParams = new URLSearchParams(formData).toString();
+          window.location.href = `/shop?${queryParams}`;
+      });
+
+      clearFiltersButton.addEventListener('click', function(event) {
+          event.preventDefault();
+          window.location.href = '/shop';
+      });
+  });
+    </script>
     
-  <%- include('../../views/partials/user/footer') %>
+    <%- include('../../views/partials/user/footer') %>

@@ -222,17 +222,27 @@
                 
                 
 
-                <p class="stock">
-                    <%= product.quantity > 0 ? "In Stock" : "<span style='color:black;'>Sold Out</span>" %>
-                </p>
-                
+                <p class="stock-status">
+                    <% if (product.quantity > 0) { %>
+                      <span style="color: green;">In Stock (<%= product.quantity %> left)</span>
+                    <% } else { %>
+                      <span style="color: red;">Out of Stock</span>
+                    <% } %>
+                  </p>
+                  
+                  <% if (product.quantity > 0) { %>
+                    <button class="btn add-to-cart"  data-product-id="<%= product._id %>" data-quantity="1"  data-price="<%= product.salePrice %>">+ Add To Cart</button>
+                  <% } else { %>
+                    <button class="btn" disabled>Out of Stock</button>
+                  <% } %>
+
+                  <button class="btn">Wishlist</button>
                 <p class="rating">⭐⭐⭐⭐☆ (4.5 / 5)</p>
                  <!-- <button class="btn" id="addtocart">Add to Cart</button> -->
                 
-                 <button class="btn add-to-cart" data-product-id="<%= product._id %>">Add to Cart</button>
+                
 
-
-                <button class="btn">Wishlist</button>
+                
             </div>
         </div>
 
@@ -258,6 +268,7 @@
 
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
     
     <!-- Custom Zoom Script -->
     <script>
@@ -352,5 +363,64 @@
 
 
     </script>
+    <head>
+        <!-- Existing head content -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    </head>
 </body>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.add-to-cart').forEach(button => {
+            button.addEventListener('click', function () {
+                let productId = this.getAttribute('data-product-id'); // Get the product ID from the button
+                addToCart(productId);
+            });
+        });
+    });
+    
+    function addToCart(productId) {
+        fetch(`/add-to-cart/${productId}`, {  // Ensure this matches your backend route
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ quantity: 1 }) // Default quantity = 1
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Replace alert with SweetAlert
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Product added to cart successfully',
+                    showConfirmButton: true,
+                    confirmButtonText: 'Go to Cart',
+                    showCancelButton: true,
+                    cancelButtonText: 'Continue Shopping'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/cart'; // Redirect to cart page if user clicks "Go to Cart"
+                    }
+                });
+            } else {
+                // Replace alert with SweetAlert for failure
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Failed to add product to cart',
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Replace alert with SweetAlert for error
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while adding to cart',
+            });
+        });
+    }
+    </script>
 <%- include("../../views/partials/user/footer") %>

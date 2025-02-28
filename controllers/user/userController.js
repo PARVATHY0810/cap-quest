@@ -358,98 +358,104 @@ const handleGoogleLogin = async (req, res) => {
   }
 }
 
+
 const loadShop = async (req, res) => {
   try {
-      // Initialize userData as null
-      let userData ;
-      
-      // Check if user is logged in and get user data if they are
-      if (req.session.user) {
-          userData = await User.findOne({ _id: req.session.user });
-      }
-  
+    let userData;
+    if (req.session.user) {
+      userData = await User.findOne({ _id: req.session.user });
+    }
 
-      const query = {
-          search: req.query.search || '',
-          sort: req.query.sort || '',
-          category: req.query.category || '',
-          brand: req.query.brand || '',
-          maxPrice: req.query.maxPrice || '',
-          minPrice: req.query.minPrice || ''
-      };
+    const query = {
+      search: req.query.search || '',
+      sort: req.query.sort || '',
+      category: req.query.category || '',
+      brand: req.query.brand || '',
+      maxPrice: req.query.maxPrice || '',
+      minPrice: req.query.minPrice || ''
+    };
 
-      // Base filter conditions
-      const filter = {
-          isBlocked: false,
-          status: "Available"
-      };
+    const filter = {
+      isBlocked: false,
+      status: "Available"
+    };
 
-      // Add search filter if provided
-      if (query.search) {
-          filter.productName = { $regex: query.search, $options: 'i' };
-      }
+    if (query.search) {
+      filter.productName = { $regex: query.search, $options: 'i' };
+    }
 
-      // Add category filter if provided
-      if (query.category) {
-          filter.category = query.category;
-      }
+    if (query.category) {
+      filter.category = query.category;
+    }
 
-      // Add brand filter if provided
-      if (query.brand) {
-          filter.brand = query.brand;
-      }
+    // Replace only the brand filtering section in the loadShop function
+if (query.brand) {
+  // Since brand is a String in productSchema, convert ObjectId to brandName
+  const brandDoc = await Brand.findById(query.brand);
+  if (brandDoc) {
+      filter.brand = brandDoc.brandName; // Use the string brandName
+  } else {
+      filter.brand = null; // Prevent invalid queries if brand not found
+  }
+}
+ 
+    if (query.minPrice || query.maxPrice) {
+      filter.salePrice = {};
+      if (query.minPrice) filter.salePrice.$gte = parseInt(query.minPrice);
+      if (query.maxPrice) filter.salePrice.$lte = parseInt(query.maxPrice);
+    }
 
-      // Add price range filter if provided
-      if (query.minPrice || query.maxPrice) {
-          filter.salesPrice = {};
-          if (query.minPrice) filter.salesPrice.$gte = parseInt(query.minPrice);
-          if (query.maxPrice) filter.salesPrice.$lte = parseInt(query.maxPrice);
-      }
+    let sortOptions = {};
+    switch (query.sort) {
+      case 'popularity':
+        sortOptions = { popularityScore: -1 };
+        break;
+      case 'price-asc':
+        sortOptions = { salePrice: 1 };
+        break;
+      case 'price-desc':
+        sortOptions = { salePrice: -1 };
+        break;
+      case 'ratings':
+        sortOptions = { averageRating: -1 };
+        break;
+      case 'featured':
+        sortOptions = { isFeatured: -1, createdAt: -1 };
+        break;
+      case 'new-arrivals':
+        sortOptions = { createdAt: -1 };
+        break;
+      case 'name-asc':
+        sortOptions = { productName: 1 };
+        break;
+      case 'name-desc':
+        sortOptions = { productName: -1 };
+        break;
+      default:
+        sortOptions = { createdAt: -1 };
+    }
 
-      // Sort options
-      let sortOptions = {};
-      switch (query.sort) {
-          case 'price-asc':
-              sortOptions = { salesPrice: 1 };
-              break;
-          case 'price-desc':
-              sortOptions = { salesPrice: -1 };
-              break;
-          case 'name-asc':
-              sortOptions = { productName: 1 };
-              break;
-          case 'name-desc':
-              sortOptions = { productName: -1 };
-              break;
-          default:
-              sortOptions = { createdAt: -1 };
-      }
+    const [products, categories, brands] = await Promise.all([
+      product.find(filter)
+        .sort(sortOptions)
+        .populate('category')
+        .populate('brand'), // Now valid since brand is a reference
+      category.find({ isListed: true }),
+      Brand.find({ isBlocked: false })
+    ]);
 
-      // Fetch all required data
-      const [products, categories, brands] = await Promise.all([
-          product.find(filter)
-                 .sort(sortOptions)
-                 .populate('category')
-                 .populate('brand'),
-          category.find({ isListed: true }),
-          Brand.find()
-      ]);
-
-     
-
-      // Render the shop page with or without user data
-      res.render('shop', {
-          products,
-          categories,
-          brands,
-          query,
-          userData, // This will be null for non-logged-in users
-          isLoggedIn: !!req.session.user // Add a boolean flag for login status
-      });
+    res.render('shop', {
+      products,
+      categories,
+      brands,
+      query,
+      userData,
+      isLoggedIn: !!req.session.user
+    });
 
   } catch (error) {
-      console.error('Shop page error:',error);
-      res.status(500).send('Internal Server Error');
+    console.error('Shop page error:', error);
+    res.status(500).send('Internal Server Error');
   }
 };
 

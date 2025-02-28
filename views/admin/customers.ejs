@@ -49,6 +49,61 @@
                             </tr>
                         <% } %>
                     
+                        <!-- Add this script before the closing body tag -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Block user with AJAX
+    function blockUser(userId, element) {
+        fetch(`/admin/blockCustomer?id=${userId}`)
+            .then(response => {
+                if (response.ok) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'User has been blocked successfully',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        // Change the button from Block to Unblock
+                        const parent = element.parentNode;
+                        parent.innerHTML = `
+                            <button class="btn btn-success" style="width: 80px;">
+                                <a href="#" onclick="unblockUser('${userId}', this); return false;" class="text-white" style="text-decoration: none;">Unblock</a>
+                            </button>
+                        `;
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    // Unblock user with AJAX
+    function unblockUser(userId, element) {
+        fetch(`/admin/unblockCustomer?id=${userId}`)
+            .then(response => {
+                if (response.ok) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'User has been unblocked successfully',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        // Change the button from Unblock to Block
+                        const parent = element.parentNode;
+                        parent.innerHTML = `
+                            <button class="btn btn-danger" style="width: 80px;">
+                                <a href="#" onclick="blockUser('${userId}', this); return false;" class="text-white" style="text-decoration: none;">Block</a>
+                            </button>
+                        `;
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+</script>
                     </tbody>
                   </table>
         </div>
@@ -69,5 +124,37 @@
         </div>
 
        
-        
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Check URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                
+                // Check if user was blocked
+                if (urlParams.get('blockSuccess') === 'true') {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'User has been blocked successfully',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        // Remove the success parameter from URL
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    });
+                }
+                
+                // Check if user was unblocked
+                if (urlParams.get('unblockSuccess') === 'true') {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'User has been unblocked successfully',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        // Remove the success parameter from URL
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    });
+                }
+            });
+        </script>
         <%- include("../../views/partials/admin/footer") %>
