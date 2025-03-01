@@ -441,6 +441,15 @@
                       <span class="original-price">₹<%= product.regularPrice %></span>
                       <span class="sale-price">₹<%= product.salePrice %></span>
                     </p>
+
+                    <p class="stock-status">
+                    <% if (product.quantity > 0) { %>
+                      <span style="color: green;">In Stock (<%= product.quantity %> left)</span>
+                    <% } else { %>
+                      <span style="color: red;">Out of Stock</span>
+                    <% } %>
+                  </p>
+
                     <a href="#" class="add-cart" data-quantity="1" data-id="<%= product._id %>" data-price="<%= product.salePrice %>">+ Add To Cart</a>
                   </div>
                 </div>
@@ -538,5 +547,8 @@
       });
   });
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     
     <%- include('../../views/partials/user/footer') %>

@@ -14,7 +14,7 @@ const getCheckoutPage = async (req, res) => {
   try {
     const userId = req.session.user;  
     const userData = userId ? await User.findById(userId) : null;
-    console.log("user in checkout:    ",userData);
+    //console.log("user in checkout:    ",userData);
 
     // Fetch cart items
     const cartItems = await Cart.find({ userId }).populate("productId");
@@ -47,59 +47,6 @@ const getCheckoutPage = async (req, res) => {
   }
 };
 
-// const getOrderDetails = async (req, res) => {
-//   try {
-//       const userId = req.session.user;
-//       const userData = userId ? await User.findById(userId) : null;
-//       const orderId = req.params.orderId;
-
-//       // Fetch specific order and populate all necessary fields
-//       const order = await Order.findOne({ orderId })
-//           .populate({
-//               path: 'orderItems.product',
-//               model: 'Product'
-//           })
-//           .populate('address');
-
-//       if (!order) {
-//        return res.status(404).render('page-404', { 
-//         message: 'Order not found',
-//         userData,
-//         user: req.session.user
-//        });
-
-//       }
-
-//       res.render('orderDetails', {
-//           order,
-//           userData,
-//           user: req.session.user
-//       });
-
-//   } catch (error) {
-//       console.error('Error fetching order details:', error);
-//       res.status(500).json({ message: 'Server error' });
-//   }
-// };
-
-// const orderConfirmation = async (req, res) => {
-//   try {
-//     const userId = req.session.user;
-//     const userData = await User.findById(userId);
-//     const { orderId } = req.params;
-
-//     const order = await Order.findById(orderId).populate("products.productId");
-
-//     if (!order) {
-//       return res.status(404).json({ message: "Order not found" });
-//     }
-
-//     res.render("orderConfirmation", { order, user: userData });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Error fetching Order Details" });
-//   }
-// };
 
 
 
@@ -202,86 +149,6 @@ const getOrderPlacedPage = async (req, res) => {
   }
 };
 
-// const loadMyOrdersPage = async(req, res) => {
-//   try {
-//     const userId = req.session.user;
-//     const userData = userId ? await User.findById(userId) : null;
-
-//     const order = await Order.find({userId: userId})
-
-//     console.log(order);
-
-//     res.render('order-details', {
-//       order,
-//       userData,
-//     });
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }
-
-// const loadMyOrdersPage = async (req, res, next) => {
-//   try {
-//     const userId = req.session.user;
-//     const page = parseInt(req.query.page) || 1;
-//     const limit = 10; // Orders per page
-//     const userData = userId ? await User.findById(userId) : null;
-    
-//     // Fetch orders with pagination and populate necessary fields
-//     const totalOrders = await Order.countDocuments({ userId });
-//     const totalPages = Math.ceil(totalOrders / limit);
-    
-//     const orders = await Order.find({ userId: userId })
-//       .populate({
-//         path: 'orderedItems.product',
-//         select: 'productName productImage' 
-//       })
-//       // .populate('address')
-//       .sort({ orderDate: -1 })
-//       .skip((page - 1) * limit)
-//       .limit(limit);
-
-//     // Format orders for the template
-//     const formattedOrders = orders.map(order => ({
-//       orderId: order.orderId,
-//       placedOn: order.orderDate.toLocaleDateString(),
-//       status: getOrderStatus(order.status),
-//       totalAmount: order.finalAmount,
-//       quantity: order.orderedItems.reduce((sum, item) => sum + item.quantity, 0),
-//       shippingAddress: order.shippingAddress, // Add this
-//       product: {
-//         productName: order.orderedItems[0]?.product?.productName || 'Product Not Found',
-//         productImage: order.orderedItems[0]?.product?.productImage?.[0] || '/placeholder-image.jpg'
-//       },
-//     }));
-
-//     console.log(formattedOrders)
-
-//     res.render('order-details', {
-//       order: formattedOrders,
-//       userData,
-//       currentPage: page,
-//       totalPages: totalPages
-//     });
-    
-//   } catch (error) {
-   
-//   }
-// };
-
-// function getOrderStatus(status) {
-//   const statusMap = {
-//     'Pending': 1,
-//     'Pending COD': 1,
-//     'Processing': 2,
-//     'Shipped': 3,
-//     'Delivered': 4,
-//     'Return Request': 5,
-//     'Returned': 6, 
-//     'Cancelled': 0
-//   };
-//   return statusMap[status] || 0;
-// }
 
 const orderDetail = async (req, res) => {
   try {
@@ -327,65 +194,6 @@ const orderDetail = async (req, res) => {
   }
 };
 
-// const viewOrder = async (req, res) => {
-//   try {
-//     const orderId = req.query.orderId;
-    
-//     // Find order and populate the product details from orderedItems
-//     const orders = await Order.find({ _id: orderId })
-//       .populate("orderedItems.product")
-//       .populate("userId");
-    
-//     if (!orders || orders.length === 0) {
-//       return res.status(404).send("Order not found");
-//     }
-
-//     // Format data to match template expectations
-//     const formattedOrders = [{
-//       _id: orders[0]._id,
-//       Date: orders[0].orderDate, // Using orderDate from your schema
-//       // Map orderedItems to orderItems expected by template
-//       orderItems: orders[0].orderedItems.map(item => ({
-//         _id: item._id,
-//         productName: item.product ? item.product.name : 'Product Name Not Available',
-//         productImage: item.product ? item.product.image : 'default.jpg',
-//         quantity: item.quantity,
-//         price: item.price,
-//         orderStatus: orders[0].status // Using the order's status for each item
-//       })),
-//       // Map shippingAddress to address expected by template
-//       address: {
-//         name: orders[0].shippingAddress.fullName,
-//         phone: orders[0].shippingAddress.phone,
-//         addressType: orders[0].shippingAddress.addressType,
-//         city: orders[0].shippingAddress.city,
-//         landmark: orders[0].shippingAddress.landmark,
-//         state: orders[0].shippingAddress.state,
-//         pincode: orders[0].shippingAddress.pincode
-//       }
-//     }];
-
-//     // Calculate total price
-//     const Totalprice = orders[0].orderedItems.reduce((sum, element) => {
-//       return sum + element.quantity * element.price;
-//     }, 0);
-
-//     console.log("Total Price:", Totalprice);
-
-//     // Add userData for the header partial
-//     const userData = req.session.user || null;
-
-//     res.render("view-allorder", { 
-//       orders: formattedOrders, 
-//       Totalprice, 
-//       userData 
-//     });
-
-//   } catch (error) {
-//     console.error("Error fetching order details:", error);
-//     res.status(500).send("Server Error");
-//   }
-// };
 const viewOrder = async (req, res) => {
   try {
     const orderId = req.query.orderId;
@@ -483,32 +291,6 @@ const getOrderDetails = async (req, res) => {
 
 
 
-// const cancelOrder=async(req,res)=>{
-//   try {
-
-//     console.log(req.body)
-//     const {orderId,productId}=req.body
-//     const orders=await Order.findOne({_id:orderId})
-//     await Order.updateOne(
-//       { _id: orderId, "orderedItems._id": productId },
-//       { $set: { "orderedItems.$.orderStatus": "cancelled" } } 
-//     );
-//     for (const item of orders.orderedItems) {
-//       await Product.findByIdAndUpdate(
-//         item.product, 
-//         { $inc: { quantity: item.quantity } } 
-//       );
-//     }    
-    
-//     return res.json({ success: "Successfully cancelled" });
-    
-//   } catch (error) {
-//     console.log(error)
-//   }
-// }
-
-
-
 const cancelOrder = async (req, res) => {
   try {
     console.log(req.body);
@@ -556,7 +338,6 @@ module.exports = {
   getCheckoutPage,
   createOrder,
   getOrderPlacedPage,
-  //loadMyOrdersPage,
   getOrderDetails,
   orderDetail,
   viewOrder,

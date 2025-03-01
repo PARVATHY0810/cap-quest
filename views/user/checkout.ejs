@@ -168,33 +168,63 @@
 
 <script>
   document.getElementById("place-order").addEventListener("click", function () {
-    const selectedAddress = document.querySelector('input[name="deliveryAddress"]:checked');
-    if (!selectedAddress) {
-      alert("Please select a delivery address.");
-      return;
+  const selectedAddress = document.querySelector('input[name="deliveryAddress"]:checked');
+  if (!selectedAddress) {
+    swal({
+      title: "Error!",
+      text: "Please select a delivery address.",
+      icon: "error",
+      button: "OK",
+    });
+    return;
+  }
+  const addressId = selectedAddress.value;
+  const cartId = document.querySelector("[data-cart-id]").getAttribute("data-cart-id");
+  if (!cartId) {
+    swal({
+      title: "Error!",
+      text: "Cart ID is missing. Please try again.",
+      icon: "error",
+      button: "OK",
+    });
+    return;
+  }
+  fetch("/create-order", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ addressId, cartId, paymentMethod: "COD", finalAmount: parseFloat(document.getElementById("total").value) })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Direct redirect without showing the default alert
+      swal({
+        title: "Success!",
+        text: "Order Placed Successfully!",
+        icon: "success",
+        button: "Continue",
+      }).then(() => {
+        window.location.href = `/order-placed?orderId=${data.orderId}`;
+      });
+    } else {
+      swal({
+        title: "Error!",
+        text: "Error: " + data.message,
+        icon: "error",
+        button: "OK",
+      });
     }
-    const addressId = selectedAddress.value;
-    const cartId = document.querySelector("[data-cart-id]").getAttribute("data-cart-id");
-    if (!cartId) {
-      alert("Cart ID is missing. Please try again.");
-      return;
-    }
-    fetch("/create-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ addressId, cartId, paymentMethod: "COD", finalAmount: parseFloat(document.getElementById("total").value) })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        alert("Order Placed Successfully!");
-        window.location.href = `/order-placed?orderId=${data.orderId}`; // Updated redirect
-      } else {
-        alert("Error: " + data.message);
-      }
-    })
-    .catch(error => console.error("Order placement error:", error));
+  })
+  .catch(error => {
+    console.error("Order placement error:", error);
+    swal({
+      title: "Error!",
+      text: "An unexpected error occurred. Please try again later.",
+      icon: "error",
+      button: "OK",
+    });
   });
+});
 </script>
 
 

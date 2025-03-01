@@ -6,12 +6,6 @@ const Address = require("../../models/addressSchema");
 const Brand = require("../../models/brandSchema");
 const Product = require("../../models/productSchema");
 const Order = require("../../models/orderSchema");
-// const order = await Order.findOne({ "orderedItems._id": item });
-// const item = order.orderedItems.id(item);
-
-
-
-
 
 const getOrders = async (req, res) => {
     try {
@@ -20,18 +14,17 @@ const getOrders = async (req, res) => {
 
        
         const orders = await Order.find()
-            .populate("orderedItems.product") 
-            .populate("userId") 
-            .sort({ createdAt: -1 }) 
-            .skip((page - 1) * limit)
-            .limit(limit);
-            console.log(orders)
+        .populate("orderedItems.product") 
+        .populate("userId") 
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit);
+    
+
+            
 
         const count = await Order.countDocuments();
         const totalpage = Math.ceil(count / limit);
-
-
-
 
         console.log(orders.map(order => order.orderedItems));
         console.log(orders.map(order => order.orderedItems.map(item => item.orderStatus)));
@@ -48,9 +41,6 @@ const getOrders = async (req, res) => {
     }
 };
 
-
-
-
 const getOrderDetails = async (req, res) => {
     try {
       const { orderId } = req.params;
@@ -63,11 +53,11 @@ const getOrderDetails = async (req, res) => {
         return res.status(404).json({ error: "Order not found" });
       }
   
-      const overallStatus = order.orderedItems.every(item => item.orderStatus === "delivered")
-        ? "delivered"
-        : order.orderedItems.some(item => item.orderStatus === "processing" || item.orderStatus === "shipped")
-          ? "processing"
-          : "pending";
+      const overallStatus = order.orderedItems.every(item => item.status === "Delivered")
+        ? "Delivered"
+        : order.orderedItems.some(item => item.status === "Processing" || item.status === "Shipped")
+          ? "Processing"
+          : "Pending";
   
       // Define userData with admin check
       const userData = req.session?.user || req.user || null;
@@ -87,31 +77,45 @@ const getOrderDetails = async (req, res) => {
       res.status(500).json({ error: "Failed to fetch order details" });
     }
   };
-
   const changeStatus = async (req, res) => {
     try {
       const { itemId } = req.params;
-      const { status,orderId } = req.body;
-
-      console.log(req.body);
-      const a = await Order.findOne({ _id: orderId, "orderedItems._id": itemId });
-      console.log(a);
-      await Order.updateOne(
+      const { status, orderId } = req.body;
+  
+      console.log("Update request received:", { itemId, status, orderId });
+      
+      // Check if input is valid
+      if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(itemId)) {
+        return res.status(400).json({ success: false, message: "Invalid order or item ID" });
+      }
+      
+      // Update the status field correctly
+      const result = await Order.updateOne(
         { _id: orderId, "orderedItems._id": itemId },
-        { $set: { "orderedItems.$.status":status} } 
+        { $set: { "orderedItems.$.status": status } }
       );
-      console.log("sucesses");
-
+      
+      console.log("Update result:", result);
+      
+      if (result.matchedCount === 0) {
+        return res.status(404).json({ success: false, message: "Order item not found" });
+      }
+      
+      return res.status(200).json({ 
+        success: true, 
+        message: "Order status updated successfully to " + status 
+      });
+  
     } catch (error) {
       console.error("Error in changeStatus:", error);
-      return res.status(500).json({ success: false, error: "Failed to update order status" });
+      return res.status(500).json({ 
+        success: false, 
+        message: "Failed to update order status: " + error.message 
+      });
     }
   };
 
-
-
-  module.exports  = {
-
+  module.exports = {
     getOrders,
     getOrderDetails,
     changeStatus

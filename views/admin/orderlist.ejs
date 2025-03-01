@@ -1,4 +1,4 @@
-<%- include("../../views/partials/admin/header") %>
+
 
   <style>
 /* General Styling */
@@ -202,91 +202,98 @@ body {
 
   </style>
 
-    <div class="container">
-      <h1>Orders List</h1>
-      <table class="orders-table">
-        <thead>
-          <tr>
-            <th>User</th>
-            <th>Order Id</th>
-            <th>Status</th>
-            <th>Total Price</th>
-            <th>Date</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% orders.forEach(order => { %>
-            <tr>
-              <td data-label="User"><%= order.userId.name %></td>
-              <td data-label="Order Id">#<%= order._id %> </td>
-              <td data-label="Status">
-                <%= (order.orderedItems.length > 0 && order.orderedItems[0] && order.orderedItems[0].status) 
-                    ? order.orderedItems[0].status 
-                    : 'Unknown' %>
-            </td>
-            
-            
-              
-              <td data-label="Total Price">₹<%= order.finalAmount %></td>
-              <td data-label="Date"><%= order.createdAt ? order.createdAt.toLocaleDateString() : 'N/A' %></td>
+<%- include("../../views/partials/admin/header") %>
 
-              <td data-label="Actions">
-                <a href="/admin/orderdetails/<%= order._id %>" class="btn">View Details</a>
+<div class="container">
+  <h1>Orders List</h1>
+  <table class="orders-table">
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Order Id</th>
+        <th>Product Name</th>
+        <th>Status</th>
+        <th>Total Price</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% orders.forEach(order => { %>
+        <tr>
+          <td data-label="User"><%= order.userId.name %></td>
+          <td data-label="Order Id">#<%= order._id %> </td>
+          <td data-label="Product Name">
+            <% if (order.orderedItems.length > 0) { %>
+              <% order.orderedItems.forEach(item => { %>
+                <p><%= item.product ? item.product.productName : 'N/A' %></p>
+              <% }) %>
+            <% } else { %>
+              N/A
+            <% } %>
+          </td>
+          <td data-label="Status">
+            <%= (order.orderedItems.length > 0 && order.orderedItems[0] && order.orderedItems[0].status) 
+                ? order.orderedItems[0].status 
+                : 'Unknown' %>
+          </td>
+          <td data-label="Total Price">₹<%= order.finalAmount %></td>
+          <td data-label="Date"><%= order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A' %></td>
+          <td data-label="Actions">
+            <a href="/admin/orderdetails/<%= order._id %>" class="btn">View Details</a>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
 
-              </td>
-            </tr>
-          <% }); %>
-        </tbody>
-      </table>
+  <div class="pagination">
+    <% 
+        const prevPage = currentpage > 1 ? currentpage - 1 : 1;
+        const nextPage = currentpage < totalpage ? currentpage + 1 : totalpage;
+    %>
+    
+    <% if (currentpage > 1) { %>
+        <a href="?page=<%= prevPage %>" class="btn">
+            <i class="bi bi-chevron-left"></i> Previous
+        </a>
+    <% } %>
 
-      <div class="pagination">
+    <div class="page-numbers">
         <% 
-            const prevPage = currentpage > 1 ? currentpage - 1 : 1;
-            const nextPage = currentpage < totalpage ? currentpage + 1 : totalpage;
-        %>
+        let startPage = Math.max(1, currentpage - 2);
+        let endPage = Math.min(totalpage, startPage + 4);
         
-        <% if (currentpage > 1) { %>
-            <a href="?page=<%= prevPage %>" class="btn">
-                <i class="bi bi-chevron-left"></i> Previous
+        if (endPage - startPage < 4) {
+            startPage = Math.max(1, endPage - 4);
+        }
+        
+        if (startPage > 1) { %>
+            <a href="?page=1">1</a>
+            <% if (startPage > 2) { %>
+                <span>...</span>
+            <% } %>
+        <% } %>
+
+        <% for(let i = startPage; i <= endPage; i++) { %>
+            <a href="?page=<%= i %>" class="<%= (i === currentpage) ? 'active' : '' %>">
+                <%= i %>
             </a>
         <% } %>
 
-        <div class="page-numbers">
-            <% 
-            let startPage = Math.max(1, currentpage - 2);
-            let endPage = Math.min(totalpage, startPage + 4);
-            
-            if (endPage - startPage < 4) {
-                startPage = Math.max(1, endPage - 4);
-            }
-            
-            if (startPage > 1) { %>
-                <a href="?page=1">1</a>
-                <% if (startPage > 2) { %>
-                    <span>...</span>
-                <% } %>
+        <% if (endPage < totalpage) { %>
+            <% if (endPage < totalpage - 1) { %>
+                <span>...</span>
             <% } %>
-
-            <% for(let i = startPage; i <= endPage; i++) { %>
-                <a href="?page=<%= i %>" class="<%= (i === currentpage) ? 'active' : '' %>">
-                    <%= i %>
-                </a>
-            <% } %>
-
-            <% if (endPage < totalpage) { %>
-                <% if (endPage < totalpage - 1) { %>
-                    <span>...</span>
-                <% } %>
-                <a href="?page=<%= totalpage %>"><%= totalpage %></a>
-            <% } %>
-        </div>
-
-        <% if (currentpage < totalpage) { %>
-            <a href="?page=<%= nextPage %>" class="btn">
-                Next <i class="bi bi-chevron-right"></i>
-            </a>
+            <a href="?page=<%= totalpage %>"><%= totalpage %></a>
         <% } %>
     </div>
-    </div>
-  <%- include("../../views/partials/admin/footer") %>
+
+    <% if (currentpage < totalpage) { %>
+        <a href="?page=<%= nextPage %>" class="btn">
+            Next <i class="bi bi-chevron-right"></i>
+        </a>
+    <% } %>
+</div>
+</div>
+<%- include("../../views/partials/admin/footer") %>
