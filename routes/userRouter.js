@@ -3,11 +3,12 @@ const router = express.Router();
 const userController = require("../controllers/user/userController");
 const passport = require("../config/passport");
 const { userAuth } = require("../middlewares/auth");
-const Product = require("../models/productSchema");
+const Product = require("../controllers/user/productController");//njn evide productSchema koduthirunnu athe enthinaa nne but oorna illaa
 const profileController = require("../controllers/user/profileController")
 const productController = require("../controllers/user/productController")
 const cartController = require('../controllers/user/cartController');
-const orderController = require('../controllers/user/orderController')
+const orderController = require('../controllers/user/orderController');
+const wishlistController = require('../controllers/user/wishlistController');
 
 //user manegement
 router.get("/pageNotFound",userController.pageNotFound);
@@ -65,6 +66,14 @@ router.get("/order-placed", userAuth, orderController.getOrderPlacedPage);
 router.get("/orders", userAuth, orderController.orderDetail)
 router.get('/order/details/:orderId', userAuth, orderController.getOrderDetails);
 router.get('/viewOrder',orderController.viewOrder);
-router.post('/cancelOrder',orderController.cancelOrder)
+router.post('/cancelOrder',orderController.cancelOrder);
+router.post('/return-order', userAuth, orderController.returnOrder);
+
+///wishlist management
+//  router.get("/wishlist",userAuth,wishlistController.getWishlist)
+// router.post('/wishlist/add',userAuth, wishlistController.addToWishlist)
+// router.post("/wishlist/remove",userAuth,wishlistController.removeFromWishlist)
+// //router.post('/cart/add', wishlistController.addToCart);
+// router.post('/cart/add', userAuth, cartController.addToCart);
 
 module.exports = router;

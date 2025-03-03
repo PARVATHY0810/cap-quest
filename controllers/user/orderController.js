@@ -7,7 +7,15 @@ const Order = require("../../models/orderSchema");
 const Address = require('../../models/addressSchema');
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
+const Razorpay = require('razorpay');
 
+
+
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
 
 
 const getCheckoutPage = async (req, res) => {
@@ -329,6 +337,44 @@ const cancelOrder = async (req, res) => {
   }
 };
 
+const returnOrder = async (req, res) => {
+  try {
+    const { orderId, productId } = req.body;
+    console.log("Return Request:", orderId, productId);
+
+    // Find the order
+    const order = await Order.findOne({ _id: orderId });
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    // Update the product status to "Returned"
+    const updatedOrder = await Order.findOneAndUpdate(
+      { _id: orderId, "orderedItems._id": productId },
+      { $set: { "orderedItems.$.status": "Returned" } },
+      { new: true }
+    );
+
+    if (!updatedOrder) {
+      return res.status(400).json({ error: "Order update failed" });
+    }
+
+    // Find the returned item and restore stock quantity
+    const returnedItem = order.orderedItems.find(item => item._id.toString() === productId);
+    if (returnedItem) {
+      await Product.findByIdAndUpdate(
+        returnedItem.product,
+        { $inc: { quantity: returnedItem.quantity } }
+      );
+    }
+
+    return res.json({ success: "Successfully returned" });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 
 module.exports = {
@@ -338,5 +384,6 @@ module.exports = {
   getOrderDetails,
   orderDetail,
   viewOrder,
-  cancelOrder
+  cancelOrder,
+  returnOrder
 };

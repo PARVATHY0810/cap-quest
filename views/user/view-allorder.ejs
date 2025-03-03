@@ -105,23 +105,36 @@
                             </thead>
                             <tbody>
                                 <% orders[0].orderItems.forEach(element => { %> 
-                                    <tr> 
-                                        <td> 
-                                            <img src="/uploads/re-image/<%= element.productImage %>" alt="" class="product-image"> 
-                                        </td> 
-                                        <td> 
-                                            <h6 class="mb-0"><%= element.productName %></h6> 
-                                        </td> 
-                                        <td class="text-center"><%= element.quantity %></td> 
-                                        <td class="text-end">Rs. <%= element.price %></td> 
-                                        <td class="text-end">Rs.<%= element.quantity * element.price %></td> 
-                                        <td> 
-                                            <button class="btn btn-danger cancelOrder" data-product-id="<%= element._id %>" data-order-id="<%= orders[0]._id %>" >Cancel</button> 
-                                        </td> 
-                                        <td><%= element.orderStatus %></td> 
-                                    </tr> 
+                                  <tr> 
+                                    <td> 
+                                      <img src="/uploads/re-image/<%= element.productImage %>" alt="" class="product-image"> 
+                                    </td> 
+                                    <td> 
+                                      <h6 class="mb-0"><%= element.productName %></h6> 
+                                    </td> 
+                                    <td class="text-center"><%= element.quantity %></td> 
+                                    <td class="text-end">Rs. <%= element.price %></td> 
+                                    <td class="text-end">Rs.<%= element.quantity * element.price %></td> 
+                                    <td>
+                                        <% if (element.orderStatus === 'Delivered' ) { %>
+                                          <button class="btn btn-primary returnOrder" data-product-id="<%= element._id %>" data-order-id="<%= orders[0]._id %>">Return</button>
+                                          <button class="btn btn-danger cancelOrder" data-product-id="<%= element._id %>" data-order-id="<%= orders[0]._id %>" disabled>Cancel</button>
+                                      
+                                        <% } else if (element.orderStatus === 'Returned') { %>
+                                            <button class="btn btn-danger cancelOrder" data-product-id="<%= element._id %>" data-order-id="<%= orders[0]._id %>" disabled>Cancel</button>
+                                          <!-- When status is Return, no cancel button will show -->
+                                        
+                                        <% } else { %>
+                                          <button class="btn btn-danger cancelOrder" data-product-id="<%= element._id %>" data-order-id="<%= orders[0]._id %>">Cancel</button>
+                                        
+                                        <% } %>
+                                      </td>
+                                      
+                                      
+                                    <td><%= element.orderStatus %></td>
+                                  </tr> 
                                 <% }) %>
-                            </tbody>
+                              </tbody>
                         </table>
                     </div>
                 </div>
@@ -156,37 +169,109 @@
     </div>
 
     <!-- Bootstrap JS Bundle with Popper -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script>
-       // Use event delegation to handle all cancel buttons
-document.addEventListener('click', async (event) => {
-    // Check if clicked element is a cancel button
+   <!-- Add this script for SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  // Use event delegation to handle all cancel buttons
+  document.addEventListener('click', async (event) => {
     if (event.target.classList.contains('cancelOrder')) {
-        const productId = event.target.dataset.productId;
-        const orderId = event.target.dataset.orderId;
-        
-        try {
-            const response = await fetch("/cancelOrder", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ orderId, productId })
-            });
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                alert(data.success);
-                // Optionally refresh the page or update the UI
-                location.reload();
-            } else {
-                alert(data.message || "Failed to cancel order.");
-            }
-        } catch (error) {
-            console.error("Error cancelling order:", error);
-            alert("Something went wrong. Please try again.");
+      const productId = event.target.dataset.productId;
+      const orderId = event.target.dataset.orderId;
+
+      try {
+        const response = await fetch("/cancelOrder", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId, productId })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          Swal.fire({
+            title: 'Success!',
+            text: data.success,
+            icon: 'success',
+            confirmButtonText: 'OK'
+          }).then(() => {
+            location.reload();
+          });
+        } else {
+          Swal.fire({
+            title: 'Error!',
+            text: data.message || "Failed to cancel order.",
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
         }
+      } catch (error) {
+        console.error("Error cancelling order:", error);
+        Swal.fire({
+          title: 'Error!',
+          text: "Something went wrong. Please try again.",
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
     }
-});
-    </script>
+  });
+
+  // Use event delegation to handle all return buttons
+  document.addEventListener('click', async (event) => {
+    if (event.target.classList.contains('returnOrder')) {
+      const productId = event.target.dataset.productId;
+      const orderId = event.target.dataset.orderId;
+
+      Swal.fire({
+        title: 'Confirm Return',
+        text: 'Are you sure you want to return this item?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, return it!'
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            const response = await fetch("/return-order", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ orderId, productId })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+              Swal.fire({
+                title: 'Return Requested!',
+                text: 'Your return request has been submitted.',
+                icon: 'success',
+                confirmButtonText: 'OK'
+              }).then(() => {
+                location.reload();
+              });
+            } else {
+              Swal.fire({
+                title: 'Error!',
+                text: data.message || "Failed to process return request.",
+                icon: 'error',
+                confirmButtonText: 'OK'
+              });
+            }
+          } catch (error) {
+            console.error("Error requesting return:", error);
+            Swal.fire({
+              title: 'Error!',
+              text: "Something went wrong. Please try again.",
+              icon: 'error',
+              confirmButtonText: 'OK'
+            });
+          }
+        }
+      });
+    }
+  });
+</script>
 </body>
 </html>

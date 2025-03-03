@@ -112,7 +112,6 @@
             <p>No saved addresses found.</p>
           <% } %>
         </div>
-        
       </div>
       <div class="section-card">
         <div class="section-header">
@@ -122,6 +121,10 @@
           <label class="payment-option">
             <input type="radio" name="paymentMethod" value="COD" checked />
             Cash on Delivery
+          </label>
+          <label class="payment-option">
+            <input type="radio" name="paymentMethod" value="razorpay" />
+            Razorpay
           </label>
         </div>
       </div>
@@ -166,66 +169,112 @@
   </div>
 </div>
 
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
   document.getElementById("place-order").addEventListener("click", function () {
-  const selectedAddress = document.querySelector('input[name="deliveryAddress"]:checked');
-  if (!selectedAddress) {
-    swal({
-      title: "Error!",
-      text: "Please select a delivery address.",
-      icon: "error",
-      button: "OK",
-    });
-    return;
-  }
-  const addressId = selectedAddress.value;
-  const cartId = document.querySelector("[data-cart-id]").getAttribute("data-cart-id");
-  if (!cartId) {
-    swal({
-      title: "Error!",
-      text: "Cart ID is missing. Please try again.",
-      icon: "error",
-      button: "OK",
-    });
-    return;
-  }
-  fetch("/create-order", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ addressId, cartId, paymentMethod: "COD", finalAmount: parseFloat(document.getElementById("total").value) })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      // Direct redirect without showing the default alert
-      swal({
-        title: "Success!",
-        text: "Order Placed Successfully!",
-        icon: "success",
-        button: "Continue",
-      }).then(() => {
-        window.location.href = `/order-placed?orderId=${data.orderId}`;
-      });
-    } else {
+    const selectedAddress = document.querySelector('input[name="deliveryAddress"]:checked');
+    if (!selectedAddress) {
       swal({
         title: "Error!",
-        text: "Error: " + data.message,
+        text: "Please select a delivery address.",
         icon: "error",
         button: "OK",
       });
+      return;
     }
-  })
-  .catch(error => {
-    console.error("Order placement error:", error);
-    swal({
-      title: "Error!",
-      text: "An unexpected error occurred. Please try again later.",
-      icon: "error",
-      button: "OK",
+    const addressId = selectedAddress.value;
+    const cartId = document.querySelector("[data-cart-id]").getAttribute("data-cart-id");
+    if (!cartId) {
+      swal({
+        title: "Error!",
+        text: "Cart ID is missing. Please try again.",
+        icon: "error",
+        button: "OK",
+      });
+      return;
+    }
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+    const finalAmount = parseFloat(document.getElementById("total").value);
+
+    fetch("/create-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ addressId, cartId, paymentMethod, finalAmount })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        if (paymentMethod === "razorpay") {
+          const options = {
+            key: "<%= process.env.RAZORPAY_KEY_ID %>",
+            amount: finalAmount * 100,
+            currency: "INR",
+            name: "Your Company Name",
+            description: "Test Transaction",
+            order_id: data.razorpayOrderId,
+            handler: function (response) {
+              swal({
+                title: "Success!",
+                text: "Order Placed Successfully!",
+                icon: "success",
+                button: "Continue",
+              }).then(() => {
+                window.location.href = `/order-placed?orderId=${data.orderId}`;
+              });
+            },
+            prefill: {
+              name: "<%= userData.name %>",
+              email: "<%= userData.email %>",
+              contact: "<%= userData.phone %>"
+            },
+            notes: {
+              address: "Razorpay Corporate Office"
+            },
+            theme: {
+              color: "#3399cc"
+            }
+          };
+          const rzp1 = new Razorpay(options);
+          rzp1.on('payment.failed', function (response) {
+            swal({
+              title: "Error!",
+              text: "Payment failed. Please try again.",
+              icon: "error",
+              button: "OK",
+            });
+          });
+          rzp1.open();
+        } else {
+          swal({
+            title: "Success!",
+            text: "Order Placed Successfully!",
+            icon: "success",
+            button: "Continue",
+          }).then(() => {
+            window.location.href = `/order-placed?orderId=${data.orderId}`;
+          });
+        }
+      } else {
+        swal({
+          title: "Error!",
+          text: "Error: " + data.message,
+          icon: "error",
+          button: "OK",
+        });
+      }
+    })
+    .catch(error => {
+      console.error("Order placement error:", error);
+      swal({
+        title: "Error!",
+        text: "An unexpected error occurred. Please try again later.",
+        icon: "error",
+        button: "OK",
+      });
     });
   });
-});
 </script>
+
 
 
 
