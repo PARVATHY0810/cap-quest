@@ -45,7 +45,7 @@ const categoryInfo = async (req, res) => {
 
 
 const addCategory = async (req, res) => {
-    console.log(req.body);
+    //console.log(req.body);
     const { name, description } = req.body;
     try {
         if (!name || !description) {
@@ -165,6 +165,7 @@ const getUnlistCategory = async (req, res) => {
         res.status(500).json({ success: false, message: "Something went wrong" });
     }
 };
+
 
 
 module.exports ={

@@ -59,9 +59,9 @@ const getOrderDetails = async (req, res) => {
           ? "Processing"
           : "Pending";
   
-      // Define userData with admin check
+      
       const userData = req.session?.user || req.user || null;
-      // Assuming your User model has an `isAdmin` or `role` field
+      
       const isAdmin = userData ? await User.findById(userData._id).select("isAdmin") : false;
   
       res.render("orderDetails", {
@@ -69,7 +69,7 @@ const getOrderDetails = async (req, res) => {
         overallStatus,
         specificAddress: order.address,
         user: order.userId || null,
-        userData: { ...userData, isAdmin: isAdmin?.isAdmin || userData?.role === "admin" } // Adjust based on your schema
+        userData: { ...userData, isAdmin: isAdmin?.isAdmin || userData?.role === "admin" }
       });
   
     } catch (error) {
@@ -84,12 +84,12 @@ const getOrderDetails = async (req, res) => {
   
       console.log("Update request received:", { itemId, status, orderId });
       
-      // Check if input is valid
+   
       if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(itemId)) {
         return res.status(400).json({ success: false, message: "Invalid order or item ID" });
       }
       
-      // Update the status field correctly
+      
       const result = await Order.updateOne(
         { _id: orderId, "orderedItems._id": itemId },
         { $set: { "orderedItems.$.status": status } }

@@ -17,16 +17,15 @@ const profile = async (req, res) => {
       return res.redirect("/login");
     }
 
-    // Fetch user details along with orders
     const user = await User.findById(req.session.user);
 
-    console.log("User Data:", user); // Debugging
+    console.log("User Data:", user); 
 
     if (!user) {
       return res.redirect("/login");
     }
 
-    // Ensure orders is always an array
+   
     res.render("profile", { user: { ...user.toObject(), orders: user.orders || [] } });
   } catch (error) {
     console.error("Error loading profile:", error);
@@ -52,44 +51,43 @@ const changeProfile = async (req, res) => {
     const { userId, name, currentpassword, NewPassword, Cpassword } = req.body;
     console.log(req.body)
 
-    // Find user by ID
+   
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    // Check if the user wants to change the password
+  
     if (currentpassword || NewPassword || Cpassword) {
       if (!currentpassword || !NewPassword || !Cpassword) {
         return res.status(400).json({ success: false, message: "All password fields are required." });
       }
 
-      // Check if the user has a password set (handling Google sign-in users)
       if (!user.password) {
         return res.status(400).json({ success: false, message: "Password change is not allowed for Google login users." });
       }
 
-      // Verify the current password
+     
       const passwordMatch = await bcrypt.compare(currentpassword, user.password);
       if (!passwordMatch) {
         return res.status(401).json({ success: false, message: "Current password is incorrect." });
       }
 
-      // Ensure new password and confirm password match
+     
       if (NewPassword !== Cpassword) {
         return res.status(400).json({ success: false, message: "New password and confirm password do not match." });
       }
 
-      // Hash and update the new password
+    
       user.password = await bcrypt.hash(NewPassword, 10);
     }
 
-    // Update name if provided
+    
     if (name) {
       user.name = name;
     }
 
-    // Save the updated user data
+   
     await user.save();
 
     return res.status(200).json({ success: true, message: "Profile updated successfully!" });
@@ -99,19 +97,7 @@ const changeProfile = async (req, res) => {
   }
 };
 
-// const loadAddress = async (req, res) => {
-//   try {
-//     const userId = req.session.user;
-    
-//     // Use the correct model name
-//     const addresses = await Address.find({ userId });
-//     console.log("Fetched addresses:", addresses);
-//     res.render('address', { addresses });  // Ensure variable names match
-//   } catch (error) {
-//     console.error('Error loading address management page:', error);
-//     res.status(500).send('An error occurred while loading the address management page.');
-//   }
-// };
+
 
 const loadAddress = async (req, res) => {
   try {

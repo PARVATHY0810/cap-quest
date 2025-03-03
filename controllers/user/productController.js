@@ -9,10 +9,10 @@ const productDetails = async (req, res) => {
         const userId = req.session.user;
         const productId = req.query.id;
 
-        // Fetch user data if user is logged in
+ 
         const userData = userId ? await User.findById(userId) : null;
         
-        // Fetch product and populate category
+        
         const product = await Product.findOne({ _id: productId }).populate('category');
         if (!product) {
             return res.redirect("/pageNotFound");
@@ -23,7 +23,7 @@ const productDetails = async (req, res) => {
         const productOffer = product.productOffer || 0;
         const totalOffer = categoryOffer + productOffer;
 
-        // Fetch related products (excluding the current product)
+        
         const relatedProducts = await Product.find({ 
             category: findCategory?._id, 
             _id: { $ne: productId } 

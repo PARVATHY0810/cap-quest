@@ -211,10 +211,8 @@ body {
       <tr>
         <th>User</th>
         <th>Order Id</th>
-        <th>Product Name</th>
         <th>Status</th>
         <th>Total Price</th>
-        <th>Date</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -223,10 +221,10 @@ body {
         <tr>
           <td data-label="User"><%= order.userId.name %></td>
           <td data-label="Order Id">#<%= order._id %> </td>
-          <td data-label="Product Name">
+         
             <% if (order.orderedItems.length > 0) { %>
               <% order.orderedItems.forEach(item => { %>
-                <p><%= item.product ? item.product.productName : 'N/A' %></p>
+                
               <% }) %>
             <% } else { %>
               N/A
@@ -238,7 +236,7 @@ body {
                 : 'Unknown' %>
           </td>
           <td data-label="Total Price">₹<%= order.finalAmount %></td>
-          <td data-label="Date"><%= order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A' %></td>
+          <!-- <td data-label="Date"><%= order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A' %></td> -->
           <td data-label="Actions">
             <a href="/admin/orderdetails/<%= order._id %>" class="btn">View Details</a>
           </td>

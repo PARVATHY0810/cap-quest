@@ -41,16 +41,7 @@ const loadCart = async (req, res) => {
             console.log(totalItemss)
             console.log(totalPrice)
 
-            // const paginatedItems = validItems.slice(startIndex, endIndex);
-            // const paginatedCart = {
-            //     ...cart.toObject(),
-            //     items: paginatedItems
-            // };
-
-            // if (validItems.length !== cart.items.length) {
-            //     cart.items = validItems;
-            //     await cart.save();
-            // }
+         
 
             res.render('cart', {
                 userData: userData,
@@ -82,20 +73,20 @@ const addToCart = async (req, res) => {
         const { quantity } = req.body;
         const productId = req.params.productId;
 
-        // First check if product exists
+        
         const productDetails = await Product.findOne({ _id: productId });
         if (!productDetails) {
             return res.status(404).json({ error: "Product not found" });
         }
 
-        // Check if product already exists in user's cart
+      
         const existingCartItem = await Cart.findOne({
             userId: userId,
             productId: productId
         });
 
         if (existingCartItem) {
-            // If product exists, update the quantity and total price
+           
             const newQuantity = existingCartItem.quantity + parseInt(quantity);
             const newTotalPrice = newQuantity * productDetails.salePrice;
 
@@ -109,7 +100,7 @@ const addToCart = async (req, res) => {
 
             return res.json({ success: "Cart Updated Successfully" });
         } else {
-            // If product doesn't exist, create new cart item
+            
             const newCart = await Cart({
                 userId: userId,
                 productId: productId,
@@ -128,7 +119,7 @@ const addToCart = async (req, res) => {
     }
 };
 
-// In cartController.js
+
 
 const increaseQuantity = async (req, res) => {
     try {
@@ -151,7 +142,7 @@ const increaseQuantity = async (req, res) => {
         cartItem.totalPrice = cartItem.quantity * cartItem.price;
         await cartItem.save();
 
-        // Calculate new cart total
+        
         const allCartItems = await Cart.find({ userId: userId });
         const cartTotal = allCartItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
@@ -189,7 +180,7 @@ const decreaseQuantity = async (req, res) => {
         cartItem.totalPrice = cartItem.quantity * cartItem.price;
         await cartItem.save();
 
-        // Calculate new cart total
+        
         const allCartItems = await Cart.find({ userId: userId });
         const cartTotal = allCartItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
@@ -213,7 +204,7 @@ const removeItem = async (req, res) => {
         const cartItemId = req.params.itemId;
         const userId = req.session.user;
 
-        // Find and delete the cart item, ensuring it belongs to the correct user
+        
         const deletedItem = await Cart.findOneAndDelete({ 
             _id: cartItemId,
             userId: userId 

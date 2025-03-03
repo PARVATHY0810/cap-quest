@@ -239,10 +239,9 @@ const editProduct = async (req, res) => {
       productImage: updatedImages,
     };
 
-    // Update product in the database
     await Product.findByIdAndUpdate({ _id: id }, updateFields, { new: true });
 
-    // Redirect with success query parameter
+    
     return res.redirect("/admin/products?success=true");
   } catch (error) {
     console.error(error);
@@ -265,7 +264,7 @@ const deleteSingleImage = async (req, res) => {
       await product.save();
     }
     
-    // Delete the physical file
+    
     const imagePath = path.join(
       __dirname,
       "../../public/uploads/re-image",

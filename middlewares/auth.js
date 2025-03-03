@@ -3,24 +3,25 @@ const User = require("../models/userSchema");
 const userAuth = async (req, res, next) => {
   try {
     if (!req.session.user) {
-      return res.redirect("/login"); // User not logged in
+      return res.redirect("/login"); 
     }
-
-    const user = await User.findById(req.session.user); // Fix case issue here
-
+    
+    const user = await User.findById(req.session.user);
+    
     if (!user) {
       console.log("User not found in database");
-      req.session.destroy(); // Clear session if user is missing
+      delete req.session.user;
       return res.redirect("/login");
     }
-
+    
     if (user.isBlocked) {
       console.log("User is blocked");
-      req.session.destroy(); // Destroy session if user is blocked
+    
+      delete req.session.user;
       return res.redirect("/login");
     }
-
-    next(); // Proceed if user is authenticated and not blocked
+    
+    next(); 
   } catch (error) {
     console.log("Error in User auth middleware:", error);
     res.status(500).send("Internal server error");

@@ -16,7 +16,7 @@ passport.use(
 
         if (user) {
     
-          return done(null, user); // Existing user (Login)
+          return done(null, user);
         } 
 
         user = new User({
@@ -27,7 +27,7 @@ passport.use(
 
         await user.save();
 
-        return done(null, user); // New user (Sign Up)
+        return done(null, user); 
 
       } catch (error) {
         console.error("Error in Google Auth", error);
@@ -37,7 +37,7 @@ passport.use(
   )
 );
 
-// Serialize and Deserialize User
+// user serialise && deserialise
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });

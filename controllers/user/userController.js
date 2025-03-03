@@ -111,7 +111,7 @@ const signup = async (req,res)=>{
     console.log('OTP generated',otp);
     const emailSent = await sendVerificationEmail(email,otp);
     if(!emailSent){
-      // return res.status(500).send("Email not sent");
+      
       return res.render("signup", { message: "Error sending verification email" });
     }
     req.session.userOtp = otp;
@@ -123,7 +123,7 @@ const signup = async (req,res)=>{
 
   } catch (error){
     console.log('User not signed up',error);
-    res.redirect("/pageNotFound"); //onne nookanam redirect signup le kke aano pagenotfound le kke anno veande nne
+    res.redirect("/pageNotFound"); 
   }
 }
 
@@ -150,7 +150,7 @@ const loadOtp=async(req,res)=>{
 
 const verifyOtp = async (req,res)=>{  
   try{
-    //res.render('verify-otp');
+    
     const { otp } = req.body;
     console.log("OTP entered",otp);
     console.log("OTP session",req.session.userOtp);
@@ -291,16 +291,13 @@ const forgotPassswordSendLink = async (req, res) => {
 
     console.log("User found:", user);
 
-    // Generate OTP
+ 
     const otp = generateOtp();
     user.forgotPasswordOtp = otp;
     user.otpExpires = Date.now() + 10 * 60 * 1000; 
     await user.save();
-
     console.log(otp)
-   
     req.session.user=email
-    // Send success response
      res.json({ success: true, message: "OTP sent to email" });
      
 
@@ -388,14 +385,14 @@ const loadShop = async (req, res) => {
       filter.category = query.category;
     }
 
-    // Replace only the brand filtering section in the loadShop function
+    
 if (query.brand) {
-  // Since brand is a String in productSchema, convert ObjectId to brandName
+  
   const brandDoc = await Brand.findById(query.brand);
   if (brandDoc) {
-      filter.brand = brandDoc.brandName; // Use the string brandName
+      filter.brand = brandDoc.brandName; 
   } else {
-      filter.brand = null; // Prevent invalid queries if brand not found
+      filter.brand = null; 
   }
 }
  
@@ -439,7 +436,7 @@ if (query.brand) {
       product.find(filter)
         .sort(sortOptions)
         .populate('category')
-        .populate('brand'), // Now valid since brand is a reference
+        .populate('brand'), 
       category.find({ isListed: true }),
       Brand.find({ isBlocked: false })
     ]);

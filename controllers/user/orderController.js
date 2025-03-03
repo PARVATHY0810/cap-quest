@@ -16,7 +16,6 @@ const getCheckoutPage = async (req, res) => {
     const userData = userId ? await User.findById(userId) : null;
     //console.log("user in checkout:    ",userData);
 
-    // Fetch cart items
     const cartItems = await Cart.find({ userId }).populate("productId");
     if (!cartItems || cartItems.length === 0) {
       return res.status(400).json({ message: "No items in cart" });
@@ -27,7 +26,7 @@ const getCheckoutPage = async (req, res) => {
     });
     const cartId = cartItems[0]._id; // Assuming one cart or aggregating items
 
-    // Fetch user's addresses
+    // Fetching 
     const addresses = await Address.find({ userId });
     if (!addresses) {
       console.log("No addresses found for user:", userId);
@@ -36,7 +35,7 @@ const getCheckoutPage = async (req, res) => {
     res.render("checkout", {
       userData,
       cart: cartItems,
-      addresses: addresses || [], // Pass addresses, default to empty array if none found
+      addresses: addresses || [], 
       total: subtotal,
       cartId: cartId,
       userId: userId,
@@ -67,17 +66,17 @@ const createOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: "Cart not found" });
     }
     
-    // Map cart items to the order schema format
+    
     const orderedItems = cartItems.map(item => ({
       product: item.productId._id,
       quantity: item.quantity,
       price: item.price
     }));
     
-    // Calculate total price from cart items
+    
     const totalPrice = cartItems.reduce((sum, item) => sum + item.price, 0);
 
-    // Create a new order
+    
     const order = new Order({
       userId,
       orderedItems,
@@ -100,10 +99,10 @@ const createOrder = async (req, res) => {
       shippingCharge: 0
     });
 
-    // Save the order to the database
+    
     const savedOrder = await order.save();
 
-    // Update product quantities
+    
     for (const item of orderedItems) {
       const product = await Product.findById(item.product);
       if (!product) {
@@ -119,10 +118,10 @@ const createOrder = async (req, res) => {
       );
     }
 
-    // Clear the cart after order placement
+    
     await Cart.deleteMany({ userId });
 
-    // Send success response with orderId
+    
     res.status(200).json({ success: true, orderId: savedOrder._id });
   } catch (error) {
     console.error("Error creating order:", error);
@@ -154,19 +153,19 @@ const orderDetail = async (req, res) => {
   try {
     const userId = req.session.user;
 
-    // Validate userId before querying
+    
     if (!ObjectId.isValid(userId)) {
       return res.status(400).json({ message: "Invalid user ID" });
     }
 
-    // Fetch user details
+    
     const userData = await User.findById(userId);
 
     if (!userData) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Fetch orders with user details
+    
     const orders = await Order.aggregate([
       {
         $lookup: {
@@ -198,7 +197,7 @@ const viewOrder = async (req, res) => {
   try {
     const orderId = req.query.orderId;
     
-    // Find order and populate the product details from orderedItems
+   
     const orders = await Order.find({ _id: orderId })
       .populate("orderedItems.product")
       .populate("userId");
@@ -210,17 +209,16 @@ const viewOrder = async (req, res) => {
     // Format data to match template expectations
     const formattedOrders = [{
       _id: orders[0]._id,
-      Date: orders[0].orderDate.toLocaleDateString(), // Using orderDate from your schema
-      // Map orderedItems to orderItems expected by template
+      Date: orders[0].orderDate.toLocaleDateString(), 
       orderItems: orders[0].orderedItems.map(item => ({
         _id: item._id,
         productName: item.product ? item.product.productName : 'Product Name Not Available',
         productImage: item.product ? item.product.productImage[0] : 'default.jpg',
         quantity: item.quantity,
         price: item.price,
-        orderStatus: item.status // Using the item's status
+        orderStatus: item.status 
       })),
-      // Map shippingAddress to address expected by template
+      
       address: {
         name: orders[0].shippingAddress.fullName,
         phone: orders[0].shippingAddress.phone,
@@ -232,14 +230,14 @@ const viewOrder = async (req, res) => {
       }
     }];
 
-    // Calculate total price
+    // Calculating the total price
     const Totalprice = orders[0].orderedItems.reduce((sum, element) => {
       return sum + element.quantity * element.price;
     }, 0);
 
     console.log("Total Price:", Totalprice);
 
-    // Add userData for the header partial
+    
     const userData = req.session.user || null;
 
     res.render("view-allorder", { 
@@ -260,7 +258,7 @@ const getOrderDetails = async (req, res) => {
     const userData = userId ? await User.findById(userId) : null;
     const orderId = req.params.orderId;
 
-    // Fetch specific order and populate all necessary fields
+    
     const order = await Order.findOne({ orderId })
       .populate({
         path: 'orderedItems.product',
@@ -278,7 +276,7 @@ const getOrderDetails = async (req, res) => {
     console.log('Order Details:', JSON.stringify(order, null, 2)); // Debugging log
 
     res.render('order-details', {
-      order, // Pass as 'order', not 'orders'
+      order, 
       userData,
       user: req.session.user
     });
@@ -307,14 +305,14 @@ const cancelOrder = async (req, res) => {
     const updatedOrder = await Order.findOneAndUpdate(
       { _id: orderId, "orderedItems._id": productId },
       { $set: { "orderedItems.$.status": "Cancelled" } },
-      { new: true } // This ensures you get the updated document
+      { new: true }
     );
 
     if (!updatedOrder) {
       return res.status(400).json({ error: "Order update failed" });
     }
 
-    // Restore product quantity
+    
     const cancelledItem = order.orderedItems.find(item => item._id.toString() === productId);
     if (cancelledItem) {
       await Product.findByIdAndUpdate(
@@ -333,7 +331,6 @@ const cancelOrder = async (req, res) => {
 
 
 
-// Add this to your existing exports
 module.exports = {
   getCheckoutPage,
   createOrder,
