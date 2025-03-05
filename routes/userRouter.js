@@ -8,6 +8,7 @@ const profileController = require("../controllers/user/profileController")
 const productController = require("../controllers/user/productController")
 const cartController = require('../controllers/user/cartController');
 const orderController = require('../controllers/user/orderController');
+const walletController = require('../controllers/user/walletController');
 const wishlistController = require('../controllers/user/wishlistController');
 
 //user manegement
@@ -68,12 +69,24 @@ router.get('/order/details/:orderId', userAuth, orderController.getOrderDetails)
 router.get('/viewOrder',orderController.viewOrder);
 router.post('/cancelOrder',orderController.cancelOrder);
 router.post('/return-order', userAuth, orderController.returnOrder);
+//coupon side
+router.get("/get-available-coupons", userAuth, orderController.getAvailableCoupons);
+router.post("/apply-coupon", userAuth, orderController.applyCoupon);
 
-///wishlist management
-//  router.get("/wishlist",userAuth,wishlistController.getWishlist)
-// router.post('/wishlist/add',userAuth, wishlistController.addToWishlist)
-// router.post("/wishlist/remove",userAuth,wishlistController.removeFromWishlist)
-// //router.post('/cart/add', wishlistController.addToCart);
-// router.post('/cart/add', userAuth, cartController.addToCart);
+/// Wallet Management 
+router.get('/user-wallet', userAuth, walletController.loadWalletPage);
+// router.post('/add-money-to-wallet', userAuth, walletController.addMoneyToWallet);
+// router.post('/verify-payment', userAuth, walletController.verifyPayment);
 
+
+// wishlist management
+router.get("/wishlist", userAuth, wishlistController.getWishlist);
+router.post('/wishlist/add', userAuth, wishlistController.addToWishlist);
+router.post("/wishlist/remove", userAuth, wishlistController.removeFromWishlist);
+router.post('/wishlist/add-to-cart', userAuth, wishlistController.addToCart);
+router.get('/wishlist/check-status', wishlistController.checkWishlistStatus);
+
+
+
+// Remove userAuth since we want to check status even for non-logged-in users
 module.exports = router;

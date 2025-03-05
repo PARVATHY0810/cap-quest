@@ -162,6 +162,26 @@
     transform: scale(1.05);
   }
   
+  .wishlist-heart-btn {
+    background: white;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    transition: color 0.3s ease-in-out, transform 0.2s;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+  .wishlist-heart-btn i {
+    color: red; /* Default red filled heart */
+  }
+  .wishlist-heart-btn:hover {
+    transform: scale(1.1);
+  }
+  .wishlist-heart-btn.removed i {
+    color: black; /* Outline heart when removed */
+  }
+  
   /* Product Information */
   .product-info {
     padding: 15px;
@@ -435,21 +455,24 @@
                   <a href="/product-details?id=<%= product._id %>">
                     <img src="/uploads/re-image/<%= product.productImage[0] %>" alt="<%= product.productName %>">
                   </a>
+                  <button class="wishlist-heart-btn toggle-wishlist" data-product-id="<%= product._id %>">
+                    <i class="fa-regular fa-heart"></i>
+                  </button>
                   <div class="product-info">
                     <h4 class="product-name"><%= product.productName %></h4>
                     <p class="product-price">
                       <span class="original-price">₹<%= product.regularPrice %></span>
                       <span class="sale-price">₹<%= product.salePrice %></span>
                     </p>
-
+          
                     <p class="stock-status">
-                    <% if (product.quantity > 0) { %>
-                      <span style="color: green;">In Stock (<%= product.quantity %> left)</span>
-                    <% } else { %>
-                      <span style="color: red;">Out of Stock</span>
-                    <% } %>
-                  </p>
-
+                      <% if (product.quantity > 0) { %>
+                        <span style="color: green;">In Stock (<%= product.quantity %> left)</span>
+                      <% } else { %>
+                        <span style="color: red;">Out of Stock</span>
+                      <% } %>
+                    </p>
+          
                     <a href="#" class="add-cart" data-quantity="1" data-id="<%= product._id %>" data-price="<%= product.salePrice %>">+ Add To Cart</a>
                   </div>
                 </div>
@@ -547,6 +570,120 @@
       });
   });
     </script>
+   
+   <script>
+   
+      document.querySelectorAll('.wishlist-heart-btn').forEach(button => {
+      button.addEventListener('click', function(event) {
+        const productId = this.getAttribute('data-product-id');
+        toggleWishlist(event, productId);
+      });
+    });
+
+    async function toggleWishlist(event, productId) {
+        event.preventDefault();
+        console.log('Attempting to toggle wishlist for product:', productId);
+        try {
+            // Store the button reference immediately to avoid losing it
+            const button = event.currentTarget || event.target;
+            if (!button) {
+                console.error('Button element not found');
+                throw new Error('Button element not found');
+            }
+
+            const response = await fetch('/wishlist/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ productId })
+            });
+
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers.get('Content-Type'));
+
+            const contentType = response.headers.get('Content-Type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                console.error('Non-JSON response:', text);
+                throw new Error('Server returned non-JSON response');
+            }
+
+            const result = await response.json();
+            console.log('Response data:', result);
+
+            if (response.ok && result.success) {
+                const icon = button.querySelector('i');
+                if (!icon) {
+                    console.error('Icon element not found in button');
+                    throw new Error('Icon element not found');
+                }
+
+                if (result.action === 'added') {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Added to Wishlist',
+                        text: 'Product has been added to your wishlist!',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                } else {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Removed from Wishlist',
+                        text: 'Product has been removed from your wishlist!',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: result.message || 'Failed to update wishlist',
+                });
+            }
+        } catch (error) {
+            console.error('Fetch error:', error.message, error.stack);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Something went wrong! Check the console for details.',
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const wishlistButtons = document.querySelectorAll('.toggle-wishlist');
+        for (const button of wishlistButtons) {
+            const productId = button.dataset.productId;
+            try {
+                const response = await fetch(`/wishlist/check-status?productId=${productId}`);
+                console.log('Check status response status:', response.status);
+                if (!response.ok) {
+                    const result = await response.json();
+                    console.error('Check status error:', result);
+                    continue;
+                }
+                const result = await response.json();
+                if (result.isInWishlist) {
+                    const icon = button.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas');
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking wishlist status:', error.message, error.stack);
+            }
+        }
+    });
+</script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     

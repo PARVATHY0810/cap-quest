@@ -1,5 +1,8 @@
 <%- include("../../views/partials/user/header") %>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
   .btn {
       display: inline-block;
@@ -99,6 +102,7 @@
   .product-content-wrap a:hover {
       background-color: #ff4c4c;
   }
+  
 </style>
 <section class="hero">
   <div class="hero__slider owl-carousel">
@@ -136,42 +140,43 @@
 
 
 <section class="product spad">
-  <div class="container">
-      <div class="row">
-          <div class="col-lg-12">
-              <ul class="filter__controls">
-                  <li data-filter=".new-arrivals">New Arrivals</li>
-              </ul>
-          </div>
-      </div>
-      <div class="row product__filter">
-        <%for(let i=0;i<products.length;i++){ %>
-              <div class="col-lg-3 col-md-4 col-12 col-sm-6">
-                  <div class="product-cart-wrap mb-30">
-                      <div class="product-img-action-wrap">
-                          <div class="product-img product-img-zoom">
-                              <a href="/product-details?id=<%=products[i]._id%>">
-                                  <img class="default-img" src="/uploads/re-image/<%= products[i].productImage[0] %>" 
-                                                           alt="<%=products[i].productName%>">
-                              </a>
-                          </div>
-                          <a href="/addToWishList?id=<%=products[i]._id%>" class="wishlist-btn">
-                              <i class="fas fa-heart"></i>
-                          </a>
-                      </div>
-
-
-                      <div class="product-content-wrap">
-                          <h6><%=products[i].productName%></h6>
-                          <h5><%=products[i].salePrice%></h5>
-                          <a href="/shop?id=<%=products[i]._id%>">Add to Cart</a>
-                      </div>
-                  </div>
-              </div>
-              <%} %>
-      </div>
-  </div>
-</section>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <ul class="filter__controls">
+                    <li data-filter=".new-arrivals">New Arrivals</li>
+                </ul>
+            </div>
+        </div>
+        <div class="row product__filter">
+          <% for(let i=0; i<products.length; i++) { %>
+                <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                    <div class="product-cart-wrap mb-30">
+                        <div class="product-img-action-wrap">
+                            <div class="product-img product-img-zoom">
+                                <a href="/product-details?id=<%=products[i]._id%>">
+                                    <img class="default-img" src="/uploads/re-image/<%= products[i].productImage[0] %>" 
+                                        alt="<%=products[i].productName%>">
+                                </a>
+                            </div>
+                            <!-- Modified wishlist button with toggle functionality -->
+                            <button class="wishlist-btn toggle-wishlist" 
+                                    data-product-id="<%=products[i]._id%>"
+                                    onclick="toggleWishlist(event, '<%=products[i]._id%>')">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="product-content-wrap">
+                            <h6><%=products[i].productName%></h6>
+                            <h5><%=products[i].salePrice%></h5>
+                            <a href="/shop?id=<%=products[i]._id%>">Add to Cart</a>
+                        </div>
+                    </div>
+                </div>
+          <% } %>
+        </div>
+    </div>
+  </section>
 
 
 
@@ -216,7 +221,110 @@
   </section>
    -->
 
+   <script>
+    async function toggleWishlist(event, productId) {
+        event.preventDefault();
+        console.log('Attempting to toggle wishlist for product:', productId);
+        try {
+            // Store the button reference immediately to avoid losing it
+            const button = event.currentTarget || event.target;
+            if (!button) {
+                console.error('Button element not found');
+                throw new Error('Button element not found');
+            }
 
+            const response = await fetch('/wishlist/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ productId })
+            });
+
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers.get('Content-Type'));
+
+            const contentType = response.headers.get('Content-Type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                console.error('Non-JSON response:', text);
+                throw new Error('Server returned non-JSON response');
+            }
+
+            const result = await response.json();
+            console.log('Response data:', result);
+
+            if (response.ok && result.success) {
+                const icon = button.querySelector('i');
+                if (!icon) {
+                    console.error('Icon element not found in button');
+                    throw new Error('Icon element not found');
+                }
+
+                if (result.action === 'added') {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Added to Wishlist',
+                        text: 'Product has been added to your wishlist!',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                } else {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Removed from Wishlist',
+                        text: 'Product has been removed from your wishlist!',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: result.message || 'Failed to update wishlist',
+                });
+            }
+        } catch (error) {
+            console.error('Fetch error:', error.message, error.stack);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Something went wrong! Check the console for details.',
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const wishlistButtons = document.querySelectorAll('.toggle-wishlist');
+        for (const button of wishlistButtons) {
+            const productId = button.dataset.productId;
+            try {
+                const response = await fetch(`/wishlist/check-status?productId=${productId}`);
+                console.log('Check status response status:', response.status);
+                if (!response.ok) {
+                    const result = await response.json();
+                    console.error('Check status error:', result);
+                    continue;
+                }
+                const result = await response.json();
+                if (result.isInWishlist) {
+                    const icon = button.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas');
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking wishlist status:', error.message, error.stack);
+            }
+        }
+    });
+</script>
 
 <%- include("../../views/partials/user/footer") %>
 

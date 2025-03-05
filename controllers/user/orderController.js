@@ -5,6 +5,7 @@ const User = require("../../models/userSchema");
 const Cart = require("../../models/cartSchema");
 const Order = require("../../models/orderSchema");
 const Address = require('../../models/addressSchema');
+const Coupon = require('../../models/couponSchema');
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
 const Razorpay = require('razorpay');
@@ -40,6 +41,8 @@ const getCheckoutPage = async (req, res) => {
       console.log("No addresses found for user:", userId);
     }
 
+    const Coupons=await Coupon.find({isListed:true,isDeleted:false});
+    console.log(Coupons)
     res.render("checkout", {
       userData,
       cart: cartItems,
@@ -47,6 +50,7 @@ const getCheckoutPage = async (req, res) => {
       total: subtotal,
       cartId: cartId,
       userId: userId,
+      Coupons
     });
   } catch (error) {
     console.error("Error fetching checkout page:", error);
@@ -60,7 +64,7 @@ const getCheckoutPage = async (req, res) => {
 const createOrder = async (req, res) => {
   try {
     const userId = req.session.user;
-    const { addressId, cartId, paymentMethod, finalAmount } = req.body;
+    const { addressId, cartId, paymentMethod, finalAmount, couponCode } = req.body; // Added couponCode here
 
     // Fetch the selected address
     const address = await Address.findById(addressId);
@@ -74,17 +78,15 @@ const createOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: "Cart not found" });
     }
     
-    
     const orderedItems = cartItems.map(item => ({
       product: item.productId._id,
       quantity: item.quantity,
       price: item.price
     }));
     
-    
     const totalPrice = cartItems.reduce((sum, item) => sum + item.price, 0);
 
-    
+    // Create the order with coupon details
     const order = new Order({
       userId,
       orderedItems,
@@ -103,14 +105,15 @@ const createOrder = async (req, res) => {
       orderDate: new Date(),
       deliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       status: paymentMethod === "COD" ? "Pending COD" : "Pending",
-      discount: 0,
-      shippingCharge: 0
+      discount: 0, // You might want to update this based on coupon logic
+      shippingCharge: 0,
+      couponApplied: couponCode ? true : false, // Added here
+      couponCode: couponCode || null // Added here
     });
 
-    
     const savedOrder = await order.save();
 
-    
+    // Update product stock
     for (const item of orderedItems) {
       const product = await Product.findById(item.product);
       if (!product) {
@@ -126,10 +129,9 @@ const createOrder = async (req, res) => {
       );
     }
 
-    
+    // Clear the cart
     await Cart.deleteMany({ userId });
 
-    
     res.status(200).json({ success: true, orderId: savedOrder._id });
   } catch (error) {
     console.error("Error creating order:", error);
@@ -139,6 +141,7 @@ const createOrder = async (req, res) => {
 
 const getOrderPlacedPage = async (req, res) => {
   try {
+    console.log("ffffffff")
     const userId = req.session.user;
     const userData = userId ? await User.findById(userId) : null;
     console.log("Userdata",userData)
@@ -377,6 +380,99 @@ const returnOrder = async (req, res) => {
 };
 
 
+const getAvailableCoupons = async (req, res) => {
+  try {
+    const currentDate = new Date();
+    const availableCoupons = await Coupon.find({
+      isListed: true,
+      isDeleted: false,
+      startOn: { $lte: currentDate },
+      expireOn: { $gte: currentDate }
+    });
+    res.json(availableCoupons);
+  } catch (error) {
+    console.error('Error fetching coupons:', error);
+    res.status(500).json({ message: 'Error fetching coupons' });
+  }
+};
+
+const applyCoupon = async (req, res) => {
+  try {
+    const { couponCode, total } = req.body;
+    const userId = req.session.user;
+
+    const coupon = await Coupon.findOne({ 
+      code: couponCode.toUpperCase(),
+      isListed: true,
+      isDeleted: false,
+      startOn: { $lte: new Date() },
+      expireOn: { $gte: new Date() }
+    });
+
+    if (!coupon) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid or expired coupon' 
+      });
+    }
+
+    // Check minimum price condition
+    if (total < coupon.minimumPrice) {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Coupon is valid for minimum purchase of ₹${coupon.minimumPrice}` 
+      });
+    }
+
+    // Check max uses
+    const userUse = coupon.userUses.find(use => use.userId.toString() === userId);
+    if (userUse && userUse.count >= coupon.maxUses) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'You have exceeded the maximum uses for this coupon' 
+      });
+    }
+
+    // Apply coupon
+    const discount = coupon.offerPrice;
+
+    // Update coupon usage
+    if (userUse) {
+      await Coupon.updateOne(
+        { _id: coupon._id, 'userUses.userId': userId },
+        { $inc: { 'userUses.$.count': 1, usesCount: 1 } }
+      );
+    } else {
+      await Coupon.updateOne(
+        { _id: coupon._id },
+        { 
+          $push: { 
+            userUses: { 
+              userId, 
+              count: 1 
+            } 
+          },
+          $inc: { usesCount: 1 }
+        }
+      );
+    }
+
+    res.json({ 
+      success: true, 
+      discount, 
+      message: 'Coupon applied successfully' 
+    });
+  } catch (error) {
+    console.error('Error applying coupon:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error applying coupon' 
+    });
+  }
+};
+
+
+
 module.exports = {
   getCheckoutPage,
   createOrder,
@@ -385,5 +481,7 @@ module.exports = {
   orderDetail,
   viewOrder,
   cancelOrder,
-  returnOrder
+  returnOrder,
+  getAvailableCoupons,
+  applyCoupon
 };
