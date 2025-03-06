@@ -30,9 +30,9 @@ const getCheckoutPage = async (req, res) => {
       return res.status(400).json({ message: "No items in cart" });
     }
     let subtotal = 0;
-    cartItems.forEach((item) => {
-      subtotal += item.price;
-    });
+cartItems.forEach((item) => {
+  subtotal += item.quantity * item.price;
+});
     const cartId = cartItems[0]._id; // Assuming one cart or aggregating items
 
     // Fetching 
@@ -64,15 +64,13 @@ const getCheckoutPage = async (req, res) => {
 const createOrder = async (req, res) => {
   try {
     const userId = req.session.user;
-    const { addressId, cartId, paymentMethod, finalAmount, couponCode } = req.body; // Added couponCode here
+    const { addressId, cartId, paymentMethod, finalAmount, couponCode } = req.body;
 
-    // Fetch the selected address
     const address = await Address.findById(addressId);
     if (!address) {
       return res.status(400).json({ success: false, message: "Invalid address" });
     }
 
-    // Fetch the cart and populate product details
     const cartItems = await Cart.find({ userId }).populate("productId");
     if (!cartItems || cartItems.length === 0) {
       return res.status(400).json({ success: false, message: "Cart not found" });
@@ -84,14 +82,27 @@ const createOrder = async (req, res) => {
       price: item.price
     }));
     
-    const totalPrice = cartItems.reduce((sum, item) => sum + item.price, 0);
+    const totalPrice = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    // Calculate discount if coupon is applied
+    let discount = 0;
+    if (couponCode) {
+      const coupon = await Coupon.findOne({ 
+        code: couponCode.toUpperCase(),
+        isListed: true,
+        isDeleted: false
+      });
+      if (coupon && totalPrice >= coupon.minimumPrice) {
+        discount = coupon.offerPrice;
+      }
+    }
 
     // Create the order with coupon details
-    const order = new Order({
+const order = new Order({
       userId,
       orderedItems,
-      totalPrice,
-      finalAmount,
+      totalPrice,  // Original price before discount
+      finalAmount: finalAmount || (totalPrice - discount),  // Final amount after discount
       shippingAddress: {
         fullName: address.name,
         addressType: address.addressType,
@@ -105,10 +116,10 @@ const createOrder = async (req, res) => {
       orderDate: new Date(),
       deliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       status: paymentMethod === "COD" ? "Pending COD" : "Pending",
-      discount: 0, // You might want to update this based on coupon logic
+      discount: discount,  // Store the discount amount
       shippingCharge: 0,
-      couponApplied: couponCode ? true : false, // Added here
-      couponCode: couponCode || null // Added here
+      couponApplied: couponCode ? true : false,
+      couponCode: couponCode || null
     });
 
     const savedOrder = await order.save();
@@ -456,7 +467,7 @@ const applyCoupon = async (req, res) => {
         }
       );
     }
-
+    
     res.json({ 
       success: true, 
       discount, 

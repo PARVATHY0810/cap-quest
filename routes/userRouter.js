@@ -77,7 +77,10 @@ router.post("/apply-coupon", userAuth, orderController.applyCoupon);
 router.get('/user-wallet', userAuth, walletController.loadWalletPage);
 // router.post('/add-money-to-wallet', userAuth, walletController.addMoneyToWallet);
 // router.post('/verify-payment', userAuth, walletController.verifyPayment);
-
+router.post('/wallet/add-money', userAuth, walletController.addMoneyToWallet);
+router.post('/wallet/verify-payment', userAuth, walletController.verifyPayment);
+// Add this to your routes file
+router.post('/process-wallet-payment', userAuth, walletController.processWalletPayment);
 
 // wishlist management
 router.get("/wishlist", userAuth, wishlistController.getWishlist);
