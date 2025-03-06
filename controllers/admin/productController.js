@@ -91,11 +91,11 @@ const getAllProducts = async (req, res) => {
     const limit = 4;
     const productData = await Product.find({
       $or: [
-        { productName: { $regex: new RegExp(".* " + search + ".*", "i") } },
+        { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
         { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
       ],
     })
-      .select("productName brand category regularPrice salePrice quantity productImage isBlocked") // Explicitly select fields including productImage
+      .select("productName brand category regularPrice salePrice quantity productImage isBlocked offerPercentage") // Explicitly select fields including offerPercentage
       .limit(limit * 1)
       .skip((page - 1) * limit)
       .sort({ createdAt: -1 })
@@ -284,6 +284,58 @@ const deleteSingleImage = async (req, res) => {
     return res.send({ status: false, message: error.message });
   }
 };
+const addProductOffer = async (req, res) => {
+  try {
+    const { productId, offerPercentage, endDate } = req.body;
+
+    if (!productId || !offerPercentage || !endDate) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    product.offerPercentage = offerPercentage;
+    product.offerEndDate = new Date(endDate);
+    product.productOffer = true;
+
+    await product.save();
+
+    res.json({ message: "Offer added successfully" });
+  } catch (error) {
+    console.error("Error adding product offer:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+const removeProductOffer = async (req, res) => {
+  try {
+    const { productId } = req.body;
+
+    if (!productId) {
+      return res.status(400).json({ error: "Product ID is required" });
+    }
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    product.offerPercentage = 0;
+    product.offerEndDate = null;
+    product.productOffer = false;
+
+    await product.save();
+
+    res.json({ message: "Offer removed successfully" });
+  } catch (error) {
+    console.error("Error removing product offer:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   getProductAddPage,
   addProducts,
@@ -293,4 +345,6 @@ module.exports = {
   getEditProduct,
   editProduct,
   deleteSingleImage,
+  addProductOffer, // Add this line
+  removeProductOffer
 };

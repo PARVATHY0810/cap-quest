@@ -20,11 +20,17 @@ const categorySchema = new Schema({
     type: Number,
     default:0,
   },
-  createdAt:{
+  // createdAt:{
+  //   type: Date,
+  //   default: Date.now   
+  // }
+  offerEndDate: {
     type: Date,
-    default: Date.now   
-  }
-})
+    default: null,
+  },
+},
+  {timestamps:true}
+);
 
 
 

@@ -1,104 +1,436 @@
 <%- include("../../views/partials/admin/header") %>
 <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: #fff;
+            border-bottom: 1px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+
+        .content-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        /* Search Bar */
+        .input-group {
+            max-width: 500px;
+            margin: 0 auto;
+            border: 1px solid #ced4da;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s;
+        }
+        .input-group:hover {
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+        .form-control {
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        .form-control:focus {
+            box-shadow: none;
+            outline: none;
+        }
+        .input-group .btn {
+            border-radius: 0 25px 25px 0;
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+        }
+        .input-group .btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* Table Styles */
+        .table {
+            background-color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin: 20px 0;
+        }
+        .table thead th {
+            background-color: #007bff;
+            color: #fff;
+            font-weight: 600;
+            padding: 15px;
+            text-align: center;
+        }
+        .table tbody td {
+            vertical-align: middle;
+            padding: 15px;
+            text-align: center;
+        }
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #f8f9fa;
+        }
+        .table img {
+            border-radius: 5px;
+            transition: transform 0.3s;
+        }
+        .table img:hover {
+            transform: scale(1.1);
+        }
+        .btn {
+            padding: 8px 15px;
+            font-size: 14px;
+            border-radius: 5px;
+            transition: transform 0.2s, background-color 0.3s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 450px; /* Slightly larger for better spacing */
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            color: #888;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .close:hover {
+            color: #333;
+        }
+        .modal-content h3 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+        .form-control:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+        }
+        .mb-4 {
+            margin-bottom: 25px;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            min-height: 14px;
+        }
+        .d-grid {
+            display: flex;
+            gap: 15px;
+            justify-content: space-between;
+        }
+        .modal-content .btn {
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            width: 100%;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: #fff;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        /* Pagination */
+        .pagination .page-item.active .page-link {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: #fff;
+        }
+        .pagination .page-link {
+            color: #007bff;
+            border-radius: 5px;
+            margin: 0 5px;
+            transition: background-color 0.3s;
+        }
+        .pagination .page-link:hover {
+            background-color: #e9ecef;
+        }
+    </style>
 </head>
-<div class="content-header">
-    <div>
+
+<body>
+    <div class="content-header">
         <h2 class="content-title card-title">Products</h2>
     </div>
-</div>
-<header class="card-header text-center mb-20">
-    <form action="" method="get" class="d-inline">
-        <div class="input-group input-group-sm border border-1 border-grey rounded-pill" style="width: 500px; margin-left: 230px;">
-            <input type="text" class="form-control border-0 rounded-pill" placeholder="Search products or brands" name="search">
-            <button class="btn  border-0" type="submit">Search</button>
-        </div>
-    </form>
-</header>
-<div class="right mt-5">
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th scope="col"><b>Product image</b></th>
-                <th scope="col"><b>Product name</b></th>
-                <th scope="col"><b>Brand</b></th>
-                <th scope="col"><b>Category</b></th>
-                <th scope="col"><b>Regular Price</b></th>
-                <th scope="col"><b>Sale Price</b></th>
-                <!-- <th scope="col"><b>Offer Price</b></th> -->
-                <!-- <th scope="col"><b>Offer</b></th> -->
-                <th scope="col"><b>Quantity</b></th>
-                <th scope="col"><b>Action</b></th>
-                <th scope="col"><b>Edit</b></th>
-            </tr>
-        </thead>
-        <tbody>
-            
-            <% for(let i=data.length-1;i>=0;i--){ %>
 
+    <header class="card-header text-center mb-20">
+        <form action="" method="get" class="d-inline">
+            <div class="input-group input-group-sm">
+                <input type="text" class="form-control" placeholder="Search products or brands" name="search">
+                <button class="btn" type="submit">Search</button>
+            </div>
+        </form>
+    </header>
+
+    <div class="right mt-5">
+        <table class="table table-striped">
+            <thead>
                 <tr>
-                    <td>
-                        <% if (data[i].productImage && data[i].productImage.length > 0) { %>
-                            <img src="/uploads/re-image/<%= data[i].productImage[0] %>" alt="<%= data[i].productImage %>" style="width: 50px; height: 50px; object-fit: cover;">
-                        <% } else { %>
-                            <span>No Image</span>
-                        <% } %>
-                    </td>
-                    
-                    <td><%= data[i].productName %></td>
-                    <td><%= data[i].brand %></td>
-                    <td><%= data[i].category.name %></td>
-                    <td><%= data[i].regularPrice %></td>
-                    <td><%= data[i].salePrice %></td>
-                    <td><%= data[i].quantity %></td>
-                    <td>
-                        <% if(data[i].isBlocked===false){ %>
-                            <button class="btn btn-danger" style="width: 80px;">
-                                <a href="/admin/blockProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Block</a>
-                            </button>
-                        <% }else{ %>
-                            <button class="btn btn-success" style="width: 80px;">
-                                <a href="/admin/unblockProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Unblock</a>
-                            </button>
-                        <% } %>
-                    </td>
-                    <td>
-                        <button class="btn btn-info" style="width: 80px;">
-                            <a href="/admin/editProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Edit</a>
-                        </button>
-                    </td>
+                    <th scope="col">Product Image</th>
+                    <th scope="col">Product Name</th>
+                    <th scope="col">Brand</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Regular Price</th>
+                    <th scope="col">Sale Price</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Offer Percentage</th>
+                    <th scope="col">Action</th>
+                    <th scope="col">Edit</th>
+                    <th scope="col">Offer Action</th>
                 </tr>
-            
-         <% } %>
+            </thead>
+            <tbody>
+                <% for(let i=data.length-1; i>=0; i--) { %>
+                    <tr>
+                        <td>
+                            <% if (data[i].productImage && data[i].productImage.length > 0) { %>
+                                <img src="/uploads/re-image/<%= data[i].productImage[0] %>" alt="<%= data[i].productName %>" style="width: 50px; height: 50px; object-fit: cover;">
+                            <% } else { %>
+                                <span>No Image</span>
+                            <% } %>
+                        </td>
+                        <td><%= data[i].productName %></td>
+                        <td><%= data[i].brand %></td>
+                        <td><%= data[i].category.name %></td>
+                        <td><%= data[i].regularPrice %></td>
+                        <td><%= data[i].salePrice %></td>
+                        <td><%= data[i].quantity %></td>
+                        <td><%= data[i].offerPercentage %> %</td> 
+                        <td>
+                            <% if(data[i].isBlocked===false){ %>
+                                <button class="btn btn-danger">
+                                    <a href="/admin/blockProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Block</a>
+                                </button>
+                            <% } else { %>
+                                <button class="btn btn-success">
+                                    <a href="/admin/unblockProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Unblock</a>
+                                </button>
+                            <% } %>
+                        </td>
+                        <td>
+                            <button class="btn btn-info">
+                                <a href="/admin/editProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Edit</a>
+                            </button>
+                        </td>
+                        <td>
+                            <% if (data[i].productOffer) { %>
+                                <button class="btn btn-danger" style="width: 80px;" onclick="removeOffer('<%= data[i]._id %>')">Remove Offer</button>
+                            <% } else { %>
+                                <button class="btn btn-primary" style="width: 80px;" onclick="showOfferModal('<%= data[i]._id %>')">Add Offer</button>
+                            <% } %>
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
 
-        </tbody>
+    <!-- Add Offer Modal -->
+    <div id="offerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeOfferModal()">×</span>
+            <h3>Add Offer</h3>
+            <form id="offerForm" onsubmit="return submitOffer(event)">
+                <input type="hidden" id="productId" name="productId">
+                <div class="mb-4">
+                    <label class="form-label">Offer Percentage</label>
+                    <input type="number" name="offerPercentage" id="offerPercentage" class="form-control" 
+                           min="0" max="100" required placeholder="Enter percentage (0-100)">
+                    <div id="offer-error" class="error-message"></div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">End Date</label>
+                    <input type="date" name="endDate" id="endDate" class="form-control" required>
+                    <div id="date-error" class="error-message"></div>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">Save Offer</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeOfferModal()">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    </table>
-</div>
-</div>
-</div>
+    <div class="container mt-3">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center mb-20">
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <li class="page-item <%- (i === currentPage) ? 'active' : '' %>">
+                        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                    </li>
+                <% } %>
+            </ul>
+        </nav>
+    </div>
 
-<!-- <div class="container mt-3">
-</div> -->
+    <script>
+        function showOfferModal(productId) {
+            const modal = document.getElementById('offerModal');
+            const productIdInput = document.getElementById('productId');
+            const endDateInput = document.getElementById('endDate');
+            const today = new Date().toISOString().split('T')[0];
+            endDateInput.setAttribute('min', today);
+            productIdInput.value = productId;
+            modal.style.display = 'flex'; /* Changed to flex for centering */
+        }
 
-<div class="container mt-3">
-  <nav aria-label="Page navigation">
-      <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
+        function closeOfferModal() {
+            const modal = document.getElementById('offerModal');
+            modal.style.display = 'none';
+            document.getElementById('offerForm').reset();
+            clearOfferErrorMessages();
+        }
 
+        function clearOfferErrorMessages() {
+            document.getElementById('offer-error').innerText = '';
+            document.getElementById('date-error').innerText = '';
+        }
 
-          <% for (let i = 1; i <= totalPages; i++) { %>
-          <li class="page-item <%- (i === currentPage) ? 'active' : '' %>">
-              <a class="page-link" href="?page=<%= i %>"><%= i %></a>
-          </li>
-          <% } %>
+        function validateOfferForm() {
+            clearOfferErrorMessages();
+            let isValid = true;
+            const offerPercentage = document.getElementById('offerPercentage').value;
+            const endDate = document.getElementById('endDate').value;
+            const today = new Date().toISOString().split('T')[0];
 
+            if (offerPercentage === '' || offerPercentage < 0 || offerPercentage > 100) {
+                document.getElementById('offer-error').innerText = 'Please enter a valid percentage (0-100)';
+                isValid = false;
+            }
+            if (endDate === '' || endDate < today) {
+                document.getElementById('date-error').innerText = 'Please select a valid future date';
+                isValid = false;
+            }
+            return isValid;
+        }
 
-      </ul>
-  </nav>
-</div>
+        async function submitOffer(event) {
+            event.preventDefault();
+            if (!validateOfferForm()) return false;
 
+            const productId = document.getElementById('productId').value;
+            const offerPercentage = document.getElementById('offerPercentage').value;
+            const endDate = document.getElementById('endDate').value;
 
+            try {
+                const response = await fetch('/admin/addProductOffer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ productId, offerPercentage, endDate })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Something went wrong');
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<%- include("../../views/partials/admin/footer") %>
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Offer Added',
+                    text: 'The offer was added successfully!',
+                });
+                closeOfferModal();
+                location.reload();
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Oops...', text: error.message });
+            }
+            return false;
+        }
+
+        async function removeOffer(productId) {
+            try {
+                const response = await fetch('/admin/removeProductOffer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ productId })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Something went wrong');
+
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Offer Removed',
+                    text: 'The offer was removed successfully!',
+                });
+                location.reload();
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Oops...', text: error.message });
+            }
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('offerModal');
+            if (event.target == modal) closeOfferModal();
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <%- include("../../views/partials/admin/footer") %>
+</body>

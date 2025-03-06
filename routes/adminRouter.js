@@ -33,7 +33,13 @@ router.get("/unlistCategory",adminAuth,categoryController.getUnlistCategory);
 router.get("/listCategory",adminAuth,categoryController.getListCategory);
 router.get("/editCategory",adminAuth,categoryController.getEditCategory)
 router.post("/editCategory",adminAuth,categoryController.getEditCategory);
-router.post("/editCategory/:id", adminAuth, categoryController.editCategory)
+router.post("/editCategory/:id", adminAuth, categoryController.editCategory);
+// Add this route for adding category offers
+router.post("/addCategoryOffer", adminAuth, categoryController.addCategoryOffer);
+// Add this route for removing category offers
+router.post("/removeCategoryOffer", adminAuth, categoryController.removeCategoryOffer);
+
+
 
 //Brand Management
 router.get("/brands",adminAuth,brandController.getBrandPage);
@@ -51,7 +57,9 @@ router.get("/unblockProduct",adminAuth,productController.unblockProduct);
 router.get("/editProduct",adminAuth,productController.getEditProduct);
 router.post("/editProduct/:id",adminAuth,uploads.array("images",4),productController.editProduct)
 router.post("/deleteImage",adminAuth,productController.deleteSingleImage);
-
+// Add these routes for adding and removing product offers
+router.post("/addProductOffer", adminAuth, productController.addProductOffer);
+router.post("/removeProductOffer", adminAuth, productController.removeProductOffer);
 
 //ordermanegement
 router.get('/orderlist',adminAuth,orderController.getOrders)

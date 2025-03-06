@@ -30,6 +30,7 @@ const productSchema = new Schema({
   },
   productOffer:{
     type: Number,
+    required: true,
     default:0,
   },
   quantity:{
@@ -47,6 +48,18 @@ const productSchema = new Schema({
   isBlocked:{
     type: Boolean,
     default: false
+  },
+  offerPercentage: {
+    type: Number,
+    default: 0,
+  },
+  productOffer:{
+    type:Boolean,
+    default:false
+  },
+  offerEndDate: {
+    type: Date,
+    default: null,
   },
   popularityScore: {
     type: Number,

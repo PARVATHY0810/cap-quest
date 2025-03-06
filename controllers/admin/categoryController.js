@@ -165,8 +165,55 @@ const getUnlistCategory = async (req, res) => {
         res.status(500).json({ success: false, message: "Something went wrong" });
     }
 };
-
-
+const addCategoryOffer = async (req, res) => {
+    try {
+      const { categoryId, offerPercentage, endDate } = req.body;
+  
+      if (!categoryId || !offerPercentage || !endDate) {
+        return res.status(400).json({ error: "All fields are required" });
+      }
+  
+      const category = await Category.findById(categoryId);
+      if (!category) {
+        return res.status(404).json({ error: "Category not found" });
+      }
+  
+      category.categoryOffer = offerPercentage;
+      category.offerEndDate = new Date(endDate);
+  
+      await category.save();
+  
+      res.json({ message: "Offer added successfully" });
+    } catch (error) {
+      console.error("Error adding category offer:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
+  
+  const removeCategoryOffer = async (req, res) => {
+    try {
+      const { categoryId } = req.body;
+  
+      if (!categoryId) {
+        return res.status(400).json({ error: "Category ID is required" });
+      }
+  
+      const category = await Category.findById(categoryId);
+      if (!category) {
+        return res.status(404).json({ error: "Category not found" });
+      }
+  
+      category.categoryOffer = 0;
+      category.offerEndDate = null;
+  
+      await category.save();
+  
+      res.json({ message: "Offer removed successfully" });
+    } catch (error) {
+      console.error("Error removing category offer:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
 
 module.exports ={
     categoryInfo,
@@ -175,4 +222,6 @@ module.exports ={
     editCategory,
     getListCategory,
     getUnlistCategory,
+    addCategoryOffer,
+    removeCategoryOffer
 };
