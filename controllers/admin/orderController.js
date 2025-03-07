@@ -80,37 +80,40 @@ const getOrderDetails = async (req, res) => {
   const changeStatus = async (req, res) => {
     try {
       const { itemId } = req.params;
-      const { status, orderId } = req.body;
+      const { status, orderId, adminResponse } = req.body;
   
-      console.log("Update request received:", { itemId, status, orderId });
-      
-   
+      console.log("Update request received:", { itemId, status, orderId, adminResponse });
+  
       if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(itemId)) {
         return res.status(400).json({ success: false, message: "Invalid order or item ID" });
       }
-      
-      
+  
+      const updateFields = { "orderedItems.$.status": status };
+      if (adminResponse) {
+        updateFields["orderedItems.$.adminResponse"] = adminResponse;
+      }
+  
       const result = await Order.updateOne(
         { _id: orderId, "orderedItems._id": itemId },
-        { $set: { "orderedItems.$.status": status } }
+        { $set: updateFields }
       );
-      
+  
       console.log("Update result:", result);
-      
+  
       if (result.matchedCount === 0) {
         return res.status(404).json({ success: false, message: "Order item not found" });
       }
-      
-      return res.status(200).json({ 
-        success: true, 
-        message: "Order status updated successfully to " + status 
+  
+      return res.status(200).json({
+        success: true,
+        message: "Order status updated successfully to " + status
       });
   
     } catch (error) {
       console.error("Error in changeStatus:", error);
-      return res.status(500).json({ 
-        success: false, 
-        message: "Failed to update order status: " + error.message 
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update order status: " + error.message
       });
     }
   };

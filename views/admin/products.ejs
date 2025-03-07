@@ -283,11 +283,11 @@
                         </td>
                         <td>
                             <% if (data[i].productOffer) { %>
-                                <button class="btn btn-danger" style="width: 80px;" onclick="removeOffer('<%= data[i]._id %>')">Remove Offer</button>
+                              <button class="btn btn-danger" style="width: 80px;" onclick="removeOffer('<%= data[i]._id %>')">Remove Offer</button>
                             <% } else { %>
-                                <button class="btn btn-primary" style="width: 80px;" onclick="showOfferModal('<%= data[i]._id %>')">Add Offer</button>
+                              <button class="btn btn-primary" style="width: 80px;" onclick="showOfferModal('<%= data[i]._id %>')">Add Offer</button>
                             <% } %>
-                        </td>
+                          </td>
                     </tr>
                 <% } %>
             </tbody>
@@ -374,55 +374,55 @@
         }
 
         async function submitOffer(event) {
-            event.preventDefault();
-            if (!validateOfferForm()) return false;
+    event.preventDefault();
+    if (!validateOfferForm()) return false;
 
-            const productId = document.getElementById('productId').value;
-            const offerPercentage = document.getElementById('offerPercentage').value;
-            const endDate = document.getElementById('endDate').value;
+    const productId = document.getElementById('productId').value;
+    const offerPercentage = document.getElementById('offerPercentage').value;
+    const endDate = document.getElementById('endDate').value;
 
-            try {
-                const response = await fetch('/admin/addProductOffer', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ productId, offerPercentage, endDate })
-                });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Something went wrong');
+    try {
+        const response = await fetch('/admin/addProductOffer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId, offerPercentage, endDate })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Something went wrong');
 
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Offer Added',
-                    text: 'The offer was added successfully!',
-                });
-                closeOfferModal();
-                location.reload();
-            } catch (error) {
-                Swal.fire({ icon: 'error', title: 'Oops...', text: error.message });
-            }
-            return false;
-        }
+        await Swal.fire({
+            icon: 'success',
+            title: 'Offer Added',
+            text: 'The offer was added successfully!',
+        });
+        closeOfferModal();
+        location.reload();
+    } catch (error) {
+        Swal.fire({ icon: 'error', title: 'Oops...', text: error.message });
+    }
+    return false;
+}
 
-        async function removeOffer(productId) {
-            try {
-                const response = await fetch('/admin/removeProductOffer', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ productId })
-                });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Something went wrong');
+async function removeOffer(productId) {
+    try {
+        const response = await fetch('/admin/removeProductOffer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Something went wrong');
 
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Offer Removed',
-                    text: 'The offer was removed successfully!',
-                });
-                location.reload();
-            } catch (error) {
-                Swal.fire({ icon: 'error', title: 'Oops...', text: error.message });
-            }
-        }
+        await Swal.fire({
+            icon: 'success',
+            title: 'Offer Removed',
+            text: 'The offer was removed successfully!',
+        });
+        location.reload();
+    } catch (error) {
+        Swal.fire({ icon: 'error', title: 'Oops...', text: error.message });
+    }
+}
 
         window.onclick = function(event) {
             const modal = document.getElementById('offerModal');

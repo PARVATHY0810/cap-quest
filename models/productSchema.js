@@ -28,10 +28,10 @@ const productSchema = new Schema({
     type: Number,
     required: true
   },
-  productOffer:{
-    type: Number,
+  productOffer: {
+    type: Boolean, 
     required: true,
-    default:0,
+    default: false, 
   },
   quantity:{
     type: Number,
@@ -53,10 +53,7 @@ const productSchema = new Schema({
     type: Number,
     default: 0,
   },
-  productOffer:{
-    type:Boolean,
-    default:false
-  },
+  
   offerEndDate: {
     type: Date,
     default: null,

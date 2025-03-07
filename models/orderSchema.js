@@ -41,6 +41,14 @@ const orderSchema = new Schema({
         ],
         default: "Processing",
       },
+      returnReason: {
+        type: String,
+        default: null,
+      },
+      adminResponse: {
+        type: String,
+        default: null,
+      },
     },
   ],
   totalPrice: {

@@ -6,6 +6,7 @@ const Cart = require("../../models/cartSchema");
 const Order = require("../../models/orderSchema");
 const Address = require('../../models/addressSchema');
 const Coupon = require('../../models/couponSchema');
+const Wallet = require("../../models/walletSchema");
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
 const Razorpay = require('razorpay');
@@ -310,7 +311,6 @@ const getOrderDetails = async (req, res) => {
 };
 
 
-
 const cancelOrder = async (req, res) => {
   try {
     console.log(req.body);
@@ -334,13 +334,26 @@ const cancelOrder = async (req, res) => {
       return res.status(400).json({ error: "Order update failed" });
     }
 
-    
     const cancelledItem = order.orderedItems.find(item => item._id.toString() === productId);
     if (cancelledItem) {
       await Product.findByIdAndUpdate(
         cancelledItem.product,
         { $inc: { quantity: cancelledItem.quantity } }
       );
+
+      // Update wallet balance if payment method was wallet
+      if (order.paymentMethod === "wallet") {
+        const wallet = await Wallet.findOne({ user: order.userId });
+        if (wallet) {
+          wallet.balance += cancelledItem.price * cancelledItem.quantity;
+          wallet.transactions.push({
+            type: "credit",
+            amount: cancelledItem.price * cancelledItem.quantity,
+            description: `Refund for cancelled order ${orderId}`
+          });
+          await wallet.save();
+        }
+      }
     }
 
     return res.json({ success: "Successfully cancelled" });
@@ -353,8 +366,8 @@ const cancelOrder = async (req, res) => {
 
 const returnOrder = async (req, res) => {
   try {
-    const { orderId, productId } = req.body;
-    console.log("Return Request:", orderId, productId);
+    const { orderId, productId, returnReason } = req.body;
+    console.log("Return Request:", orderId, productId, returnReason);
 
     // Find the order
     const order = await Order.findOne({ _id: orderId });
@@ -362,10 +375,10 @@ const returnOrder = async (req, res) => {
       return res.status(404).json({ error: "Order not found" });
     }
 
-    // Update the product status to "Returned"
+    // Update the product status to "Return Request" and add the reason
     const updatedOrder = await Order.findOneAndUpdate(
       { _id: orderId, "orderedItems._id": productId },
-      { $set: { "orderedItems.$.status": "Returned" } },
+      { $set: { "orderedItems.$.status": "Return Request", "orderedItems.$.returnReason": returnReason } },
       { new: true }
     );
 
@@ -373,16 +386,24 @@ const returnOrder = async (req, res) => {
       return res.status(400).json({ error: "Order update failed" });
     }
 
-    // Find the returned item and restore stock quantity
     const returnedItem = order.orderedItems.find(item => item._id.toString() === productId);
     if (returnedItem) {
-      await Product.findByIdAndUpdate(
-        returnedItem.product,
-        { $inc: { quantity: returnedItem.quantity } }
-      );
+      // Update wallet balance if payment method was wallet
+      if (order.paymentMethod === "wallet") {
+        const wallet = await Wallet.findOne({ user: order.userId });
+        if (wallet) {
+          wallet.balance += returnedItem.price * returnedItem.quantity;
+          wallet.transactions.push({
+            type: "credit",
+            amount: returnedItem.price * returnedItem.quantity,
+            description: `Refund for returned order ${orderId}`
+          });
+          await wallet.save();
+        }
+      }
     }
 
-    return res.json({ success: "Successfully returned" });
+    return res.json({ success: "Return request submitted successfully" });
 
   } catch (error) {
     console.error(error);

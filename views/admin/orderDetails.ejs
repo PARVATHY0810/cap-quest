@@ -236,6 +236,7 @@ Fixed Order Details Template
             <th>Item</th>
             <th>Quantity</th>
             <th>Price</th>
+            <th>Feedback</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -247,13 +248,18 @@ Fixed Order Details Template
                 <td><%= item.product ? item.product.productName : "Product Deleted" %></td>
                 <td><%= item.quantity %></td>
                 <td>₹<%= item.price.toFixed(2) %></td>
+                <td><%=item.returnReason%></td>
                 <td>
                   <span class="status-badge status-<%= (item.status || 'unknown').toLowerCase().replace(/\s+/g, '') %>" id="status-display-<%= item._id %>">
                     <%= item.status || 'Unknown' %>
                   </span>
                 </td>
                 <td>
-                  <button class="edit-status-btn" onclick="openStatusModal('<%= item._id %>', '<%= item.status %>')">Edit Status</button>
+                  <button class="edit-status-btn" onclick="openStatusModal('<%= item._id %>', '<%= item.status %>')" <%= item.status === 'Returned' ? 'disabled' : '' %>>Edit Status</button>
+                  <% if (item.status === 'Return Request') { %>
+                    <button class="btn btn-success mt-2" onclick="respondToReturn('<%= item._id %>', 'Returned')">Allow</button>
+                    <button class="btn btn-danger mt-2" onclick="respondToReturn('<%= item._id %>', 'Denied')">Deny</button>
+                  <% } %>
                 </td>
               </tr>
             <% }); %>
@@ -398,6 +404,31 @@ Fixed Order Details Template
         closeStatusModal();
       }
     };
+
+    function respondToReturn(itemId, response) {
+    const orderId = document.getElementById('orderId').value;
+
+    fetch(`/admin/orders/update-status/${itemId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ status: response, orderId, adminResponse: response })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('Response submitted successfully');
+        location.reload();
+      } else {
+        alert('Failed to submit response');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('An error occurred. Please try again.');
+    });
+  }
   </script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

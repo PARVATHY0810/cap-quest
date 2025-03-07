@@ -217,6 +217,7 @@
     }
   });
 
+  
   // Use event delegation to handle all return buttons
   document.addEventListener('click', async (event) => {
     if (event.target.classList.contains('returnOrder')) {
@@ -224,20 +225,37 @@
       const orderId = event.target.dataset.orderId;
 
       Swal.fire({
-        title: 'Confirm Return',
-        text: 'Are you sure you want to return this item?',
-        icon: 'warning',
+        title: 'Return Request',
+        text: 'Please provide a reason for returning this item',
+        input: 'textarea',
+        inputPlaceholder: 'Enter your return reason here...',
+        inputAttributes: {
+          'aria-label': 'Return reason'
+        },
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, return it!'
+        confirmButtonText: 'Submit Return',
+        preConfirm: (reason) => {
+          if (!reason) {
+            Swal.showValidationMessage('Please enter a return reason');
+            return false;
+          }
+          return reason;
+        }
       }).then(async (result) => {
         if (result.isConfirmed) {
+          const returnReason = result.value;
+          
           try {
             const response = await fetch("/return-order", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ orderId, productId })
+              body: JSON.stringify({ 
+                orderId, 
+                productId,
+                returnReason // Add the return reason to the request
+              })
             });
 
             const data = await response.json();

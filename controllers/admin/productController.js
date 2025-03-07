@@ -95,8 +95,7 @@ const getAllProducts = async (req, res) => {
         { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
       ],
     })
-      .select("productName brand category regularPrice salePrice quantity productImage isBlocked offerPercentage") // Explicitly select fields including offerPercentage
-      .limit(limit * 1)
+      .select("productName brand category regularPrice salePrice quantity productImage isBlocked offerPercentage productOffer") // Added productOffer      .limit(limit * 1)
       .skip((page - 1) * limit)
       .sort({ createdAt: -1 })
       .populate("category")
@@ -287,22 +286,19 @@ const deleteSingleImage = async (req, res) => {
 const addProductOffer = async (req, res) => {
   try {
     const { productId, offerPercentage, endDate } = req.body;
-
     if (!productId || !offerPercentage || !endDate) {
       return res.status(400).json({ error: "All fields are required" });
     }
-
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
-
     product.offerPercentage = offerPercentage;
     product.offerEndDate = new Date(endDate);
-    product.productOffer = true;
-
+    product.productOffer = true; // This is now consistent with the Boolean type
+    const discountAmount = (product.regularPrice * offerPercentage) / 100;
+    product.salePrice = product.regularPrice - discountAmount;
     await product.save();
-
     res.json({ message: "Offer added successfully" });
   } catch (error) {
     console.error("Error adding product offer:", error);
@@ -313,22 +309,18 @@ const addProductOffer = async (req, res) => {
 const removeProductOffer = async (req, res) => {
   try {
     const { productId } = req.body;
-
     if (!productId) {
       return res.status(400).json({ error: "Product ID is required" });
     }
-
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
-
     product.offerPercentage = 0;
     product.offerEndDate = null;
-    product.productOffer = false;
-
+    product.productOffer = false; // This is now consistent with the Boolean type
+    product.salePrice = product.regularPrice;
     await product.save();
-
     res.json({ message: "Offer removed successfully" });
   } catch (error) {
     console.error("Error removing product offer:", error);
