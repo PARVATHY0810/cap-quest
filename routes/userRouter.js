@@ -16,6 +16,7 @@ router.get("/pageNotFound",userController.pageNotFound);
 router.get("/",userController.loadHomepage);
 router.get("/signup",userController.loadSignupPage);
 router.post("/signup",userController.signup);
+router.post("/check-referral", userController.checkReferralCode);
 router.get('/verify-otp',userController.loadOtp);
 router.post("/verify-otp",userController.verifyOtp);
 router.post("/resend-otp", userController.resendOtp);

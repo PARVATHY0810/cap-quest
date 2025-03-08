@@ -49,7 +49,7 @@
             <div class="col-md-6">
                 <div class="card text-center">
                     <h3 class="mb-4">Sign Up</h3>
-                    <form id="signform" method="post" action = "/signup">
+                    <form id="signform" method="post" action="/signup">
                         <div class="mb-3">
                             <input type="text" class="form-control" name="name" id="name" placeholder="Username" />
                             <div id="error1" class="error-message"></div>
@@ -65,6 +65,10 @@
                         <div class="mb-3">
                             <input type="password" class="form-control" name="cPassword" id="confirm-password" placeholder="Confirm Password" />
                             <div id="error4" class="error-message"></div>
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" name="referralCode" id="referralCode" placeholder="Referral Code (Optional)" />
+                            <div id="error5" class="error-message"></div>
                         </div>
                         <button type="submit" class="btn btn-orange w-100">Sign Up</button>
                     </form>
@@ -91,24 +95,26 @@ form.addEventListener('submit', (e) => {
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value.trim();
     const cPassword = document.getElementById('confirm-password').value.trim();
+    const referralCode = document.getElementById('referralCode').value.trim();
 
     const error1 = document.getElementById('error1');
     const error2 = document.getElementById('error2');
     const error3 = document.getElementById('error3');
     const error4 = document.getElementById('error4');
+    const error5 = document.getElementById('error5');
 
     error1.textContent = '';
     error2.textContent = '';
     error3.textContent = '';
     error4.textContent = '';
+    error5.textContent = '';
 
    // Username validation: Only alphabets allowed (no numbers or special characters)
-if (name === '') {
-    error1.textContent = 'Username is required';
-} else if (!/^[A-Za-z]+$/.test(name)) {  // Checks if name contains only alphabets
-    error1.textContent = 'Username should contain only alphabets';
-}
-
+    if (name === '') {
+        error1.textContent = 'Username is required';
+    } else if (!/^[A-Za-z]+$/.test(name)) {  // Checks if name contains only alphabets
+        error1.textContent = 'Username should contain only alphabets';
+    }
 
     // Email validation: Must contain '@gmail.com'
     if (email === '') {
@@ -129,6 +135,19 @@ if (name === '') {
         error4.textContent = 'Passwords do not match';
     }
 
+    if (referralCode) {
+        const response = await fetch('/check-referral', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ referralCode })
+        });
+        const result = await response.json();
+        if (!result.valid) {
+            error5.textContent = 'Invalid referral code';
+            return;
+        }
+    }
+
     // Submit the form only if all validations pass
     if (
         name && !/\d/.test(name) &&
@@ -140,10 +159,6 @@ if (name === '') {
     }
 })
 
-
-</script>
-
-<script>
     window.onload = function () {
         let message ="<%= typeof message !== 'undefined' ? message.replace(/"/g, '&quot;') : '' %>";  // Ensure message is always defined
         if (message && message.trim() !== "") {

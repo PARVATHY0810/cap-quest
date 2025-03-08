@@ -44,15 +44,15 @@ const login = async (req,res)=>{
    }
  };
 
-  const loadDashboard = async (req,res)=>{
-    if(req.session.admin){
-      try{
-        res.render("dashboard")
-      } catch (error){
-        res.redirect("/pageerror")
-      }
-    }
-  }
+  // const loadDashboard = async (req,res)=>{
+  //   if(req.session.admin){
+  //     try{
+  //       res.render("dashboard")
+  //     } catch (error){
+  //       res.redirect("/pageerror")
+  //     }
+  //   }
+  // }
 
   // const dashboard =async(req,res)=>{
   //   try {
@@ -81,7 +81,7 @@ const logout = async (req,res)=>{
    module.exports = {
      loadlogin, 
      login, 
-    loadDashboard,
+    //loadDashboard,
     pageerror,
     logout,
     //dashboard

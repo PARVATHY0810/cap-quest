@@ -11,9 +11,6 @@ const adminRouter=require("./routes/adminRouter")
 const nocache = require("nocache")
 db()
 
-
-
-
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(session({
@@ -47,7 +44,5 @@ const PORT=process.env.PORT || 4488;
 app.listen(PORT,()=>{
   console.log(`server is running http://localhost:${PORT}`);
 })
-
-
 
 module.exports = app;

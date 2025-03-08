@@ -262,6 +262,31 @@ function resendOTP() {
     return false;
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+        const otpForm = document.querySelector('#otp-form'); // Assuming verify-otp.ejs has this form ID
+        if (otpForm) {
+            otpForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(otpForm);
+            const response = await fetch('/verify-otp', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            if (result.success) {
+                Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: result.message || 'Signup successful!',
+                confirmButtonText: 'OK'
+                }).then(() => {
+                window.location.href = result.redirectUrl;
+                });
+            }
+            });
+        }
+        });
+
 
 </script>
 <%- include("../../views/partials/user/footer") %>

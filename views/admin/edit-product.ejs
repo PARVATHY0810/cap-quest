@@ -166,7 +166,7 @@
                                             <input type="hidden" name="currentImages[]" value="<%=product.productImage[i]%>">
                                             <input type="hidden" name="imagePositions[]" value="<%=i%>">
                                             <img class="image-preview" src="/uploads/re-image/<%=product.productImage[i]%>" alt="Product Image">
-                                            <button type="button" class="remove-image-btn" onclick="deleteSingleImage('<%=product.productImage[i]%>','<%=product._id%>', <%=i%>)">X</button>
+                                            <button type="button" class="remove-image-btn" onclick="deleteSingleImage('<%=product.productImage[i]%>','<%=product._id%>', '<%=i%>')">X</button>
                                             <span class="image-position-label">Position <%=i+1%></span>
                                         </div>
                                         <%}%>
