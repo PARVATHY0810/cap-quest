@@ -8,35 +8,199 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <%- include('../../views/partials/user/header') %>
     <style>
-        .order-details {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        .product-image {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-        }
-        .order-status {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-        .order-summary {
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            padding: 20px;
-        }
-        .summary-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-        }
-        .summary-total {
-            font-weight: bold;
-            border-top: 1px solid #dee2e6;
-            padding-top: 15px;
-            margin-top: 10px;
-        }
+      :root {
+          --primary-orange: #ff6200;
+          --dark-orange: #e55b00;
+          --black: #1a1a1a;
+          --light-gray: #f5f5f5;
+          --white: #ffffff;
+      }
+
+      body {
+          font-family: 'Georgia', serif;
+          background: linear-gradient(135deg, var(--white) 0%, var(--light-gray) 100%);
+          color: var(--black);
+          padding-top: 60px;
+          padding-bottom: 60px;
+      }
+
+      .order-details {
+          max-width: 1100px;
+          margin: 0 auto;
+      }
+
+      h2 {
+          color: var(--black);
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          border-bottom: 3px solid var(--primary-orange);
+          padding-bottom: 10px;
+          margin-bottom: 25px;
+      }
+
+      .order-id {
+          color: var(--primary-orange);
+          font-size: 1.2rem;
+          font-weight: 600;
+          letter-spacing: 1px;
+      }
+
+      .card {
+          border: none;
+          border-radius: 8px;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+          background-color: var(--white);
+          transition: transform 0.3s ease;
+          margin-bottom: 30px;
+      }
+
+      .card:hover {
+          transform: translateY(-5px);
+      }
+
+      .card-header {
+          background-color: var(--black);
+          color: var(--white);
+          border-radius: 8px 8px 0 0;
+          padding: 15px 20px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+      }
+
+      .card-body {
+          padding: 25px;
+      }
+
+      .product-image {
+          width: 100px;
+          height: 100px;
+          object-fit: cover;
+          border-radius: 4px;
+          border: 1px solid var(--light-gray);
+      }
+
+      .table {
+          margin-bottom: 0;
+      }
+
+      .table thead th {
+          background-color: var(--black);
+          color: var(--white);
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          border: none;
+      }
+
+      .table td {
+          vertical-align: middle;
+          border-bottom: 1px solid var(--light-gray);
+          padding: 20px;
+      }
+
+      .table tr:hover td {
+          background-color: var(--light-gray);
+      }
+
+      .order-summary {
+          background-color: var(--white);
+          border-radius: 8px;
+          padding: 25px;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      }
+
+      .summary-item {
+          display: flex;
+          justify-content: space-between;
+          padding: 12px 0;
+          border-bottom: 1px solid var(--light-gray);
+      }
+
+      .summary-item span:first-child {
+          font-weight: 500;
+          color: var(--black);
+      }
+
+      .summary-item span:last-child {
+          color: var(--primary-orange);
+          font-weight: 600;
+      }
+
+      .summary-total {
+          font-weight: 700;
+          border-top: 2px solid var(--primary-orange);
+          padding-top: 15px;
+          margin-top: 15px;
+      }
+
+      .summary-total span:last-child {
+          color: var(--black);
+          font-size: 1.2rem;
+      }
+
+      .btn-primary, .btn-danger {
+          background-color: var(--primary-orange);
+          border-color: var(--primary-orange);
+          text-transform: uppercase;
+          font-weight: 600;
+          padding: 8px 16px;
+          border-radius: 4px;
+          transition: all 0.3s ease;
+      }
+
+      .btn-primary:hover, .btn-danger:hover {
+          background-color: var(--dark-orange);
+          border-color: var(--dark-orange);
+      }
+
+      .btn-danger:disabled {
+          background-color: #757575;
+          border-color: #757575;
+          opacity: 0.8;
+      }
+
+      .btn-outline-primary {
+          color: var(--primary-orange);
+          border-color: var(--primary-orange);
+          text-transform: uppercase;
+          font-weight: 600;
+          padding: 8px 16px;
+          border-radius: 4px;
+          transition: all 0.3s ease;
+      }
+
+      .btn-outline-primary:hover {
+          background-color: var(--primary-orange);
+          color: var(--white);
+      }
+
+      .order-status {
+          color: var(--black);
+          font-size: 1.1rem;
+          font-weight: 600;
+          background-color: var(--light-gray);
+          padding: 8px 15px;
+          border-radius: 4px;
+          display: inline-block;
+      }
+
+      @media (max-width: 768px) {
+          .card-body {
+              padding: 20px;
+          }
+          .product-image {
+              width: 80px;
+              height: 80px;
+          }
+          .table td {
+              padding: 15px;
+          }
+          .order-summary {
+              margin-top: 20px;
+          }
+      }
     </style>
 </head>
 <body>
@@ -84,80 +248,97 @@
           
             <input type="hidden" value="<%= orders[0]._id %>" id="orderId">
 
-            <!-- Order Items -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Order Items</h5>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-borderless mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th scope="col">Product</th>
-                                    <th scope="col">Details</th>
-                                    <th scope="col" class="text-center">Quantity</th>
-                                    <th scope="col" class="text-end">Price</th>
-                                    <th scope="col" class="text-end">Total</th>
-                                    <th>Action</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% orders[0].orderItems.forEach(element => { %> 
-                                  <tr> 
-                                    <td> 
-                                      <img src="/uploads/re-image/<%= element.productImage %>" alt="" class="product-image"> 
-                                    </td> 
-                                    <td> 
-                                      <h6 class="mb-0"><%= element.productName %></h6> 
-                                    </td> 
-                                    <td class="text-center"><%= element.quantity %></td> 
-                                    <td class="text-end">Rs. <%= element.price %></td> 
-                                    <td class="text-end">Rs.<%= element.quantity * element.price %></td> 
-                                    <td>
-                                        <% if (element.orderStatus === 'Delivered' ) { %>
-                                          <button class="btn btn-primary returnOrder" data-product-id="<%= element._id %>" data-order-id="<%= orders[0]._id %>">Return</button>
-                                          <button class="btn btn-danger cancelOrder" data-product-id="<%= element._id %>" data-order-id="<%= orders[0]._id %>" disabled>Cancel</button>
-                                      
-                                        <% } else if (element.orderStatus === 'Returned') { %>
-                                            <button class="btn btn-danger cancelOrder" data-product-id="<%= element._id %>" data-order-id="<%= orders[0]._id %>" disabled>Cancel</button>
-                                          <!-- When status is Return, no cancel button will show -->
-                                        
-                                        <% } else { %>
-                                          <button class="btn btn-danger cancelOrder" data-product-id="<%= element._id %>" data-order-id="<%= orders[0]._id %>">Cancel</button>
-                                        
-                                        <% } %>
-                                      </td>
-                                      
-                                      
-                                    <td><%= element.orderStatus %></td>
-                                  </tr> 
-                                <% }) %>
-                              </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+  <!-- Order Items -->
+<div class="card mb-4">
+  <div class="card-header">
+      <h5 class="mb-0">Order Items</h5>
+  </div>
+  <div class="card-body p-0">
+      <div class="table-responsive">
+          <table class="table table-borderless mb-0">
+              <thead class="bg-light">
+                  <tr>
+                      <th scope="col">Product</th>
+                      <th scope="col">Details</th>
+                      <th scope="col" class="text-center">Quantity</th>
+                      <th scope="col" class="text-end">Price</th>
+                      <th scope="col" class="text-end">Total</th>
+                      <th>Action</th>
+                      <th>Status</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <% orders[0].orderItems.forEach(element => { %> 
+                    <tr> 
+                      <td> 
+                        <img src="/uploads/re-image/<%= element.productImage %>" alt="" class="product-image"> 
+                      </td> 
+                      <td> 
+                        <h6 class="mb-0"><%= element.productName %></h6> 
+                      </td> 
+                      <td class="text-center"><%= element.quantity %></td> 
+                      <td class="text-end">Rs. <%= element.price %></td> 
+                      <td class="text-end">Rs.<%= element.quantity * element.price %></td> 
+                      <td>
+                          <% if (element.orderStatus === 'Delivered' ) { %>
+                            <button class="btn btn-primary returnOrder" data-product-id="<%= element._id %>" data-order-id="<%= orders[0]._id %>">Return</button>
+                            <button class="btn btn-danger cancelOrder" data-product-id="<%= element._id %>" data-order-id="<%= orders[0]._id %>" disabled>Cancel</button>
+                        
+                            <% } else if (element.orderStatus === 'Return Request') { %>
+                              <button class="btn btn-danger cancelOrder" data-product-id="<%= element._id %>" data-order-id="<%= orders[0]._id %>" disabled>Cancel</button>
+                            
 
+                          <% } else if (element.orderStatus === 'Returned') { %>
+                              <button class="btn btn-danger cancelOrder" data-product-id="<%= element._id %>" data-order-id="<%= orders[0]._id %>" disabled>Cancel</button>
+                            
+                              
+                            <!-- When status is Return, no cancel button will show -->
+                          
+                          <% } else if (element.orderStatus === 'Cancelled') { %>
+                          <button class="btn btn-danger cancelOrder" data-product-id="<%= element._id %>" data-order-id="<%= orders[0]._id %>" disabled>Cancelled</button>
+
+                            <% } else if (element.orderStatus === 'Processing') { %>
+                              <button class="btn btn-danger cancelOrder" data-product-id="<%= element._id %>" data-order-id="<%= orders[0]._id %>">Cancel</button>
+                            
+
+                          <% } else { %>
+                            <button class="btn btn-danger cancelOrder" data-product-id="<%= element._id %>" data-order-id="<%= orders[0]._id %>">Cancel</button>
+                          
+                          <% } %>
+                          
+                        </td>
+                        
+                        
+                      <td><%= element.orderStatus %></td>
+                    </tr> 
+                  <% }) %>
+                </tbody>
+          </table>
+      </div>
+  </div>
+</div>
             <!-- Order Summary -->
             <div class="row">
                 <div class="col-md-6 ms-auto">
-                    <div class="order-summary">
-                        <h5 class="mb-3">Order Summary</h5>
-                        <div class="summary-item">
-                            <span>Subtotal</span>
-                            <span>Rs.<%= Totalprice %></span>
-                        </div>
-                        <div class="summary-item">
-                            <span>Shipping</span>
-                            <span>Free</span>
-                        </div>
-                        <div class="summary-item summary-total">
-                            <span>Total</span>
-                            <span>Rs.<%= Totalprice %></span>
-                        </div>
+                  <div class="order-summary">
+                    <h5 class="mb-3">Order Summary</h5>
+                    <div class="summary-item">
+                        <span>Subtotal</span>
+                        <span>Rs.<%= Totalprice %></span>
                     </div>
+                    <div class="summary-item">
+                        <span>Coupon Discount</span>
+                        <span>- Rs.<%= orders[0].couponDiscount || 0 %></span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Shipping</span>
+                        <span>Free</span>
+                    </div>
+                    <div class="summary-item summary-total">
+                        <span>Total</span>
+                        <span>Rs.<%= Totalprice - (orders[0].couponDiscount || 0) %></span>
+                    </div>
+                </div>
                 </div>
             </div>
 
@@ -174,48 +355,51 @@
 
 <script>
   // Use event delegation to handle all cancel buttons
-  document.addEventListener('click', async (event) => {
-    if (event.target.classList.contains('cancelOrder')) {
-      const productId = event.target.dataset.productId;
-      const orderId = event.target.dataset.orderId;
+// Use event delegation to handle all cancel buttons
+document.addEventListener('click', async (event) => {
+  if (event.target.classList.contains('cancelOrder')) {
+    const button = event.target;
+    const productId = button.dataset.productId;
+    const orderId = button.dataset.orderId;
 
-      try {
-        const response = await fetch("/cancelOrder", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ orderId, productId })
+    try {
+      const response = await fetch("/cancelOrder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, productId })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        Swal.fire({
+          title: 'Success!',
+          text: data.success,
+          icon: 'success',
+          confirmButtonText: 'OK'
+        }).then(() => {
+          button.disabled = true; // Disable the button after successful cancellation
+          button.textContent = 'Cancelled'; // Optionally change the button text
         });
-
-        const data = await response.json();
-
-        if (data.success) {
-          Swal.fire({
-            title: 'Success!',
-            text: data.success,
-            icon: 'success',
-            confirmButtonText: 'OK'
-          }).then(() => {
-            location.reload();
-          });
-        } else {
-          Swal.fire({
-            title: 'Error!',
-            text: data.message || "Failed to cancel order.",
-            icon: 'error',
-            confirmButtonText: 'OK'
-          });
-        }
-      } catch (error) {
-        console.error("Error cancelling order:", error);
+      } else {
         Swal.fire({
           title: 'Error!',
-          text: "Something went wrong. Please try again.",
+          text: data.message || "Failed to cancel order.",
           icon: 'error',
           confirmButtonText: 'OK'
         });
       }
+    } catch (error) {
+      console.error("Error cancelling order:", error);
+      Swal.fire({
+        title: 'Error!',
+        text: "Something went wrong. Please try again.",
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
     }
-  });
+  }
+});
 
   
   // Use event delegation to handle all return buttons

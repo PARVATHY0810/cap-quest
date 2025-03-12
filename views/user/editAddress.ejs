@@ -1,7 +1,5 @@
 <title>Edit User Address</title>
 <style>
-
-
     * {
         margin: 0;
         padding: 0;
@@ -14,23 +12,47 @@
         justify-content: center;
         align-items: center;
         min-height: 100vh;
-        background-color: #f4f4f4;
+        background-color: #fff; /* White background */
+        color: #000; /* Black text */
     }
 
     .container {
-        width: 70%;
-        max-width: 900px;
-        background: white;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        margin-left: 280px;
+        width: 50%; /* Reduced from 70% */
+        max-width: 600px; /* Reduced from 900px */
+        background: #fff;
+        padding: 20px; /* Reduced from 30px */
+        border-radius: 8px; /* Slightly smaller radius */
+        border: 2px solid #ff6200; /* Orange border */
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Reduced shadow */
+        margin: 15px auto; /* Reduced margin */
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 15px; /* Reduced from 20px */
+        font-size: 12px; /* Reduced from 14px */
+    }
+
+    .breadcrumbs a {
+        color: #ff6200;
+        text-decoration: none;
+        margin-right: 4px; /* Reduced from 5px */
+    }
+
+    .breadcrumbs a:hover {
+        text-decoration: underline;
+    }
+
+    .breadcrumbs span {
+        color: #666;
+        margin-right: 4px; /* Reduced from 5px */
     }
 
     h2 {
         text-align: center;
-        color: #2d6a4f;
-        margin-bottom: 20px;
+        color: #ff6200;
+        margin-bottom: 15px; /* Reduced from 25px */
+        font-size: 20px; /* Reduced from 24px */
     }
 
     form {
@@ -41,52 +63,64 @@
     .form-group {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 15px;
+        margin-bottom: 10px; /* Reduced from 15px */
+        align-items: center;
     }
 
     .form-group label {
-        width: 20%;
+        width: 25%; /* Adjusted for better balance */
         font-weight: bold;
-        color: #333;
+        color: #000;
+        font-size: 14px; /* Reduced from default */
     }
 
     .form-group input {
-        width: 75%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        font-size: 16px;
+        width: 70%; /* Reduced from 75% */
+        padding: 8px; /* Reduced from 10px */
+        border: 1px solid #ff6200;
+        border-radius: 4px; /* Slightly smaller radius */
+        font-size: 14px; /* Reduced from 16px */
+        background: #fff;
+        color: #000;
+        outline: none;
+    }
+
+    .form-group input:focus {
+        border-color: #ff8533;
+        box-shadow: 0 0 4px rgba(255, 98, 0, 0.5); /* Reduced shadow */
     }
 
     button {
         width: 100%;
-        padding: 12px;
-        background: #2d6a4f;
-        color: white;
+        padding: 10px; /* Reduced from 12px */
+        background: #ff6200;
+        color: #fff;
         border: none;
-        border-radius: 5px;
-        font-size: 18px;
+        border-radius: 4px; /* Slightly smaller radius */
+        font-size: 16px; /* Reduced from 18px */
         cursor: pointer;
-        margin-top: 10px;
+        margin-top: 15px; /* Reduced from 20px */
+        transition: background 0.3s ease;
     }
 
     button:hover {
-        background: #1b4d35;
+        background: #e65c00;
     }
 
     /* Responsive Design */
     @media (max-width: 768px) {
         .container {
-            width: 90%;
+            width: 80%; /* Adjusted for smaller screens */
         }
 
         .form-group {
             flex-direction: column;
+            align-items: flex-start;
         }
 
         .form-group label, .form-group input {
             width: 100%;
-            margin-bottom: 5px;
+            margin-bottom: 6px; /* Reduced from 8px */
         }
     }
 </style>

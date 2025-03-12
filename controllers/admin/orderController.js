@@ -12,11 +12,14 @@ const getOrders = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = 7;
 
+        console.log('this is page',page)
+        console.log('this is limit',limit)
+
        
         const orders = await Order.find()
         .populate("orderedItems.product") 
         .populate("userId") 
-        .sort({ createdAt: -1 })
+        .sort({ createdOn: -1 })
         .skip((page - 1) * limit)
         .limit(limit);
     
@@ -26,8 +29,11 @@ const getOrders = async (req, res) => {
         const count = await Order.countDocuments();
         const totalpage = Math.ceil(count / limit);
 
-        console.log(orders.map(order => order.orderedItems));
-        console.log(orders.map(order => order.orderedItems.map(item => item.orderStatus)));
+      console.log('this is count',count)
+      console.log('this is totalpage',totalpage)
+
+        // console.log(orders.map(order => order.orderedItems));
+        // console.log(orders.map(order => order.orderedItems.map(item => item.orderStatus)));
 
         
         res.render("orderlist", { 

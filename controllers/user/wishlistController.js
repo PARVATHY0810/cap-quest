@@ -54,7 +54,7 @@ const getWishlist = async (req, res) => {
       cartItems,
       userData,
       pageTitle: 'My Wishlist',
-      error: null // No error by default
+      error: null 
     });
 
   } catch (error) {
@@ -190,19 +190,18 @@ const addToCart = async (req, res) => {
       return res.status(400).json({ success: false, message: "Out of Stock" });
     }
 
-    // Check if a cart item with this product already exists
     const existingCartItem = await Cart.findOne({ 
       userId, 
       productId: productId 
     });
 
     if (existingCartItem) {
-      // Update existing cart item
+    
       existingCartItem.quantity += 1;
       existingCartItem.totalPrice = existingCartItem.quantity * product.salePrice;
       await existingCartItem.save();
     } else {
-      // Create new cart item
+      
       const newCartItem = new Cart({
         userId,
         productId,

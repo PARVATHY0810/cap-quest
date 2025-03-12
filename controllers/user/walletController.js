@@ -15,16 +15,9 @@ const razorpay = new Razorpay({
 
 const loadWalletPage = async (req, res) => {
     try {
-        // Fetch user information
         const user = req.session.user; 
-        
-        // Fetch wallet information, populating user details
         const wallet = await Wallet.findOne({ user: req.session.user });
-        
-        // Sort transactions in descending order (most recent first)
         const transactions = wallet ? wallet.transactions.sort((a, b) => b.date - a.date) : [];
-        
-        // Render the page with all necessary data
         res.render('user-wallet', {
             user: user,
             wallet: wallet || { balance: 0 },
@@ -39,10 +32,7 @@ const loadWalletPage = async (req, res) => {
 const addMoneyToWallet = async (req, res) => {
     try {
       const { amount } = req.body;
-      
-      // Get the user ID from session
       const userId = req.session.user;
-      
       if (!userId) {
         return res.status(401).json({
           success: false,
@@ -50,9 +40,7 @@ const addMoneyToWallet = async (req, res) => {
         });
       }
       
-      // Find the user's wallet
       let wallet = await Wallet.findOne({ user: userId });
-      
       if (!wallet) {
         wallet = new Wallet({ 
           user: userId,
@@ -61,7 +49,7 @@ const addMoneyToWallet = async (req, res) => {
         });
       }
   
-      // Check if the amount exceeds the per-transaction limit
+      
       if (amount > 100000) {
         return res.json({
           success: false,
@@ -69,7 +57,6 @@ const addMoneyToWallet = async (req, res) => {
         });
       }
   
-      // Check if adding the amount would exceed the wallet balance limit
       if (wallet.balance + Number(amount) > 200000) {
         return res.json({
           success: false,
@@ -77,9 +64,8 @@ const addMoneyToWallet = async (req, res) => {
         });
       }
     
-      // Create Razorpay order
       const options = {
-        amount: amount * 100, // Convert to paise
+        amount: amount * 100, 
         currency: "INR",
         receipt: `wallet_${Date.now()}`
       };
@@ -100,7 +86,7 @@ const addMoneyToWallet = async (req, res) => {
     }
   };
   
-  // Function to verify Razorpay payment
+  // here we verify Razorpay payment
   const verifyPayment = async (req, res) => {
     try {
       const {
@@ -109,7 +95,7 @@ const addMoneyToWallet = async (req, res) => {
         razorpay_signature
       } = req.body;
   
-      // Get the user ID from session
+      
       const userId = req.session.user;
       
       if (!userId) {
@@ -119,7 +105,7 @@ const addMoneyToWallet = async (req, res) => {
         });
       }
   
-      // Verify signature
+      
       const sign = razorpay_order_id + "|" + razorpay_payment_id;
       const generated_signature = crypto
         .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
@@ -127,11 +113,10 @@ const addMoneyToWallet = async (req, res) => {
         .digest('hex');
   
       if (generated_signature === razorpay_signature) {
-        // Get order details
         const order = await razorpay.orders.fetch(razorpay_order_id);
-        const amount = order.amount / 100; // Convert from paise to rupees
+        const amount = order.amount / 100; 
   
-        // Update wallet
+        
         let wallet = await Wallet.findOne({ user: userId });
         
         if (!wallet) {
@@ -172,10 +157,9 @@ const addMoneyToWallet = async (req, res) => {
     }
   };
   
-  // Utility function to add money to wallet (for refunds, etc.)
   const addToWallet = async ({ userId, amount, description }) => {
     try {
-      // Validate inputs
+      
       if (!userId || !amount || isNaN(amount) || amount <= 0) {
         throw new Error('Invalid user ID or amount');
       }
@@ -189,7 +173,7 @@ const addMoneyToWallet = async (req, res) => {
         });
       }
   
-      // Add transaction
+      
       wallet.transactions.push({
         type: 'credit',
         amount: Number(amount),
@@ -197,10 +181,10 @@ const addMoneyToWallet = async (req, res) => {
         description: description || 'Wallet credit'
       });
   
-      // Update balance
+  
       wallet.balance += Number(amount);
   
-      // Save the wallet
+    
       await wallet.save();
       console.log(`Wallet updated for user ${userId}: Added ₹${amount} with description "${description}"`);
       return true;
@@ -210,7 +194,7 @@ const addMoneyToWallet = async (req, res) => {
     }
   };
   
-   // Add this function to walletController.js
+   
 const processWalletPayment = async (req, res) => {
     try {
       const { orderId, amount } = req.body;
@@ -223,7 +207,7 @@ const processWalletPayment = async (req, res) => {
         });
       }
   
-      // Find user's wallet
+      
       let wallet = await Wallet.findOne({ user: userId });
       
       if (!wallet) {
@@ -233,18 +217,16 @@ const processWalletPayment = async (req, res) => {
         });
       }
   
-      // Check if sufficient balance
+      // Check  balance
       if (wallet.balance < amount) {
         return res.status(400).json({
           success: false,
           message: 'Insufficient wallet balance'
         });
       }
-  
-      // Deduct amount from wallet
+
       wallet.balance -= amount;
       
-      // Add transaction record
       wallet.transactions.push({
         type: 'debit',
         amount: Number(amount),
@@ -254,7 +236,7 @@ const processWalletPayment = async (req, res) => {
       
       await wallet.save();
   
-      // Update order payment status if needed
+      // Update the  payment status of our order
       await Order.findByIdAndUpdate(orderId, {
         $set: { 
           paymentStatus: 'Paid'

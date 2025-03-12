@@ -1,28 +1,26 @@
 const mongoose = require("mongoose");
 const path = require('path'); 
-const User = require("../../models/userSchema"); // Adjust path as needed
-const Order = require("../../models/orderSchema"); // Adjust path as needed
-const Product = require("../../models/productSchema"); // Adjust path as needed
+const User = require("../../models/userSchema"); 
+const Order = require("../../models/orderSchema"); 
+const Product = require("../../models/productSchema"); 
 const ExcelJS = require("exceljs");
 const PDFDocument = require("pdfkit");
 
 
-// File: dashboardController.js
-// Modify the loadDashboard function to include the new chart data
-
 const loadDashboard = async (req, res) => {
   if (req.session.admin) {
     try {
-      // Get total counts
+      
       const totalUsers = await User.countDocuments({ isAdmin: false });
       const totalProducts = await Product.countDocuments();
       const totalOrders = await Order.countDocuments();
 
-      // Calculate total revenue
+      
       const orders = await Order.find();
       const totalRevenue = orders.reduce((sum, order) => sum + (order.finalAmount || 0), 0);
+      const totalDiscount = orders.reduce((sum, order) => sum + (order.discount || 0),0);
 
-      // Add growth percentages (calculate dynamically)
+      
       const previousMonthStart = new Date();
       previousMonthStart.setMonth(previousMonthStart.getMonth() - 1);
       previousMonthStart.setDate(1);
@@ -50,11 +48,12 @@ const loadDashboard = async (req, res) => {
         orderDate: { $gte: previousMonthStart, $lte: previousMonthEnd } 
       });
       
+      
       const prevMonthRevenue = (await Order.find({ 
         orderDate: { $gte: previousMonthStart, $lte: previousMonthEnd } 
       })).reduce((sum, order) => sum + (order.finalAmount || 0), 0);
 
-      // Calculate growth percentages
+      
       const totalUsersGrowth = prevMonthUsers > 0 ? ((totalUsers - prevMonthUsers) / prevMonthUsers * 100).toFixed(1) : 5.3;
       const totalProductsGrowth = prevMonthProducts > 0 ? ((totalProducts - prevMonthProducts) / prevMonthProducts * 100).toFixed(1) : 7.1;
       
@@ -75,7 +74,7 @@ const loadDashboard = async (req, res) => {
         .sort({ orderDate: -1 })
         .limit(5);
 
-      // Format recent orders for display
+      
       const formattedRecentOrders = recentOrders.map((order) => ({
         orderId: order.orderId,
         customerName: order.userId ? order.userId.name : "Unknown Customer",
@@ -88,17 +87,18 @@ const loadDashboard = async (req, res) => {
         date: order.orderDate.toLocaleDateString(),
       }));
 
-      // Prepare data for charts
+    
       const monthlyData = await getMonthlyData();
       const { revenueData, ordersData, chartLabels } = monthlyData;
 
-      // Get top products, categories and brands data
+      
       const { productLabels, productData } = await getTopProductsData();
       const { categoryLabels, categoryData } = await getTopCategoriesData();
       const { brandLabels, brandData } = await getTopBrandsData();
 
-      // Render dashboard with all data
+      //  dashboard with full data
       res.render("dashboard", {
+        totalDiscount,
         totalUsers,
         totalProducts,
         totalOrders,
@@ -152,7 +152,7 @@ const downloadReport = async (req, res) => {
       productsSold: order.orderedItems.reduce((sum, item) => sum + (item.quantity || 0), 0),
     }));
 
-    // Group data by date
+    
     const groupedData = reportData.reduce((acc, curr) => {
       const date = curr.date;
       if (!acc[date]) {
@@ -202,8 +202,78 @@ const downloadReport = async (req, res) => {
     res.status(500).json({ error: "Failed to generate report" });
   }
 };
+const generateExcelReport = async (data, reportType) => {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Sales Report");
 
-// Helper Functions
+  worksheet.addRow(["Order ID", "Date", "Customer", "Status", "Amount"]);
+  data.forEach((row) => {
+    worksheet.addRow([row.orderId, row.date, row.customerName, row.status, row.revenue]);
+  });
+
+  worksheet.getRow(1).font = { bold: true };
+  worksheet.columns.forEach((column) => {
+    column.width = 20;
+  });
+
+  return workbook;
+};
+
+const generatePDFReport = (data, reportType) => {
+  const doc = new PDFDocument();
+
+  doc.fontSize(20).text("Sales Report", { align: "center" });
+  doc.fontSize(12).moveDown();
+  doc.text(`Report Type: ${reportType.charAt(0).toUpperCase() + reportType.slice(1)}`, {
+    align: "center",
+  });
+  doc.text(`Generated Date: ${new Date().toLocaleDateString()}`, { align: "center" });
+
+  const periodStart = data[0]?.date || "";
+  const periodEnd = data[data.length - 1]?.date || "";
+  doc.text(`Period: ${periodStart} to ${periodEnd}`, { align: "center" });
+
+  doc.moveDown();
+  doc.text("Summary:", { align: "center" });
+  const totalOrders = data.reduce((sum, row) => sum + row.orders, 0);
+  const totalRevenue = data.reduce((sum, row) => sum + row.revenue, 0);
+  doc.text(`Total Orders: ${totalOrders}`, { align: "center" });
+  doc.text(`Total Revenue: ₹${totalRevenue.toLocaleString("en-IN")}`, {
+    align: "center",
+  });
+
+  const tableTop = 250;
+  doc.fontSize(12).text("Order ID", 50, tableTop);
+  doc.text("Date", 200, tableTop);
+  doc.text("Customer", 300, tableTop);
+  doc.text("Status", 400, tableTop);
+  doc.text("Amount", 500, tableTop);
+
+  doc.lineWidth(1)
+    .moveTo(50, tableTop + 20)
+    .lineTo(600, tableTop + 20)
+    .stroke();
+
+  let yPosition = tableTop + 40;
+  data.forEach((row) => {
+    doc.fontSize(10);
+    doc.text(row.orderId || "", 50, yPosition, { width: 150 });
+    doc.text(row.date || "", 200, yPosition, { width: 100 });
+    doc.text(row.customerName || "Unknown", 300, yPosition, { width: 100 });
+    doc.text(row.status || "", 400, yPosition, { width: 100 });
+    doc.text(`₹${row.revenue.toLocaleString("en-IN")}`, 500, yPosition, { width: 100 });
+
+    yPosition += 30;
+    doc.lineWidth(0.5)
+      .moveTo(50, yPosition - 5)
+      .lineTo(600, yPosition - 5)
+      .stroke();
+  });
+
+  return doc;
+};
+
+
 const getDateRange = (reportType, startDate, endDate) => {
   const endDateTime = new Date();
   let startDateTime = new Date();
@@ -327,9 +397,6 @@ const getTopProductsData = async () => {
   }
 };
 
-// File: dashboardController.js
-// Add these functions after getTopProductsData
-
 const getTopCategoriesData = async () => {
   try {
     const topCategories = await Order.aggregate([
@@ -409,181 +476,6 @@ const getTopBrandsData = async () => {
       brandLabels: ["No Data"],
       brandData: [100]
     };
-  }
-};
-
-const generateExcelReport = async (data, reportType) => {
-  const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet("Sales Report");
-
-  worksheet.addRow(["Order ID", "Date", "Customer", "Status", "Amount"]);
-  data.forEach((row) => {
-    worksheet.addRow([row.orderId, row.date, row.customerName, row.status, row.revenue]);
-  });
-
-  worksheet.getRow(1).font = { bold: true };
-  worksheet.columns.forEach((column) => {
-    column.width = 20;
-  });
-
-  return workbook;
-};
-
-const generatePDFReport = (data, reportType) => {
-  const doc = new PDFDocument();
-
-  doc.fontSize(20).text("Sales Report", { align: "center" });
-  doc.fontSize(12).moveDown();
-  doc.text(`Report Type: ${reportType.charAt(0).toUpperCase() + reportType.slice(1)}`, {
-    align: "center",
-  });
-  doc.text(`Generated Date: ${new Date().toLocaleDateString()}`, { align: "center" });
-
-  const periodStart = data[0]?.date || "";
-  const periodEnd = data[data.length - 1]?.date || "";
-  doc.text(`Period: ${periodStart} to ${periodEnd}`, { align: "center" });
-
-  doc.moveDown();
-  doc.text("Summary:", { align: "center" });
-  const totalOrders = data.reduce((sum, row) => sum + row.orders, 0);
-  const totalRevenue = data.reduce((sum, row) => sum + row.revenue, 0);
-  doc.text(`Total Orders: ${totalOrders}`, { align: "center" });
-  doc.text(`Total Revenue: ₹${totalRevenue.toLocaleString("en-IN")}`, {
-    align: "center",
-  });
-
-  const tableTop = 250;
-  doc.fontSize(12).text("Order ID", 50, tableTop);
-  doc.text("Date", 200, tableTop);
-  doc.text("Customer", 300, tableTop);
-  doc.text("Status", 400, tableTop);
-  doc.text("Amount", 500, tableTop);
-
-  doc.lineWidth(1)
-    .moveTo(50, tableTop + 20)
-    .lineTo(600, tableTop + 20)
-    .stroke();
-
-  let yPosition = tableTop + 40;
-  data.forEach((row) => {
-    doc.fontSize(10);
-    doc.text(row.orderId || "", 50, yPosition, { width: 150 });
-    doc.text(row.date || "", 200, yPosition, { width: 100 });
-    doc.text(row.customerName || "Unknown", 300, yPosition, { width: 100 });
-    doc.text(row.status || "", 400, yPosition, { width: 100 });
-    doc.text(`₹${row.revenue.toLocaleString("en-IN")}`, 500, yPosition, { width: 100 });
-
-    yPosition += 30;
-    doc.lineWidth(0.5)
-      .moveTo(50, yPosition - 5)
-      .lineTo(600, yPosition - 5)
-      .stroke();
-  });
-
-  return doc;
-};
-// File: dashboardController.js
-// Add these new controller functions
-
-const getChartData = async (req, res) => {
-  try {
-    const { timeRange } = req.query;
-    let startDate = new Date();
-    const endDate = new Date();
-    
-    // Set date range based on requested time range
-    switch (timeRange) {
-      case 'last-7-days':
-        startDate.setDate(startDate.getDate() - 7);
-        break;
-      case 'last-30-days':
-        startDate.setDate(startDate.getDate() - 30);
-        break;
-      case 'last-3-months':
-        startDate.setMonth(startDate.getMonth() - 3);
-        break;
-      case 'yearly':
-        startDate.setFullYear(startDate.getFullYear() - 1);
-        break;
-      default:
-        startDate.setFullYear(startDate.getFullYear() - 1);
-    }
-    
-    // Get filtered orders
-    const orders = await Order.find({
-      orderDate: { $gte: startDate, $lte: endDate }
-    });
-    
-    // Process data based on time range
-    let chartLabels = [];
-    let revenueData = [];
-    let ordersData = [];
-    
-    if (timeRange === 'last-7-days') {
-      // Daily data for last 7 days
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        const dateStr = date.toLocaleDateString('en-US', { weekday: 'short' });
-        chartLabels.push(dateStr);
-        
-        const dayOrders = orders.filter(order => {
-          const orderDate = new Date(order.orderDate);
-          return orderDate.getDate() === date.getDate() && 
-                 orderDate.getMonth() === date.getMonth() &&
-                 orderDate.getFullYear() === date.getFullYear();
-        });
-        
-        const dayRevenue = dayOrders.reduce((sum, order) => sum + order.finalAmount, 0);
-        revenueData.push(dayRevenue);
-        ordersData.push(dayOrders.length);
-      }
-    } else if (timeRange === 'last-30-days' || timeRange === 'last-3-months') {
-      // Weekly data
-      const weeks = timeRange === 'last-30-days' ? 4 : 12;
-      for (let i = weeks - 1; i >= 0; i--) {
-        const endWeek = new Date();
-        endWeek.setDate(endWeek.getDate() - (i * 7));
-        const startWeek = new Date(endWeek);
-        startWeek.setDate(startWeek.getDate() - 6);
-        
-        const weekLabel = `${startWeek.getDate()}/${startWeek.getMonth() + 1} - ${endWeek.getDate()}/${endWeek.getMonth() + 1}`;
-        chartLabels.push(weekLabel);
-        
-        const weekOrders = orders.filter(order => {
-          const orderDate = new Date(order.orderDate);
-          return orderDate >= startWeek && orderDate <= endWeek;
-        });
-        
-        const weekRevenue = weekOrders.reduce((sum, order) => sum + order.finalAmount, 0);
-        revenueData.push(weekRevenue);
-        ordersData.push(weekOrders.length);
-      }
-    } else {
-      // Monthly data for yearly view
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      for (let i = 11; i >= 0; i--) {
-        const month = new Date().getMonth() - i;
-        const year = new Date().getFullYear() + Math.floor(month / 12);
-        const adjustedMonth = ((month % 12) + 12) % 12;
-        
-        chartLabels.push(monthNames[adjustedMonth]);
-        
-        const monthOrders = orders.filter(order => {
-          const orderDate = new Date(order.orderDate);
-          return orderDate.getMonth() === adjustedMonth && orderDate.getFullYear() === year;
-        });
-        
-        const monthRevenue = monthOrders.reduce((sum, order) => sum + order.finalAmount, 0);
-        revenueData.push(monthRevenue);
-        ordersData.push(monthOrders.length);
-      }
-    }
-    
-    res.json({ chartLabels, revenueData, ordersData });
-  } catch (error) {
-    console.error('Error fetching chart data:', error);
-    res.status(500).json({ error: 'Failed to fetch chart data' });
   }
 };
 
@@ -704,17 +596,19 @@ const getBrandData = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch brand data' });
   }
 };
+
+
+
 module.exports = {
   loadDashboard,
   downloadReport,
-  generateExcelReport, // Already exported but keeping for completeness
-  generatePDFReport,   // Already exported but keeping for completeness
-  getChartData,
+  generateExcelReport, 
+  generatePDFReport,   
   getCategoryData,
   getBrandData,
   getTopCategoriesData,
   getTopBrandsData,
-  getTopProductsData,  // Missing from exports
-  getMonthlyData,      // Missing from exports
-  getDateRange         // Missing from exports
+  getTopProductsData,  
+  getMonthlyData,      
+  getDateRange         
 };

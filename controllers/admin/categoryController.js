@@ -45,7 +45,7 @@ const categoryInfo = async (req, res) => {
 
 
 const addCategory = async (req, res) => {
-    //console.log(req.body);
+    
     const { name, description } = req.body;
     try {
         if (!name || !description) {
@@ -96,7 +96,7 @@ const editCategory = async (req, res) => {
             return res.status(400).json({ error: "Name and description are required" });
         }
 
-        // Case-insensitive validation using regex with 'i' option
+    
         const existingCategory = await Category.findOne({ 
             name: { $regex: new RegExp(`^${categoryName}$`, 'i') },
             _id: { $ne: id }
@@ -107,7 +107,7 @@ const editCategory = async (req, res) => {
         }
 
         const updatedCategory = await Category.findByIdAndUpdate(id, {
-            name: categoryName, // Keep original case for storage
+            name: categoryName, 
             description: description,
         }, { new: true, runValidators: true });
 
@@ -122,27 +122,6 @@ const editCategory = async (req, res) => {
     }
 }
 
-// const getListCategory = async (req,res)=>{
-//     try {
-//         let id = req.query.id;
-//         await Category.updateOne({_id:id},{$set:{isListed:false}});
-//         res.redirect("/admin/category");
-       
-//     } catch (error) {
-//         res.redirect("/pageerror");
-//     }
-// };
-
-// const getUnlistCategory = async (req,res)=>{
-//     try {
-//         let id = req.query.id;
-//         await Category.updateOne({_id:id},{$set:{isListed:true}});
-//         res.redirect("/admin/category")
-       
-//     } catch (error) {
-//         res.redirect("/pageerror");
-//     }
-// }
 
 const getListCategory = async (req, res) => {
     try {

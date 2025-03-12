@@ -199,52 +199,47 @@
                 </div>
             </div>
 
-            <div class="product-info">
-                <h1><%= product.productName %></h1>
-                <p><%= product.description %></p>
-                <p><strong>Brand:</strong> <%= product.brand %></p>
-                <p><strong>Category:</strong> <%= product.category.name %></p>
-                <!-- <h1 style="color: red;"><%= product.offerPercentage %>%</h1> -->
-                <!-- <p class="price">Sale Price: ₹<%= product.salePrice %>  
-                    <% if (product.regularPrice > product.salePrice) { %>
-                        <span class="discount">(Save <%= ((product.regularPrice - product.salePrice) / product.regularPrice * 100).toFixed(1) %>%)</span>
-                    <% } %>
-                </p> -->
-                <% 
-                const categoryOffer = product.category.categoryOffer || 0;
-                const productOffer = product.offerPercentage || 0;
-                const combinedOffer = Math.max(categoryOffer, productOffer);
-                const discountAmount = (product.regularPrice * combinedOffer) / 100;
-                const salePrice = product.regularPrice - discountAmount;
-            %>
-        
+           <!-- ...existing code... -->
 
-                <p class="price">
-                    <span>Sale Price: ₹<%= product.salePrice %></span>  
-                    <% if (product.regularPrice > product.salePrice) { %>
-                        <span style="text-decoration: line-through; color: #888; font-size: 14px;">₹<%= product.regularPrice %></span>
-                        <span class="discount">(Save <%= ((product.regularPrice - product.salePrice) / product.regularPrice * 100).toFixed(1) %>%)</span>
-                    <% } %>
-                </p>
-                
-                
-                
+<div class="product-info">
+    <h1><%= product.productName %></h1>
+    <p><%= product.description %></p>
+    <p><strong>Brand:</strong> <%= product.brand %></p>
+    <p><strong>Category:</strong> <%= product.category.name %></p>
 
-                <p class="stock-status">
-                    <% if (product.quantity > 0) { %>
-                      <span style="color: green;">In Stock (<%= product.quantity %> left)</span>
-                    <% } else { %>
-                      <span style="color: red;">Out of Stock</span>
-                    <% } %>
-                  </p>
-                  
-                  <% if (product.quantity > 0) { %>
-                    <button class="btn add-to-cart"  data-product-id="<%= product._id %>" data-quantity="1"  data-price="<%= product.salePrice %>">+ Add To Cart</button>
-                  <% } else { %>
-                    <button class="btn" disabled>Out of Stock</button>
-                  <% } %>
+    <% 
+    const categoryOffer = product.category.categoryOffer || 0;
+    const productOffer = product.offerPercentage || 0;
+    const highestOffer = Math.max(categoryOffer, productOffer);
+    const discountAmount = (product.regularPrice * highestOffer) / 100;
+    const salePrice = product.regularPrice - discountAmount;
+    %>
 
-                  <button class="btn">Wishlist</button>
+    <p class="price">
+        <span>Sale Price: ₹<%= salePrice %></span>  
+        <% if (product.regularPrice > salePrice) { %>
+            <span style="text-decoration: line-through; color: #888; font-size: 14px;">₹<%= product.regularPrice %></span>
+            <span class="discount">(Save <%= highestOffer %>%)</span>
+        <% } %>
+    </p>
+
+    <p class="stock-status">
+        <% if (product.quantity > 0) { %>
+            <span style="color: green;">In Stock (<%= product.quantity %> left)</span>
+        <% } else { %>
+            <span style="color: red;">Out of Stock</span>
+        <% } %>
+    </p>
+
+    <% if (product.quantity > 0) { %>
+        <button class="btn add-to-cart" data-product-id="<%= product._id %>" data-quantity="1" data-price="<%= salePrice %>">+ Add To Cart</button>
+    <% } else { %>
+        <button class="btn" disabled>Out of Stock</button>
+    <% } %>
+
+    
+    <button class="btn add-to-wishlist" id="add-to-wishlist" data-product-id="<%= product._id %>">Wishlist</button>
+
                 <p class="rating">⭐⭐⭐⭐☆ (4.5 / 5)</p>
                  <!-- <button class="btn" id="addtocart">Add to Cart</button> -->
                 
@@ -278,114 +273,80 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
     
-    <!-- Custom Zoom Script -->
-    <script>
-        $(document).ready(function() {
-            var $image = $("#zoomImage");
-            var $cursorBox = $("#cursorBox");
-            var $zoomWindow = $("#zoomWindow");
-
-            var imageWidth = $image.width();
-            var imageHeight = $image.height();
-            var zoomFactor = 2; // Adjust the zoom level
-            var zoomWidth = 100;
-            var zoomHeight = 100;
-
-            // Show cursor box & zoom window on hover
-            $image.mouseenter(function() {
-                $cursorBox.show();
-                $zoomWindow.show();
-            });
-
-            // Hide cursor box & zoom window when not hovering
-            $image.mouseleave(function() {
-                $cursorBox.hide();
-                $zoomWindow.hide();
-            });
-
-            // Update cursor and zoom window dynamically
-            $image.mousemove(function(event) {
-                var offset = $image.offset();
-                var x = event.pageX - offset.left;
-                var y = event.pageY - offset.top;
-
-                // Prevent cursor box from going outside the image
-                var cursorX = Math.max(0, Math.min(x - zoomWidth / 2, imageWidth - zoomWidth));
-                var cursorY = Math.max(0, Math.min(y - zoomHeight / 2, imageHeight - zoomHeight));
-
-                // Move the cursor box
-                $cursorBox.css({
-                    left: cursorX + "px",
-                    top: cursorY + "px"
-                });
-
-                // Move the zoomed image inside the zoom window
-                var bgX = -(cursorX * zoomFactor) + "px";
-                var bgY = -(cursorY * zoomFactor) + "px";
-
-                $zoomWindow.css({
-                    "background-position": bgX + " " + bgY
-                });
-            });
-
-            // Change main image on thumbnail click
-            $(".thumbnail-image").on("click", function() {
-                var newSrc = $(this).attr("src");
-                $image.attr("src", newSrc);
-                $image.attr("data-zoom-image", newSrc);
-                $zoomWindow.css("background-image", "url(" + newSrc + ")");
-            });
-        });
-
-        document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.add-to-cart').forEach(button => {
-            button.addEventListener('click', function () {
-                let productId = this.getAttribute('data-product-id'); // Get the product ID from the button
-                addToCart(productId);
-            });
-        });
-    });
-
-    function addToCart(productId) {
-        fetch(`/add-to-cart/${productId}`, {  // Ensure this matches your backend route
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ quantity: 1 }) // Default quantity = 1
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Product added to cart successfully');
-                window.location.href = '/cart'; // Redirect to cart page (optional)
-            } else {
-                alert('Failed to add product to cart');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while adding to cart');
-        });
-    }
 
 
-    </script>
-    <head>
-        <!-- Existing head content -->
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    </head>
-</body>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    $(document).ready(function() {
+        var $image = $("#zoomImage");
+        var $cursorBox = $("#cursorBox");
+        var $zoomWindow = $("#zoomWindow");
+
+        var imageWidth = $image.width();
+        var imageHeight = $image.height();
+        var zoomFactor = 2; // Adjust the zoom level
+        var zoomWidth = 100;
+        var zoomHeight = 100;
+
+        // Show cursor box & zoom window on hover
+        $image.mouseenter(function() {
+            $cursorBox.show();
+            $zoomWindow.show();
+        });
+
+        // Hide cursor box & zoom window when not hovering
+        $image.mouseleave(function() {
+            $cursorBox.hide();
+            $zoomWindow.hide();
+        });
+
+        // Update cursor and zoom window dynamically
+        $image.mousemove(function(event) {
+            var offset = $image.offset();
+            var x = event.pageX - offset.left;
+            var y = event.pageY - offset.top;
+
+            // Prevent cursor box from going outside the image
+            var cursorX = Math.max(0, Math.min(x - zoomWidth / 2, imageWidth - zoomWidth));
+            var cursorY = Math.max(0, Math.min(y - zoomHeight / 2, imageHeight - zoomHeight));
+
+            // Move the cursor box
+            $cursorBox.css({
+                left: cursorX + "px",
+                top: cursorY + "px"
+            });
+
+            // Move the zoomed image inside the zoom window
+            var bgX = -(cursorX * zoomFactor) + "px";
+            var bgY = -(cursorY * zoomFactor) + "px";
+
+            $zoomWindow.css({
+                "background-position": bgX + " " + bgY
+            });
+        });
+
+        // Change main image on thumbnail click
+        $(".thumbnail-image").on("click", function() {
+            var newSrc = $(this).attr("src");
+            $image.attr("src", newSrc);
+            $image.attr("data-zoom-image", newSrc);
+            $zoomWindow.css("background-image", "url(" + newSrc + ")");
+        });
+
+        // Add to Cart functionality
         document.querySelectorAll('.add-to-cart').forEach(button => {
             button.addEventListener('click', function () {
                 let productId = this.getAttribute('data-product-id'); // Get the product ID from the button
                 addToCart(productId);
             });
         });
+
+        // Add to Wishlist functionality
+        document.getElementById('add-to-wishlist').addEventListener('click', function () {
+            let productId = this.getAttribute('data-product-id'); // Get the product ID from the button
+            addToWishlist(productId);
+        });
     });
-    
+
     function addToCart(productId) {
         fetch(`/add-to-cart/${productId}`, {  // Ensure this matches your backend route
             method: 'POST',
@@ -402,6 +363,21 @@
                     icon: 'success',
                     title: 'Success!',
                     text: 'Product added to cart successfully',
+                    showConfirmButton: true,
+                    confirmButtonText: 'Go to Cart',
+                    showCancelButton: true,
+                    cancelButtonText: 'Continue Shopping'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/cart'; // Redirect to cart page if user clicks "Go to Cart"
+                    }
+                });
+            } else if (data.message === 'Product already in cart') {
+                // If product is already in cart, increase the quantity
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Product already in cart',
+                    text: 'The quantity has been updated.',
                     showConfirmButton: true,
                     confirmButtonText: 'Go to Cart',
                     showCancelButton: true,
@@ -430,5 +406,52 @@
             });
         });
     }
-    </script>
+
+    function addToWishlist(productId) {
+        fetch(`/wishlist/add`, {  // Ensure this matches your backend route
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ productId }) // Send the product ID
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Replace alert with SweetAlert
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Product added to wishlist successfully',
+                    showConfirmButton: true,
+                    confirmButtonText: 'Go to Wishlist',
+                    showCancelButton: true,
+                    cancelButtonText: 'Continue Shopping'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/wishlist'; // Redirect to wishlist page if user clicks "Go to Wishlist"
+                    }
+                });
+            } else {
+                // Replace alert with SweetAlert for failure
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Failed to add product to wishlist',
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Replace alert with SweetAlert for error
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while adding to wishlist',
+            });
+        });
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <%- include("../../views/partials/user/footer") %>

@@ -71,10 +71,23 @@
                 </article>
             </div>
         </div>
+        <div class="col-lg-3">
+            <div class="card card-body mb-4 shadow-sm border-0">
+                <article class="d-flex align-items-center">
+                    <div class="icon-stat me-3 rounded-circle d-flex align-items-center justify-content-center bg-warning-light" style="width: 52px; height: 52px;">
+                        <i class="fas fa-tags text-primary fs-4"></i>  <!-- Discount Icon -->
+                    </div>
+                    <div>
+                        <h6 class="mb-1 text-muted">Total Discount</h6>
+                        <span class="fs-4 fw-bold"><%= totalDiscount %></span>
+                    </div>
+                </article>
+            </div>
+        </div>
     </div>
 
     <!-- Charts and Overview -->
-    <div class="row">
+    <!-- <div class="row">
         <div class="col-xl-8 col-lg-12">
             <div class="card mb-4 shadow-sm border-0">
                 <article class="card-body">
@@ -97,12 +110,12 @@
                     </div>
                 </article>
             </div>
-        </div>
-        <div class="col-xl-4 col-lg-12">
-            <div class="row">
+        </div> -->
+        <!-- <div class="col-xl-4 col-lg-12">
+            <div class="row"> -->
                 <!-- File: dashboard.ejs -->
             <!-- Update the Top Categories section -->
-            <div class="col-12 mb-4">
+            <!-- <div class="col-12 mb-4">
                 <div class="card mb-4 shadow-sm border-0">
                     <article class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -148,16 +161,17 @@
             </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- Recent Orders -->
     <div class="card mb-4 shadow-sm border-0">
         <header class="card-header bg-white">
             <div class="d-flex justify-content-between align-items-center">
                 <h4 class="card-title mb-0">Recent Orders</h4>
-                <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+                <a href="/admin/orderlist" class="btn btn-sm btn-outline-primary">View All</a>
             </div>
         </header>
+        
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
@@ -169,7 +183,7 @@
                             <th>Amount</th>
                             <th>Status</th>
                             <th>Date</th>
-                            <th>Action</th>
+                           
                         </tr>
                     </thead>
                     <tbody>
@@ -194,7 +208,7 @@
                             </td>
                             <td><%= order.date %></td>
                             <td>
-                                <div class="dropdown">
+                                <!-- <div class="dropdown">
                                     <button class="btn btn-sm btn-light" type="button" id="dropdownMenuButton-<%= order.orderId %>" data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="fas fa-ellipsis-v"></i>
                                     </button>
@@ -204,8 +218,10 @@
                                         <li><hr class="dropdown-divider"></li>
                                         <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i>Delete</a></li>
                                     </ul>
-                                </div>
+                                </div> -->
                             </td>
+                            <!-- Add filter options for recent orders -->
+
                         </tr>
                         <% }); %>
                     </tbody>
@@ -299,8 +315,8 @@
 </style>
 
 <!-- Dashboard Scripts -->
-// File: dashboard.ejs
-// Replace the chart scripts with this:
+<!-- // File: dashboard.ejs
+// Replace the chart scripts with this: -->
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -510,6 +526,47 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.filter-option').forEach(option => {
+        option.addEventListener('click', function(e) {
+            e.preventDefault();
+            const timeRange = this.dataset.range;
+            
+            fetch(`/admin/recent-orders?timeRange=${timeRange}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Update the recent orders table with the filtered data
+                    const tbody = document.querySelector('.table tbody');
+                    tbody.innerHTML = '';
+                    data.forEach(order => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>#${order.orderId}</td>
+                            <td>${order.customerName}</td>
+                            <td>${order.productName}</td>
+                            <td>₹${order.amount.toLocaleString('en-IN')}</td>
+                            <td>
+                                <span class="badge ${getStatusBadgeClass(order.status)}">${order.status}</span>
+                            </td>
+                            <td>${order.date}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error fetching recent orders:', error));
+        });
+    });
+
+    function getStatusBadgeClass(status) {
+        switch (status) {
+            case 'Pending COD': return 'bg-warning text-dark';
+            case 'Processing': return 'bg-info text-dark';
+            case 'Delivered': return 'bg-success';
+            case 'Cancelled': return 'bg-danger';
+            default: return 'bg-secondary';
+        }
+    }
+});
 </script>
 
 <%- include("../../views/partials/admin/footer") %>

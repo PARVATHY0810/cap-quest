@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="css/owl.carousel.min.css" type="text/css">
     <link rel="stylesheet" href="css/slicknav.min.css" type="text/css">
     <link rel="stylesheet" href="../../../css/style.css" type="text/css">
+    
 <style>
     .dropdown{
         position: relative;
@@ -125,22 +126,22 @@ a[href="/login"]:hover {
                 </ul>
             </nav>
         </div>
-        <div class="col-lg-3 col-md-3">
-            <div class="header__nav__option ">
-                <% if (!userData) { %>
-                    <a href="/signup" class="sign-in-link">Sign Up</a>
-                    <a href="/login">Log in</a>
-                <% } else { %>
-                    <div class="dropdown">
-                        <a href="#" class="sign-in-link"><%= userData.name %></a>
-                        <div class="dropdown-content">
-                            <a href="/profile">Profile</a>
-                            <a href="/logout">Logout</a>
-                        </div>
+        <div class="header__nav__option">
+            <% if (!userData) { %>
+                <a href="/signup" class="sign-in-link">Sign Up</a>
+                <a href="/login">Log in</a>
+            <% } else { %>
+                <div class="dropdown">
+                    <a href="#" class="sign-in-link"><%= userData.name %></a>
+                    <div class="dropdown-content">
+                        <a href="/profile">Profile</a>
+                        <a href="/logout">Logout</a>
                     </div>
-                    <a href="/cart" class="sign-in-link">Cart</a>
-                <% } %>
-            </div>
+                </div>
+                <a href="/cart" class="sign-in-link"><i class="fa fa-shopping-cart"></i></a>
+                <a href="/wishlist" class="sign-in-link"><i class="fa fa-heart"></i></a> <!-- Add this line -->
+            <% } %>
+        </div>
         </div>
     </div>
     <div class="canvas__open"><i class="fa fa-bars"></i></div>

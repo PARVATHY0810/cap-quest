@@ -2,9 +2,9 @@ const Coupons = require('../../models/couponSchema'); // Adjust path to match yo
 
 const getCouponPage = async (req, res, next) => {
     try {
-        // Pagination parameters
+        // Pagination 
         const page = parseInt(req.query.page) || 1;
-        const limit = 10; // Number of coupons per page
+        const limit = 10; 
         const skip = (page - 1) * limit;
 
         // Count total active (non-deleted) coupons
@@ -15,12 +15,12 @@ const getCouponPage = async (req, res, next) => {
         const coupons = await Coupons.find({ isDeleted: false })
             .skip(skip)
             .limit(limit)
-            .sort({ createdOn: -1 }) // Sort by creation date, newest first
+            .sort({ createdOn: -1 }) 
             .select('code offerPrice minimumPrice startOn expireOn maxUses usesCount isListed'); // Select only needed fields
 
-        // Render the EJS page with required data
+        
         res.render('coupon', {
-            coupons, // Array of coupon objects
+            coupons, 
             currentPage: page,
             totalPages,
             hasNextPage: page < totalPages,
@@ -28,7 +28,7 @@ const getCouponPage = async (req, res, next) => {
         });
     } catch (error) {
         console.error('Error in getCouponPage:', error);
-        next(error); // Pass to error-handling middleware
+        next(error); 
     }
 };
 
@@ -43,7 +43,7 @@ const addCoupon = async (req, res) => {
           expireOn
       } = req.body;
 
-      // Validate required fields
+      // Validatations
       if (!code || typeof code !== 'string' || code.trim() === '') {
           return res.status(400).json({
               success: false,
@@ -58,7 +58,7 @@ const addCoupon = async (req, res) => {
           });
       }
 
-      // Clean and format the code
+      
       code = code.trim().toUpperCase();
 
       // Additional validations
@@ -81,7 +81,7 @@ const addCoupon = async (req, res) => {
           offerPrice: Number(offerPrice),
           minimumPrice: Number(minimumPrice),
           startOn: new Date(startOn),
-          maxUses: maxUses ? Number(maxUses) : 5, // Use default from schema if not provided
+          maxUses: maxUses ? Number(maxUses) : 5, 
           expireOn: new Date(expireOn),
           createdOn: new Date(),
           usesCount: 0,
@@ -149,5 +149,5 @@ module.exports = {
     getCouponPage,
     addCoupon,
     toggleCouponStatus,
-    // ... other exports (addCoupon, toggleCouponStatus, applyCoupon)
+    
 };

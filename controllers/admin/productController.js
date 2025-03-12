@@ -96,8 +96,9 @@ const getAllProducts = async (req, res) => {
       ],
     })
       .select("productName brand category regularPrice salePrice quantity productImage isBlocked offerPercentage productOffer") // Added productOffer      .limit(limit * 1)
-      .skip((page - 1) * limit)
       .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
       .populate("category")
       .exec();
 
@@ -189,7 +190,7 @@ const editProduct = async (req, res) => {
       return res.redirect("/admin/products?error=duplicate");
     }
 
-    // Handle image replacement at specific positions
+    // Update the images
     let updatedImages = [...product.productImage];
 
     if (req.files && req.files.length > 0) {
@@ -199,28 +200,26 @@ const editProduct = async (req, res) => {
 
       for (let i = 0; i < req.files.length; i++) {
         const position = parseInt(replacePositions[i]);
-        const resizedImagePath = path.join(
-          __dirname,
-          "../../public/uploads/re-image",
-          `resized-${req.files[i].filename}`
+        
+        // The images are already cropped by the frontend, just save them
+        const imageName = `cropped-${req.files[i].filename}`;
+        const imagePath = path.join(__dirname,"../../public/uploads/re-image",imageName);
+        
+        // Save the file
+        await fs.promises.writeFile(
+          imagePath,
+          await fs.promises.readFile(req.files[i].path)
         );
 
-        await sharp(req.files[i].path)
-          .resize(600, 600, { fit: "cover" })
-          .toFile(resizedImagePath);
-
+        // Update the images array
         if (position < updatedImages.length) {
-          const oldImagePath = path.join(
-            __dirname,
-            "../../public/uploads/re-image",
-            updatedImages[position]
-          );
+          const oldImagePath = path.join(__dirname,"../../public/uploads/re-image",updatedImages[position]);
           if (fs.existsSync(oldImagePath)) {
             fs.unlinkSync(oldImagePath);
           }
-          updatedImages[position] = `resized-${req.files[i].filename}`;
+          updatedImages[position] = imageName;
         } else {
-          updatedImages.push(`resized-${req.files[i].filename}`);
+          updatedImages.push(imageName);
         }
       }
     }
@@ -239,7 +238,6 @@ const editProduct = async (req, res) => {
     };
 
     await Product.findByIdAndUpdate({ _id: id }, updateFields, { new: true });
-
     
     return res.redirect("/admin/products?success=true");
   } catch (error) {
@@ -295,7 +293,7 @@ const addProductOffer = async (req, res) => {
     }
     product.offerPercentage = offerPercentage;
     product.offerEndDate = new Date(endDate);
-    product.productOffer = true; // This is now consistent with the Boolean type
+    product.productOffer = true; 
     const discountAmount = (product.regularPrice * offerPercentage) / 100;
     product.salePrice = product.regularPrice - discountAmount;
     await product.save();
@@ -318,13 +316,14 @@ const removeProductOffer = async (req, res) => {
     }
     product.offerPercentage = 0;
     product.offerEndDate = null;
-    product.productOffer = false; // This is now consistent with the Boolean type
+    product.productOffer = false; 
     product.salePrice = product.regularPrice;
     await product.save();
     res.json({ message: "Offer removed successfully" });
   } catch (error) {
     console.error("Error removing product offer:", error);
     res.status(500).json({ error: "Internal Server Error" });
+    
   }
 };
 
@@ -337,6 +336,6 @@ module.exports = {
   getEditProduct,
   editProduct,
   deleteSingleImage,
-  addProductOffer, // Add this line
+  addProductOffer, 
   removeProductOffer
 };

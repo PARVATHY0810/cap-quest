@@ -138,21 +138,32 @@
       $(".add-to-cart-btn").on("click", function () {
         const button = $(this);
         const productId = button.data("product-id");
-    
+  
         $.ajax({
           url: `/wishlist/add-to-cart`,
           type: "POST",
           contentType: "application/json",
           data: JSON.stringify({ productId }),
           success: function (response) {
-            Swal.fire({
-              icon: "success",
-              title: "Added to Cart",
-              text: response.message,
-              confirmButtonText: 'OK'
-            }).then(() => {
-              button.replaceWith('<a href="/cart" class="btn btn-success">Go to Cart</a>');
-            });
+            if (response.message === 'Product already in cart') {
+              Swal.fire({
+                icon: "info",
+                title: "Product already in cart",
+                text: "The quantity has been updated.",
+                confirmButtonText: 'OK'
+              }).then(() => {
+                button.replaceWith('<a href="/cart" class="btn btn-success">Go to Cart</a>');
+              });
+            } else {
+              Swal.fire({
+                icon: "success",
+                title: "Added to Cart",
+                text: response.message,
+                confirmButtonText: 'OK'
+              }).then(() => {
+                button.replaceWith('<a href="/cart" class="btn btn-success">Go to Cart</a>');
+              });
+            }
           },
           error: function (xhr) {
             const errorMessage = xhr.responseJSON?.message || "Failed to add product.";
@@ -162,78 +173,58 @@
               text: errorMessage,
               confirmButtonText: 'OK'
             });
-    
+  
             if (errorMessage === "Out of Stock") {
               button.replaceWith('<button disabled class="btn btn-danger">Out of Stock</button>');
             }
           }
         });
       });
-    
-        
-       // Remove from wishlist functionality
-        $(".wishlist-heart-btn").on("click", function () {
-          const button = $(this);
-          const productId = button.data("product-id");
-          
-          $.ajax({
-            url: "/wishlist/remove",
-            type: "POST",
-            contentType: "application/json",
-            data: JSON.stringify({ productId }),
-            success: function (response) {
-              Swal.fire({
-                icon: "success",
-                title: "Removed from Wishlist",
-                text: response.message,
-                confirmButtonText: 'OK'
-              }).then(() => {
-                // Remove the product card from the DOM
-                button.closest('.col-md-3').remove();
-                
-                // Check if wishlist is now empty
-                if ($('.wishlist-item').length === 0) {
-                  $('.container').html(`
-                    <div class="empty-wishlist">
-                      <h3>Your wishlist is empty</h3>
-                      <p class="text-muted">Browse our products and add items to your wishlist</p>
-                      <a href="/shop" class="btn btn-primary mt-3">Browse Products</a>
-                    </div>
-                  `);
-                }
-              });
-            },
-            error: function (xhr) {
-              const errorMessage = xhr.responseJSON?.message || "Failed to remove product";
-              Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: errorMessage,
-                confirmButtonText: 'OK'
-              });
-            }
-          });
+  
+      // Remove from wishlist functionality
+      $(".wishlist-heart-btn").on("click", function () {
+        const button = $(this);
+        const productId = button.data("product-id");
+  
+        $.ajax({
+          url: "/wishlist/remove",
+          type: "POST",
+          contentType: "application/json",
+          data: JSON.stringify({ productId }),
+          success: function (response) {
+            Swal.fire({
+              icon: "success",
+              title: "Removed from Wishlist",
+              text: response.message,
+              confirmButtonText: 'OK'
+            }).then(() => {
+              // Remove the product card from the DOM
+              button.closest('.col-md-3').remove();
+  
+              // Check if wishlist is now empty
+              if ($('.wishlist-item').length === 0) {
+                $('.container').html(`
+                  <div class="empty-wishlist">
+                    <h3>Your wishlist is empty</h3>
+                    <p class="text-muted">Browse our products and add items to your wishlist</p>
+                    <a href="/shop" class="btn btn-primary mt-3">Browse Products</a>
+                  </div>
+                `);
+              }
+            });
+          },
+          error: function (xhr) {
+            const errorMessage = xhr.responseJSON?.message || "Failed to remove product";
+            Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: errorMessage,
+              confirmButtonText: 'OK'
+            });
+          }
         });
       });
-      
-      $(".add-to-cart-btn").on("click", function () {
-  const button = $(this);
-  const productId = button.data("product-id");
-
-  $.ajax({
-    url: `/wishlist/add-to-cart`,
-    type: "POST",
-    contentType: "application/json",
-    data: JSON.stringify({ productId }),
-    success: function (response) {
-      // Success handling with SweetAlert
-    },
-    error: function (xhr) {
-      // Error handling
-    }
-  });
-});
-
-      </script>
+    });
+  </script>
 </body>
 </html>

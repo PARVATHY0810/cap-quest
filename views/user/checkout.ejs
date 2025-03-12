@@ -297,13 +297,21 @@ document.getElementById("place-order").addEventListener("click", function () {
   }
   const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
   const finalAmount = parseFloat(document.getElementById("total").value);
+  const couponCode = document.getElementById("coupon-code").value || ""; // Get the coupon code from input
 
   fetch("/create-order", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ addressId, cartId, paymentMethod, finalAmount })
+    body: JSON.stringify({ 
+      addressId, 
+      cartId, 
+      paymentMethod, 
+      finalAmount, 
+      couponCode // Add couponCode here
+    })
   })
   .then(response => response.json())
+  // Rest of the code remains the same...
   .then(data => {
     if (data.success) {
       if (paymentMethod === "razorpay") {
@@ -494,9 +502,25 @@ document.getElementById("place-order").addEventListener("click", function () {
       const couponCode = document.getElementById('coupon-code').value;
       applyCoupon(couponCode);
     });
+    
+  });
+  
+</script>
+<script>
+  // Check if there's a blocked product and show SweetAlert
+  document.addEventListener('DOMContentLoaded', function() {
+    <% if (locals.blockedProduct) { %>
+      swal({
+        title: "Error!",
+        text: "<%= locals.blockedProductName ? 'Product ' + locals.blockedProductName + ' is blocked.' : 'One of the products in your cart is blocked.' %>",
+        icon: "error",
+        button: "OK",
+      }).then(() => {
+        window.location.href = "/cart"; // Redirect to cart page after alert
+      });
+    <% } %>
   });
 </script>
-
 
 
 

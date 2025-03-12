@@ -103,7 +103,7 @@ const checkReferralCode = async (req, res) => {
 
 const signup = async (req, res) => {
   try {
-    const { name, email, password, cPassword, referralCode } = req.body; // Add referralCode here
+    const { name, email, password, cPassword, referralCode } = req.body; 
     console.log('User data', name, email, password, cPassword, referralCode);
 
     if (password !== cPassword) {
@@ -122,10 +122,10 @@ const signup = async (req, res) => {
       return res.render("signup", { message: "Error sending verification email" });
     }
 
-    // Generate a unique referral code for the new user
+    
     const newReferralCode = await generateReferralCode();
 
-    // Check if a referral code was provided and link referredBy
+    
     let referredBy = null;
     if (referralCode) {
       const referrer = await User.findOne({ referralCode });
@@ -137,7 +137,7 @@ const signup = async (req, res) => {
     }
 
     req.session.userOtp = otp;
-    req.session.userData = { name, email, password, referralCode: newReferralCode, referredBy }; // Store referral data in session
+    req.session.userData = { name, email, password, referralCode: newReferralCode, referredBy }; 
     console.log('User signed up', req.session.userData);
     res.redirect('/verify-otp');
 
@@ -184,11 +184,11 @@ const verifyOtp = async (req, res) => {
       });
       await saveUserData.save();
 
-      // Handle wallet updates if referredBy exists
+      
       if (referredBy) {
         const Wallet = require('../../models/walletSchema');
         
-        // Update or create new user's wallet
+        
         let newUserWallet = await Wallet.findOne({ user: saveUserData._id });
         if (!newUserWallet) {
           newUserWallet = new Wallet({ user: saveUserData._id, balance: 0 });
@@ -201,7 +201,7 @@ const verifyOtp = async (req, res) => {
         });
         await newUserWallet.save();
 
-        // Update referrer's wallet
+        
         let referrerWallet = await Wallet.findOne({ user: referredBy });
         if (!referrerWallet) {
           referrerWallet = new Wallet({ user: referredBy, balance: 0 });
@@ -296,11 +296,11 @@ const login = async (req, res) => {
       return res.render("login", { message: "Invalid password" });
     }
 
-    // Check if the user has a referral code; if not, generate and save one
+    
     if (!findUser.referralCode) {
       const newReferralCode = await generateReferralCode();
       findUser.referralCode = newReferralCode;
-      await findUser.save(); // Save the updated user document
+      await findUser.save(); 
       console.log(`Generated and saved referral code for ${email}: ${newReferralCode}`);
     } else {
       console.log(`User ${email} already has referral code: ${findUser.referralCode}`);
@@ -507,6 +507,16 @@ if (query.brand) {
       Brand.find({ isBlocked: false })
     ]);
 
+    // Calculate the highest offer for each product
+    products.forEach(product => {
+      const categoryOffer = product.category.categoryOffer || 0;
+      const productOffer = product.offerPercentage || 0;
+      const highestOffer = Math.max(categoryOffer, productOffer);
+      const discountAmount = (product.regularPrice * highestOffer) / 100;
+      product.salePrice = product.regularPrice - discountAmount;
+      product.highestOffer = highestOffer;
+    });
+
     res.render('shop', {
       products,
       categories,
@@ -531,7 +541,7 @@ async function generateReferralCode() {
   }
   const existingUser = await User.findOne({ referralCode: code });
   if (existingUser) {
-    return generateReferralCode(); // Recursively generate a new one if it exists
+    return generateReferralCode(); 
   }
   return code;
 }

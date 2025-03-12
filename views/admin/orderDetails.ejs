@@ -1,4 +1,4 @@
-Fixed Order Details Template
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -223,6 +223,15 @@ Fixed Order Details Template
 </head>
 <body>
   <div class="order-container">
+
+    <nav class="breadcrumb">
+      <a href="/admin/dashboard">Dashboard</a>
+      <span>></span>
+      <a href="/admin/orderlist">Orders</a>
+      <span>></span>
+      <span class="current">Order Details</span>
+    </nav>
+    
     <div class="info-box">
       <div class="info-label">Total:</div>
       <div class="info-value">₹<%= order.finalAmount.toFixed(2) %></div>
@@ -248,14 +257,14 @@ Fixed Order Details Template
                 <td><%= item.product ? item.product.productName : "Product Deleted" %></td>
                 <td><%= item.quantity %></td>
                 <td>₹<%= item.price.toFixed(2) %></td>
-                <td><%=item.returnReason%></td>
+                <td><%= item.returnReason %></td>
                 <td>
                   <span class="status-badge status-<%= (item.status || 'unknown').toLowerCase().replace(/\s+/g, '') %>" id="status-display-<%= item._id %>">
                     <%= item.status || 'Unknown' %>
                   </span>
                 </td>
                 <td>
-                  <button class="edit-status-btn" onclick="openStatusModal('<%= item._id %>', '<%= item.status %>')" <%= item.status === 'Returned' ? 'disabled' : '' %>>Edit Status</button>
+                  <button class="edit-status-btn" onclick="openStatusModal('<%= item._id %>', '<%= item.status %>')" <%= item.status === 'Returned' || item.status === 'Cancelled' ? 'disabled' : '' %>>Edit Status</button>
                   <% if (item.status === 'Return Request') { %>
                     <button class="btn btn-success mt-2" onclick="respondToReturn('<%= item._id %>', 'Returned')">Allow</button>
                     <button class="btn btn-danger mt-2" onclick="respondToReturn('<%= item._id %>', 'Denied')">Deny</button>

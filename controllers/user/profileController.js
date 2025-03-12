@@ -1,7 +1,6 @@
 const User = require("../../models/userSchema");
 const orders = require("../../models/orderSchema")
 const Address = require("../../models/addressSchema");
-//const Order = require("../../models/orderSchema");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 
@@ -186,7 +185,7 @@ const editAddress = async (req, res) => {
           return res.redirect('/profile');         
       }  
 
-      // const totalAddress = addressData.address.find(addr => addr._id.toString() === addressId);
+      
       
       res.render("editAddress", { userId,addressData });     
   } catch (error) {         
@@ -202,7 +201,7 @@ const updateAddress = async (req, res) => {
       const {  addressId, addressType, name, city, landmark, state, pincode, phone } = req.body;
 
       const updatedAddress = await Address.findByIdAndUpdate(
-          {  _id: addressId }, // Find user’s address array and specific address
+          {  _id: addressId }, 
           {
             $set: {
               userId:req.session.user,
@@ -215,7 +214,7 @@ const updateAddress = async (req, res) => {
              phone: phone
             }
           },
-          { new: true } // Return updated document
+          { new: true } 
       );
 
       if (!updatedAddress) {
@@ -246,10 +245,6 @@ const deleteAddress = async (req,res)=>{
 
   }
 }
-
-
-
-
 
       module.exports = {
         profile,

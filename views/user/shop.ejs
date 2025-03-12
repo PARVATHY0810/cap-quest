@@ -463,6 +463,9 @@
                     <p class="product-price">
                       <span class="original-price">₹<%= product.regularPrice %></span>
                       <span class="sale-price">₹<%= product.salePrice %></span>
+                      <% if (product.highestOffer > 0) { %>
+                        <span class="discount">(Save <%= product.highestOffer %>%)</span>
+                      <% } %>
                     </p>
           
                     <p class="stock-status">

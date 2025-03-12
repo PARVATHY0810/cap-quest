@@ -8,56 +8,101 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <%- include('../../views/partials/user/header') %>
     <style>
+        :root {
+            --primary-orange: #ff6200;
+            --dark-orange: #e55b00;
+            --black: #1a1a1a;
+            --light-gray: #f5f5f5;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+            font-family: 'Georgia', serif;
+        }
+
         .order-list {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
+            padding: 20px;
         }
+
+        .order-header {
+            background-color: var(--black);
+            color: white;
+            padding: 15px;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
         .order-item {
-            border-bottom: 1px solid #eee;
-            padding: 15px 0;
+            background-color: white;
+            padding: 20px;
+            border-bottom: 1px solid var(--light-gray);
+            transition: all 0.3s ease;
         }
+
+        .order-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
         .order-item:last-child {
             border-bottom: none;
         }
-        .order-header {
-            background-color: #f8f9fa;
-            border-bottom: 2px solid #dee2e6;
+
+        .card {
+            border: none;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
-        .order-total {
-            font-weight: bold;
-            border-top: 2px solid #dee2e6;
+
+        .btn-outline-primary {
+            border-color: var(--primary-orange);
+            color: var(--primary-orange);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-orange);
+            color: white;
+            border-color: var(--primary-orange);
+        }
+
+        h2 {
+            color: var(--black);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 3px solid var(--primary-orange);
+            padding-bottom: 10px;
+        }
+
+        .pagination .page-link {
+            color: var(--primary-orange);
+            border: none;
+            margin: 0 5px;
+            border-radius: 4px;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-orange);
+            border-color: var(--primary-orange);
+            color: white;
+        }
+
+        .pagination .page-link:hover {
+            background-color: var(--dark-orange);
+            color: white;
         }
     </style>
 </head>
 <body>
     <div class="container my-5">
         <div class="order-list">
-            <h2 class="mb-4">Order List</h2>
+            <h2 class="mb-4">Order Ledger</h2>
             
-            <!-- Order Search/Filter -->
-            <div class="row mb-4">
-                <!-- <div class="col-md-6">
-                    <input type="text" class="form-control" placeholder="Search orders...">
-                </div> -->
-
-
-                
-                <!-- <div class="col-md-3">
-                    <select class="form-select">
-                        <option selected>Filter by status</option>
-                        <option>Pending</option>
-                        <option>Processing</option>
-                        <option>Shipped</option>
-                        <option>Delivered</option>
-                        <option>Cancelled</option>
-                    </select>
-                </div> -->
-                <!-- <div class="col-md-3">
-                    <button class="btn btn-primary w-100">Search</button>
-                </div> -->
-            </div>
-            
-            <!-- Order List -->
             <div class="card">
                 <div class="card-body p-0">
                     <!-- Order Header -->
