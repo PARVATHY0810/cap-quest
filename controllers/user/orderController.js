@@ -86,6 +86,14 @@ const createOrder = async (req, res) => {
   try {
     const userId = req.session.user;
     const { addressId, cartId, paymentMethod, finalAmount, couponCode } = req.body;
+    
+    if (paymentMethod === "COD" && finalAmount > 5000) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "COD limit 5000 is exceeded, please choose another payment option",
+        codLimitExceeded: true
+      });
+    }
 
     const address = await Address.findById(addressId);
     if (!address) {

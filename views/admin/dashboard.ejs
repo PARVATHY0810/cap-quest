@@ -115,21 +115,12 @@
             <div class="row">
                 <!-- File: dashboard.ejs -->
             <!-- Update the Top Categories section -->
+             
             <div class="col-12 mb-4">
                 <div class="card mb-4 shadow-sm border-0">
                     <article class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h5 class="card-title mb-0">Top Categories</h5>
-                            <div class="dropdown">
-                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fas fa-filter me-1"></i> Filter
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item filter-option" href="#" data-chart="category" data-range="week">Last Week</a></li>
-                                    <li><a class="dropdown-item filter-option" href="#" data-chart="category" data-range="month">Last Month</a></li>
-                                    <li><a class="dropdown-item filter-option" href="#" data-chart="category" data-range="year">Last Year</a></li>
-                                </ul>
-                            </div>
                         </div>
                         <div class="chart-container" style="position: relative; height:180px; width:100%;">
                             <canvas id="categoryChart"></canvas>
@@ -142,7 +133,7 @@
                     <article class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h5 class="card-title mb-0">Top Brands</h5>
-                            <div class="dropdown">
+                            <!-- <div class="dropdown">
                                 <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="fas fa-filter me-1"></i> Filter
                                 </button>
@@ -151,7 +142,7 @@
                                     <li><a class="dropdown-item filter-option" href="#" data-chart="brand" data-range="month">Last Month</a></li>
                                     <li><a class="dropdown-item filter-option" href="#" data-chart="brand" data-range="year">Last Year</a></li>
                                 </ul>
-                            </div>
+                            </div> -->
                         </div>
                         <div class="chart-container" style="position: relative; height:180px; width:100%;">
                             <canvas id="brandChart"></canvas>

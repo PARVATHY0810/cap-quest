@@ -504,6 +504,73 @@ document.getElementById("place-order").addEventListener("click", function () {
     });
     
   });
+
+  // Add this JavaScript to your checkout page where the payment form is submitted
+// Assuming you have a form submission with AJAX like this:
+
+document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  // Get form data
+  const formData = new FormData(this);
+  const formDataObj = {};
+  formData.forEach((value, key) => {
+    formDataObj[key] = value;
+  });
+  
+  // Check if COD is selected and amount exceeds limit
+  // This is an additional client-side check, but we'll still rely on server validation
+  if (formDataObj.paymentMethod === 'COD' && parseFloat(formDataObj.finalAmount) > 5000) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'COD Limit Exceeded',
+      text: 'Orders above Rs 5000 are not eligible for Cash on Delivery. Please choose another payment option.',
+      confirmButtonText: 'OK'
+    });
+    return; // Stop form submission
+  }
+  
+  // Send the AJAX request
+  fetch('/create-order', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(formDataObj)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Redirect to order placed page
+      window.location.href = `/order-placed?orderId=${data.orderId}`;
+    } else if (data.codLimitExceeded) {
+      // Show SweetAlert for COD limit exceeded
+      Swal.fire({
+        icon: 'warning',
+        title: 'COD Limit Exceeded',
+        text: 'Orders above Rs 5000 are not eligible for Cash on Delivery. Please choose another payment option.',
+        confirmButtonText: 'OK'
+      });
+    } else {
+      // Show other error messages
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: data.message || 'Something went wrong!',
+        confirmButtonText: 'OK'
+      });
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Something went wrong!',
+      confirmButtonText: 'OK'
+    });
+  });
+});
   
 </script>
 <script>
