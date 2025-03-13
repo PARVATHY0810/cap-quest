@@ -273,6 +273,107 @@ const generatePDFReport = (data, reportType) => {
   return doc;
 };
 
+const getChartData = async (req, res) => {
+  try {
+    const { timeRange } = req.query;
+    let startDate = new Date();
+    const endDate = new Date();
+    
+    // Set date range based on requested time range
+    switch (timeRange) {
+      case 'last-7-days':
+        startDate.setDate(startDate.getDate() - 7);
+        break;
+      case 'last-30-days':
+        startDate.setDate(startDate.getDate() - 30);
+        break;
+      case 'last-3-months':
+        startDate.setMonth(startDate.getMonth() - 3);
+        break;
+      case 'yearly':
+        startDate.setFullYear(startDate.getFullYear() - 1);
+        break;
+      default:
+        startDate.setFullYear(startDate.getFullYear() - 1);
+    }
+    
+    // Get filtered orders
+    const orders = await Order.find({
+      orderDate: { $gte: startDate, $lte: endDate }
+    });
+    
+    // Process data based on time range
+    let chartLabels = [];
+    let revenueData = [];
+    let ordersData = [];
+    
+    if (timeRange === 'last-7-days') {
+      // Daily data for last 7 days
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toLocaleDateString('en-US', { weekday: 'short' });
+        chartLabels.push(dateStr);
+        
+        const dayOrders = orders.filter(order => {
+          const orderDate = new Date(order.orderDate);
+          return orderDate.getDate() === date.getDate() && 
+                 orderDate.getMonth() === date.getMonth() &&
+                 orderDate.getFullYear() === date.getFullYear();
+        });
+        
+        const dayRevenue = dayOrders.reduce((sum, order) => sum + order.finalAmount, 0);
+        revenueData.push(dayRevenue);
+        ordersData.push(dayOrders.length);
+      }
+    } else if (timeRange === 'last-30-days' || timeRange === 'last-3-months') {
+      // Weekly data
+      const weeks = timeRange === 'last-30-days' ? 4 : 12;
+      for (let i = weeks - 1; i >= 0; i--) {
+        const endWeek = new Date();
+        endWeek.setDate(endWeek.getDate() - (i * 7));
+        const startWeek = new Date(endWeek);
+        startWeek.setDate(startWeek.getDate() - 6);
+        
+        const weekLabel = `${startWeek.getDate()}/${startWeek.getMonth() + 1} - ${endWeek.getDate()}/${endWeek.getMonth() + 1}`;
+        chartLabels.push(weekLabel);
+        
+        const weekOrders = orders.filter(order => {
+          const orderDate = new Date(order.orderDate);
+          return orderDate >= startWeek && orderDate <= endWeek;
+        });
+        
+        const weekRevenue = weekOrders.reduce((sum, order) => sum + order.finalAmount, 0);
+        revenueData.push(weekRevenue);
+        ordersData.push(weekOrders.length);
+      }
+    } else {
+      // Monthly data for yearly view
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      for (let i = 11; i >= 0; i--) {
+        const month = new Date().getMonth() - i;
+        const year = new Date().getFullYear() + Math.floor(month / 12);
+        const adjustedMonth = ((month % 12) + 12) % 12;
+        
+        chartLabels.push(monthNames[adjustedMonth]);
+        
+        const monthOrders = orders.filter(order => {
+          const orderDate = new Date(order.orderDate);
+          return orderDate.getMonth() === adjustedMonth && orderDate.getFullYear() === year;
+        });
+        
+        const monthRevenue = monthOrders.reduce((sum, order) => sum + order.finalAmount, 0);
+        revenueData.push(monthRevenue);
+        ordersData.push(monthOrders.length);
+      }
+    }
+    
+    res.json({ chartLabels, revenueData, ordersData });
+  } catch (error) {
+    console.error('Error fetching chart data:', error);
+    res.status(500).json({ error: 'Failed to fetch chart data' });
+  }
+};
 
 const getDateRange = (reportType, startDate, endDate) => {
   const endDateTime = new Date();
@@ -610,5 +711,6 @@ module.exports = {
   getTopBrandsData,
   getTopProductsData,  
   getMonthlyData,      
-  getDateRange         
+  getDateRange  ,
+  getChartData,       
 };

@@ -39,7 +39,8 @@ router.get("/dashboard", adminAuth, dashboardController.loadDashboard);
 router.get("/category-data", adminAuth, dashboardController.getCategoryData);
 router.get("/brand-data", adminAuth, dashboardController.getBrandData);
 router.get("/download-report", adminAuth, dashboardController.downloadReport);
-//router.get("/download-report", adminAuth, dashboardController.downloadReport);
+router.get("/chart-data", adminAuth, dashboardController.getChartData);
+
 
 //Brand Management
 router.get("/brands",adminAuth,brandController.getBrandPage);

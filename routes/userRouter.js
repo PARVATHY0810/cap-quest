@@ -70,6 +70,8 @@ router.get('/order/details/:orderId', userAuth, orderController.getOrderDetails)
 router.get('/viewOrder',orderController.viewOrder);
 router.post('/cancelOrder',orderController.cancelOrder);
 router.post('/return-order', userAuth, orderController.returnOrder);
+router.get('/download-invoice', userAuth, orderController.downloadInvoice);
+
 //coupon side
 router.get("/get-available-coupons", userAuth, orderController.getAvailableCoupons);
 router.post("/apply-coupon", userAuth, orderController.applyCoupon);

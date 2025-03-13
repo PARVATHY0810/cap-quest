@@ -10,6 +10,7 @@ const Wallet = require("../../models/walletSchema");
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
 const Razorpay = require('razorpay');
+const PDFDocument = require('pdfkit');
 
 
 
@@ -528,7 +529,95 @@ const applyCoupon = async (req, res) => {
   }
 };
 
+const downloadInvoice = async (req, res) => {
+  try {
+    const orderId = req.query.orderId;
 
+    // Fetch order details
+    const order = await Order.findById(orderId)
+      .populate("orderedItems.product")
+      .populate("userId");
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Create a new PDF document
+    const doc = new PDFDocument({ size: 'A4', margin: 50 });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=invoice_${orderId}.pdf`);
+    doc.pipe(res);
+
+    // Header
+    doc.fontSize(20).text('Invoice', { align: 'center' });
+    doc.fontSize(10).text(`Order ID: ${orderId}`, { align: 'right' });
+    doc.text(`Date: ${order.orderDate.toLocaleDateString()}`, { align: 'right' });
+    doc.moveDown();
+
+    // Company Info (assuming a generic placeholder; adjust as per your invoice model)
+    doc.fontSize(12).text('Your Company Name', { align: 'left' });
+    doc.fontSize(10).text('123 Business Street, City, State, ZIP', { align: 'left' });
+    doc.text('Email: contact@company.com', { align: 'left' });
+    doc.moveDown();
+
+    // Customer Info
+    doc.fontSize(12).text('Bill To:', { underline: true });
+    doc.fontSize(10).text(order.shippingAddress.fullName);
+    doc.text(`${order.shippingAddress.addressType}, ${order.shippingAddress.landmark}`);
+    doc.text(`${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.pincode}`);
+    doc.text(`Phone: ${order.shippingAddress.phone}`);
+    doc.moveDown();
+
+    // Table Header
+    doc.fontSize(12).text('Order Items', { underline: true });
+    doc.moveDown(0.5);
+    const tableTop = doc.y;
+    const itemWidth = 200;
+    const qtyWidth = 50;
+    const priceWidth = 80;
+    const totalWidth = 80;
+
+    doc.fontSize(10).text('Item', 50, tableTop, { width: itemWidth });
+    doc.text('Qty', 250, tableTop, { width: qtyWidth, align: 'center' });
+    doc.text('Price', 300, tableTop, { width: priceWidth, align: 'right' });
+    doc.text('Total', 380, tableTop, { width: totalWidth, align: 'right' });
+    doc.moveTo(50, tableTop + 15).lineTo(460, tableTop + 15).stroke();
+
+    // Table Rows
+    let y = tableTop + 25;
+    order.orderedItems.forEach(item => {
+      doc.text(item.product ? item.product.productName : 'N/A', 50, y, { width: itemWidth });
+      doc.text(item.quantity.toString(), 250, y, { width: qtyWidth, align: 'center' });
+      doc.text(`Rs. ${item.price}`, 300, y, { width: priceWidth, align: 'right' });
+      doc.text(`Rs. ${item.quantity * item.price}`, 380, y, { width: totalWidth, align: 'right' });
+      y += 20;
+    });
+
+    // Summary
+    const summaryTop = y + 20;
+    doc.fontSize(12).text('Order Summary', 50, summaryTop, { underline: true });
+    doc.fontSize(10);
+    doc.text('Subtotal:', 300, summaryTop + 20, { width: 100, align: 'right' });
+    doc.text(`Rs. ${order.totalPrice}`, 400, summaryTop + 20, { width: 60, align: 'right' });
+    doc.text('Discount:', 300, summaryTop + 40, { width: 100, align: 'right' });
+    doc.text(`- Rs. ${order.discount || 0}`, 400, summaryTop + 40, { width: 60, align: 'right' });
+    doc.text('Shipping:', 300, summaryTop + 60, { width: 100, align: 'right' });
+    doc.text('Free', 400, summaryTop + 60, { width: 60, align: 'right' });
+    doc.text('Total:', 300, summaryTop + 80, { width: 100, align: 'right' });
+    doc.fontSize(12).text(`Rs. ${order.finalAmount}`, 400, summaryTop + 80, { width: 60, align: 'right' });
+
+    // Footer
+    doc.moveDown(2);
+    doc.fontSize(8).text('Thank you for your purchase!', { align: 'center' });
+
+    // Finalize the PDF
+    doc.end();
+
+  } catch (error) {
+    console.error("Error generating invoice:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 module.exports = {
   getCheckoutPage,
@@ -540,5 +629,6 @@ module.exports = {
   cancelOrder,
   returnOrder,
   getAvailableCoupons,
-  applyCoupon
+  applyCoupon,
+  downloadInvoice
 };
