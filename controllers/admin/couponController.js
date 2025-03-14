@@ -145,9 +145,67 @@ const toggleCouponStatus = async (req, res) => {
   }
 };
 
-module.exports = {
+const getCouponById = async (req, res) => {
+    try {
+      const { couponId } = req.params;
+      const coupon = await Coupons.findById(couponId);
+      if (!coupon) {
+        return res.status(404).json({ success: false, message: 'Coupon not found' });
+      }
+      res.status(200).json(coupon);
+    } catch (error) {
+      console.error('Error in getCouponById:', error);
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  };
+  
+  const updateCoupon = async (req, res) => {
+    try {
+      const { couponId } = req.params;
+      const { code, offerPrice, minimumPrice, startOn, expireOn, maxUses } = req.body;
+  
+      const updatedCoupon = await Coupons.findByIdAndUpdate(couponId, {
+        code,
+        offerPrice,
+        minimumPrice,
+        startOn: new Date(startOn),
+        expireOn: new Date(expireOn),
+        maxUses
+      }, { new: true });
+  
+      if (!updatedCoupon) {
+        return res.status(404).json({ success: false, message: 'Coupon not found' });
+      }
+  
+      res.status(200).json({ success: true, message: 'Coupon updated successfully', coupon: updatedCoupon });
+    } catch (error) {
+      console.error('Error in updateCoupon:', error);
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  };
+  
+  const deleteCoupon = async (req, res) => {
+    try {
+      const { couponId } = req.params;
+      const deletedCoupon = await Coupons.findByIdAndUpdate(couponId, { isDeleted: true }, { new: true });
+  
+      if (!deletedCoupon) {
+        return res.status(404).json({ success: false, message: 'Coupon not found' });
+      }
+  
+      res.status(200).json({ success: true, message: 'Coupon deleted successfully' });
+    } catch (error) {
+      console.error('Error in deleteCoupon:', error);
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  };
+  
+  module.exports = {
     getCouponPage,
     addCoupon,
     toggleCouponStatus,
-    
-};
+    getCouponById,
+    updateCoupon,
+    deleteCoupon
+  };
+

@@ -78,6 +78,49 @@
             </div>
         </div>
 
+        <!-- Edit Coupon Modal -->
+<!-- Edit Coupon Modal -->
+<div class="modal fade" id="editCouponModal" tabindex="-1" aria-labelledby="editCouponModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editCouponModalLabel">Edit Coupon</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editCouponForm">
+            <input type="hidden" id="editCouponId" name="couponId">
+            <div class="mb-3">
+              <label for="editCode" class="form-label">Coupon Code</label>
+              <input type="text" class="form-control" id="editCode" name="code" required>
+            </div>
+            <div class="mb-3">
+              <label for="editOfferPrice" class="form-label">Offer Price</label>
+              <input type="number" class="form-control" id="editOfferPrice" name="offerPrice" required>
+            </div>
+            <div class="mb-3">
+              <label for="editMinimumPrice" class="form-label">Minimum Price</label>
+              <input type="number" class="form-control" id="editMinimumPrice" name="minimumPrice" required>
+            </div>
+            <div class="mb-3">
+              <label for="editStartOn" class="form-label">Start Date</label>
+              <input type="date" class="form-control" id="editStartOn" name="startOn" required>
+            </div>
+            <div class="mb-3">
+              <label for="editExpireOn" class="form-label">Expiration Date</label>
+              <input type="date" class="form-control" id="editExpireOn" name="expireOn" required>
+            </div>
+            <div class="mb-3">
+              <label for="editMaxUses" class="form-label">Max Uses</label>
+              <input type="number" class="form-control" id="editMaxUses" name="maxUses" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Save Changes</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
         <!-- Coupon List Table -->
         <h3 class="mt-5">Coupon List</h3>
         <table class="table table-striped coupon-table">
@@ -92,34 +135,40 @@
                     <th>Uses Count</th>
                     <th>Status</th>
                     <th>Action</th>
+                   
                 </tr>
             </thead>
             <tbody>
                 <% if (coupons.length > 0) { %>
-                    <% coupons.forEach(coupon => { %>
-                        <tr class="<%= new Date(coupon.expireOn) < new Date() ? 'expired' : '' %>">
-                            <td><%= coupon.code.toUpperCase() %></td> <!-- Display in uppercase -->
-                            <td><%= coupon.offerPrice %></td>
-                            <td><%= coupon.minimumPrice %></td>
-                            <td><%= new Date(coupon.startOn).toLocaleDateString() %></td>
-                            <td><%= new Date(coupon.expireOn).toLocaleDateString() %></td>
-                            <td><%= coupon.maxUses %></td>
-                            <td><%= coupon.usesCount %></td>
-                            <td><%= coupon.isListed ? 'Listed' : 'Unlisted' %></td>
-                            <td>
-                                <button class="btn btn-sm <%= coupon.isListed ? 'btn-warning' : 'btn-success' %> status-toggle" 
-                                        data-id="<%= coupon._id %>">
-                                    <%= coupon.isListed ? 'Unlist' : 'List' %>
-                                </button>
-                            </td>
-                        </tr>
-                    <% }) %>
-                <% } else { %>
-                    <tr>
-                        <td colspan="9" class="text-center">No coupons found</td>
+                  <% coupons.forEach(coupon => { %>
+                    <tr class="<%= new Date(coupon.expireOn) < new Date() ? 'expired' : '' %>">
+                      <td><%= coupon.code.toUpperCase() %></td> <!-- Display in uppercase -->
+                      <td><%= coupon.offerPrice %></td>
+                      <td><%= coupon.minimumPrice %></td>
+                      <td><%= new Date(coupon.startOn).toLocaleDateString() %></td>
+                      <td><%= new Date(coupon.expireOn).toLocaleDateString() %></td>
+                      <td><%= coupon.maxUses %></td>
+                      <td><%= coupon.usesCount %></td>
+                      <td><%= coupon.isListed ? 'Listed' : 'Unlisted' %></td>
+                      <td>
+                        <button class="btn btn-sm btn-warning status-toggle" data-id="<%= coupon._id %>">
+                          <%= coupon.isListed ? 'Unlist' : 'List' %>
+                        </button>
+                        <button class="btn btn-sm btn-primary edit-coupon" data-id="<%= coupon._id %>" data-bs-toggle="modal" data-bs-target="#editCouponModal">
+                          Edit
+                        </button>
+                        <button class="btn btn-sm btn-danger delete-coupon" data-id="<%= coupon._id %>">
+                          Delete
+                        </button>
+                      </td>
                     </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="9" class="text-center">No coupons found</td>
+                  </tr>
                 <% } %>
-            </tbody>
+              </tbody>
         </table>
 
         <!-- Pagination -->
@@ -292,4 +341,123 @@ button.addEventListener('click', async () => {
         });
         
     </script>
+  <script>
+    // Edit Coupon functionality
+    document.querySelectorAll('.edit-coupon').forEach(button => {
+      button.addEventListener('click', async () => {
+        const couponId = button.getAttribute('data-id');
+        try {
+          const response = await fetch(`/admin/coupons/${couponId}`);
+          const coupon = await response.json();
+          if (coupon) {
+            document.getElementById('editCouponId').value = coupon._id;
+            document.getElementById('editCode').value = coupon.code;
+            document.getElementById('editOfferPrice').value = coupon.offerPrice;
+            document.getElementById('editMinimumPrice').value = coupon.minimumPrice;
+            document.getElementById('editStartOn').value = new Date(coupon.startOn).toISOString().split('T')[0];
+            document.getElementById('editExpireOn').value = new Date(coupon.expireOn).toISOString().split('T')[0];
+            document.getElementById('editMaxUses').value = coupon.maxUses;
+          }
+        } catch (error) {
+          console.error('Error fetching coupon:', error);
+        }
+      });
+    });
+  
+    document.getElementById('editCouponForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+      try {
+        const response = await fetch(`/admin/coupons/${data.couponId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        if (result.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Coupon Updated',
+            text: result.message,
+            timer: 2000,
+            showConfirmButton: false
+          }).then(() => {
+            location.reload();
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: result.message,
+            timer: 2000,
+            showConfirmButton: false
+          });
+        }
+      } catch (error) {
+        console.error('Error updating coupon:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to update coupon',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    });
+  
+    // Delete Coupon functionality
+    document.querySelectorAll('.delete-coupon').forEach(button => {
+      button.addEventListener('click', async () => {
+        const couponId = button.getAttribute('data-id');
+        Swal.fire({
+          title: 'Are you sure?',
+          text: "You won't be able to revert this!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: 'Yes, delete it!'
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            try {
+              const response = await fetch(`/admin/coupons/${couponId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+              });
+              const result = await response.json();
+              if (result.success) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Deleted!',
+                  text: 'Coupon has been deleted.',
+                  timer: 2000,
+                  showConfirmButton: false
+                }).then(() => {
+                  location.reload();
+                });
+              } else {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: result.message,
+                  timer: 2000,
+                  showConfirmButton: false
+                });
+              }
+            } catch (error) {
+              console.error('Error deleting coupon:', error);
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to delete coupon',
+                timer: 2000,
+                showConfirmButton: false
+              });
+            }
+          }
+        });
+      });
+    });
+  </script>
 <%- include("../../views/partials/admin/footer") %>
