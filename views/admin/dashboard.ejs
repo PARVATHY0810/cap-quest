@@ -128,6 +128,18 @@
                     </article>
                 </div>
             </div>
+            <div class="col-12 mb-4">
+                <div class="card mb-4 shadow-sm border-0">
+                  <article class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                      <h5 class="card-title mb-0">Top Products</h5>
+                    </div>
+                    <div class="chart-container" style="position: relative; height:180px; width:100%;">
+                      <canvas id="productChart"></canvas>
+                    </div>
+                  </article>
+                </div>
+              </div>
             <div class="col-12">
                 <div class="card mb-4 shadow-sm border-0">
                     <article class="card-body">
@@ -431,6 +443,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         );
+        
+        // Product Pie Chart - Dynamic data
+    const productChart = new Chart(
+      document.getElementById('productChart').getContext('2d'),
+      {
+        type: 'doughnut',
+        data: {
+          labels: chartData.productLabels || ['No Data'],
+          datasets: [{
+            data: chartData.productData || [100],
+            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } }
+        }
+      }
+    );
+
+
 
         // Set up filter buttons for category and brand charts
         document.querySelectorAll('.btn-filter').forEach(btn => {

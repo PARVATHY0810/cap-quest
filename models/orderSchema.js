@@ -38,6 +38,7 @@ const orderSchema = new Schema({
           "Cancelled",
           "Return Request",
           "Returned",
+          "Payment Failed",
         ],
         default: "Processing",
       },
@@ -51,6 +52,15 @@ const orderSchema = new Schema({
       },
     },
   ],
+  razorpayOrderId: {
+    type: String,
+    default: null
+  },
+  status: {
+    type: String,
+    enum: ["Pending", "Pending COD", "Payment Failed", "Processing", "Shipped", "Delivered", "Cancelled"],
+    default: "Pending"
+  },
   totalPrice: {
     type: Number,
     required: true,

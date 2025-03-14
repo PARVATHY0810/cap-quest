@@ -198,11 +198,13 @@
 
     <!-- Add this section before the Order Summary section -->
 <!-- Add this section before the Order Summary section -->
+<!-- Add this section before the Order Summary section -->
 <div class="section-card coupon-section">
   <h3>Apply Coupon</h3>
   <div class="coupon-input">
     <input type="text" id="coupon-code" placeholder="Enter coupon code">
     <button id="apply-coupon" class="btn btn-secondary">Apply</button>
+    <button id="remove-coupon" class="btn btn-warning" style="display: none;">Remove</button>
   </div>
   <div id="coupon-result" class="mt-2"></div>
   <div class="available-coupons mt-3">
@@ -347,10 +349,43 @@ document.getElementById("place-order").addEventListener("click", function () {
         const rzp1 = new Razorpay(options);
         rzp1.on('payment.failed', function (response) {
           swal({
-            title: "Error!",
-            text: "Payment failed. Please try again.",
+            title: "Payment Failed!",
+            text: "Your payment has failed. The order has been recorded.",
             icon: "error",
-            button: "OK",
+            buttons: {
+              viewOrders: {
+                text: "View Orders",
+                value: "viewOrders",
+              },
+              backToHome: {
+                text: "Back to Home",
+                value: "backToHome",
+              },
+            },
+          }).then((value) => {
+            // Record the failed order and clear cart
+            fetch('/handle-payment-failure', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                orderId: data.orderId,
+                cartId: cartId,
+                razorpayPaymentId: response.error.metadata.payment_id,
+              }),
+            })
+            .then(res => res.json())
+            .then(result => {
+              if (result.success) {
+                if (value === "viewOrders") {
+                  window.location.href = `/viewOrder?orderId=${data.orderId}`;
+                } else if (value === "backToHome") {
+                  window.location.href = "/";
+                }
+              } else {
+                console.error('Failed to handle payment failure:', result.message);
+              }
+            })
+            .catch(err => console.error('Error:', err));
           });
         });
         rzp1.open();
@@ -422,89 +457,115 @@ document.getElementById("place-order").addEventListener("click", function () {
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const couponSelect = document.getElementById('coupon-select');
-    const applyCouponBtn = document.getElementById('apply-coupon');
-    const couponResultDiv = document.getElementById('coupon-result');
+ 
+// Add this JavaScript to your checkout page where the payment form is submitted
+document.addEventListener('DOMContentLoaded', () => {
+  const applyCouponBtn = document.getElementById('apply-coupon');
+  const removeCouponBtn = document.getElementById('remove-coupon');
+  const couponResultDiv = document.getElementById('coupon-result');
+  const couponCodeInput = document.getElementById('coupon-code');
+  let appliedCouponCode = null;
 
-    // Fetch and populate available coupons in the select dropdown
-    async function fetchAvailableCoupons() {
-      try {
-        const response = await fetch('/get-available-coupons');
-        const coupons = await response.json();
+  // Fetch and populate available coupons in the select dropdown
+  async function fetchAvailableCoupons() {
+    try {
+      const response = await fetch('/get-available-coupons');
+      const coupons = await response.json();
 
-        const availableCouponsList = document.getElementById('available-coupons-list');
-        availableCouponsList.innerHTML = ''; // Reset list
+      const availableCouponsList = document.getElementById('available-coupons-list');
+      availableCouponsList.innerHTML = ''; // Reset list
 
-        coupons.forEach(coupon => {
-          const couponDiv = document.createElement('div');
-          couponDiv.textContent = `${coupon.code} - ₹${coupon.offerPrice} off (Min ₹${coupon.minimumPrice})`;
-          availableCouponsList.appendChild(couponDiv);
-        });
-      } catch (error) {
-        console.error('Error fetching coupons:', error);
-        couponResultDiv.innerHTML = '<div class="text-danger">Error loading coupons</div>';
-      }
+      coupons.forEach(coupon => {
+        const couponDiv = document.createElement('div');
+        couponDiv.textContent = `${coupon.code} - ₹${coupon.offerPrice} off (Min ₹${coupon.minimumPrice})`;
+        availableCouponsList.appendChild(couponDiv);
+      });
+    } catch (error) {
+      console.error('Error fetching coupons:', error);
+      couponResultDiv.innerHTML = '<div class="text-danger">Error loading coupons</div>';
+    }
+  }
+
+  // Apply coupon functionality
+  async function applyCoupon(couponCode) {
+    const total = parseFloat(document.getElementById('total').value);
+
+    if (!couponCode) {
+      couponResultDiv.innerHTML = '<div class="text-danger">Please select a coupon</div>';
+      return;
     }
 
-    // Apply coupon functionality
-    async function applyCoupon(couponCode) {
-      const total = parseFloat(document.getElementById('total').value);
+    try {
+      const response = await fetch('/apply-coupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          couponCode, 
+          total 
+        })
+      });
 
-      if (!couponCode) {
-        couponResultDiv.innerHTML = '<div class="text-danger">Please select a coupon</div>';
-        return;
+      const result = await response.json();
+
+      if (result.success) {
+        couponResultDiv.innerHTML = `
+          <div class="text-success">
+            Coupon applied! You saved ₹${result.discount}
+          </div>
+        `;
+        
+        // Update total
+        const finalTotal = total - result.discount;
+        document.getElementById('final-total').textContent = `₹${finalTotal.toFixed(2)}`;
+        document.getElementById('total').value = finalTotal.toFixed(2);
+
+        // Ensure couponCode is sent with order
+        document.getElementById('place-order').dataset.couponCode = couponCode;
+
+        // Update button states
+        appliedCouponCode = couponCode;
+        applyCouponBtn.style.display = 'none';
+        removeCouponBtn.style.display = 'inline-block';
+      } else {
+        couponResultDiv.innerHTML = `
+          <div class="text-danger">
+            ${result.message}
+          </div>
+        `;
       }
-
-      try {
-        const response = await fetch('/apply-coupon', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            couponCode, 
-            total 
-          })
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          couponResultDiv.innerHTML = `
-            <div class="text-success">
-              Coupon applied! You saved ₹${result.discount}
-            </div>
-          `;
-          
-          // Update total
-          const finalTotal = total - result.discount;
-          document.getElementById('final-total').textContent = `₹${finalTotal.toFixed(2)}`;
-          document.getElementById('total').value = finalTotal.toFixed(2);
-
-          // Ensure couponCode is sent with order
-          document.getElementById('place-order').dataset.couponCode = couponCode;
-        } else {
-          couponResultDiv.innerHTML = `
-            <div class="text-danger">
-              ${result.message}
-            </div>
-          `;
-        }
-      } catch (error) {
-        couponResultDiv.innerHTML = '<div class="text-danger">Error applying coupon</div>';
-      }
+    } catch (error) {
+      couponResultDiv.innerHTML = '<div class="text-danger">Error applying coupon</div>';
     }
+  }
 
-    // Fetch coupons on page load
-    fetchAvailableCoupons();
+  // Remove coupon functionality
+  function removeCoupon() {
+    const total = parseFloat(document.getElementById('total').value);
+    const originalTotal = total + parseFloat(couponResultDiv.querySelector('.text-success').textContent.match(/₹(\d+)/)[1]);
 
-    // Apply coupon when button is clicked
-    applyCouponBtn.addEventListener('click', () => {
-      const couponCode = document.getElementById('coupon-code').value;
-      applyCoupon(couponCode);
-    });
-    
+    couponResultDiv.innerHTML = '<div class="text-warning">Coupon removed</div>';
+    document.getElementById('final-total').textContent = `₹${originalTotal.toFixed(2)}`;
+    document.getElementById('total').value = originalTotal.toFixed(2);
+
+    // Reset coupon code input and button states
+    couponCodeInput.value = '';
+    appliedCouponCode = null;
+    applyCouponBtn.style.display = 'inline-block';
+    removeCouponBtn.style.display = 'none';
+  }
+
+  // Fetch coupons on page load
+  fetchAvailableCoupons();
+
+  // Apply coupon when button is clicked
+  applyCouponBtn.addEventListener('click', () => {
+    const couponCode = couponCodeInput.value;
+    applyCoupon(couponCode);
   });
 
+  // Remove coupon when button is clicked
+  removeCouponBtn.addEventListener('click', removeCoupon);
+});
   // Add this JavaScript to your checkout page where the payment form is submitted
 // Assuming you have a form submission with AJAX like this:
 

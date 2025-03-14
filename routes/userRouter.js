@@ -63,6 +63,7 @@ router.post('/remove/:itemId', userAuth, cartController.removeItem);
 router.get("/checkout", userAuth, orderController.getCheckoutPage);
 router.post("/create-order", userAuth, orderController.createOrder);
 router.get("/order-placed", userAuth, orderController.getOrderPlacedPage);
+router.post('/handle-payment-failure', userAuth, orderController.handlePaymentFailure);
 
 //order Management
 router.get("/orders", userAuth, orderController.orderDetail)
@@ -71,6 +72,8 @@ router.get('/viewOrder',orderController.viewOrder);
 router.post('/cancelOrder',orderController.cancelOrder);
 router.post('/return-order', userAuth, orderController.returnOrder);
 router.get('/download-invoice', userAuth, orderController.downloadInvoice);
+router.post('/retry-payment', userAuth, orderController.retryPayment);
+router.post('/verify-payment', userAuth, orderController.verifyPayment);
 
 //coupon side
 router.get("/get-available-coupons", userAuth, orderController.getAvailableCoupons);
