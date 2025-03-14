@@ -133,7 +133,7 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script>
+  <!-- <script>
     $(document).ready(function () {
       $(".add-to-cart-btn").on("click", function () {
         const button = $(this);
@@ -225,6 +225,104 @@
         });
       });
     });
-  </script>
+  </script> -->
+<!-- filepath: c:\Users\User\Desktop\project1\views\user\wishlist.ejs -->
+
+<script>
+  $(document).ready(function () {
+    $(".add-to-cart-btn").on("click", function () {
+      const button = $(this);
+      const productId = button.data("product-id");
+
+      $.ajax({
+        url: `/wishlist/add-to-cart`,
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({ productId }),
+        success: function (response) {
+          Swal.fire({
+            icon: "success",
+            title: "Added to Cart",
+            text: response.message,
+            confirmButtonText: 'OK'
+          }).then(() => {
+            // Remove the product card from the DOM
+            button.closest('.col-md-3').remove();
+
+            // Check if wishlist is now empty
+            if ($('.wishlist-item').length === 0) {
+              $('.container').html(`
+                <div class="empty-wishlist">
+                  <h3>Your wishlist is empty</h3>
+                  <p class="text-muted">Browse our products and add items to your wishlist</p>
+                  <a href="/shop" class="btn btn-primary mt-3">Browse Products</a>
+                </div>
+              `);
+            }
+          });
+        },
+        error: function (xhr) {
+          const errorMessage = xhr.responseJSON?.message || "Failed to add product.";
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: errorMessage,
+            confirmButtonText: 'OK'
+          });
+
+          if (errorMessage === "Out of Stock") {
+            button.replaceWith('<button disabled class="btn btn-danger">Out of Stock</button>');
+          }
+        }
+      });
+    });
+
+    // Remove from wishlist functionality
+    $(".wishlist-heart-btn").on("click", function () {
+      const button = $(this);
+      const productId = button.data("product-id");
+
+      $.ajax({
+        url: "/wishlist/remove",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({ productId }),
+        success: function (response) {
+          Swal.fire({
+            icon: "success",
+            title: "Removed from Wishlist",
+            text: response.message,
+            confirmButtonText: 'OK'
+          }).then(() => {
+            // Remove the product card from the DOM
+            button.closest('.col-md-3').remove();
+
+            // Check if wishlist is now empty
+            if ($('.wishlist-item').length === 0) {
+              $('.container').html(`
+                <div class="empty-wishlist">
+                  <h3>Your wishlist is empty</h3>
+                  <p class="text-muted">Browse our products and add items to your wishlist</p>
+                  <a href="/shop" class="btn btn-primary mt-3">Browse Products</a>
+                </div>
+              `);
+            }
+          });
+        },
+        error: function (xhr) {
+          const errorMessage = xhr.responseJSON?.message || "Failed to remove product";
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: errorMessage,
+            confirmButtonText: 'OK'
+          });
+        }
+      });
+    });
+  });
+</script>
+
+
 </body>
 </html>
